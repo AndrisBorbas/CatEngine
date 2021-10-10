@@ -22,6 +22,9 @@ target_include_directories(tinyobjloader PUBLIC tinyobjloader-master)
 add_library(imgui STATIC)
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
 
+add_library(loguru STATIC)
+target_include_directories(loguru PUBLIC loguru-2.1.0)
+
 file(GLOB sources **/*.cpp)
 
 message("${sources}")
