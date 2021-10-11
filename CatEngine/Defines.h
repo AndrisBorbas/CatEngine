@@ -14,3 +14,5 @@
 #include <GLFW/glfw3native.h>
 
 #include <vulkan/vulkan.hpp>
+
+#include <loguru.hpp>
