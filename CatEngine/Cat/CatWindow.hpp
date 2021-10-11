@@ -19,6 +19,7 @@ private:
 	int m_iWidth;
 	int m_iHeight;
 	bool m_bFramebufferResized;
+
 	void initWindow();
 	static void frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight );
 
