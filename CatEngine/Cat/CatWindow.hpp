@@ -16,29 +16,26 @@ class CatWindow
 private:
 	GLFWwindow* m_pWindow;
 	std::string m_sWindowName;
-	int m_nWidth;
-	int m_nHeight;
+	int m_iWidth;
+	int m_iHeight;
 	bool m_bFramebufferResized;
 
 	void initWindow();
-	static void frameBufferResizeCallback( GLFWwindow* pWindow, int nWidth, int nHeight );
+	static void frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight );
 
 public:
-	CatWindow( int nWidth, int nHeight, std::string sWindowName );
+	CatWindow( int iWidth, int iHeight, std::string sWindowName );
 	~CatWindow();
 
 	CatWindow( const CatWindow& ) = delete;
 	CatWindow& operator=( const CatWindow& ) = delete;
-	CatWindow( CatWindow&& ) = delete;
-	CatWindow& operator=( CatWindow&& ) = delete;
 
-
-	bool shouldClose() const { return glfwWindowShouldClose( m_pWindow ); }
-	vk::Extent2D getExtent() const { return { static_cast< uint32_t >( m_nWidth ), static_cast< uint32_t >( m_nHeight ) }; }
-	bool wasWindowResized() const { return m_bFramebufferResized; }
+	bool shouldClose() { return glfwWindowShouldClose( m_pWindow ); }
+	vk::Extent2D getExtent() { return { static_cast< uint32_t >( m_iWidth ), static_cast< uint32_t >( m_iHeight ) }; }
+	bool wasWindowResized() { return m_bFramebufferResized; }
 	void resetWindowResizedFlag() { m_bFramebufferResized = false; }
 	GLFWwindow* getGLFWwindow() const { return m_pWindow; }
 
-	vk::SurfaceKHR* createWindowSurface( const vk::Instance& rInstance, vk::SurfaceKHR* pSurface ) const;
+	void createWindowSurface( vk::Instance& instance, vk::SurfaceKHR* surface );
 };
 } // namespace cat

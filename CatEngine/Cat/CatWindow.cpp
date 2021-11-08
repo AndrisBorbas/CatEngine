@@ -1,12 +1,9 @@
 #include "CatWindow.hpp"
 
-#include <utility>
-#include <iostream>
-
 namespace cat
 {
-CatWindow::CatWindow( int nWidth, int nHeight, std::string sWindowName )
-	: m_sWindowName{ std::move( sWindowName ) }, m_nWidth{ nWidth }, m_nHeight{ nHeight }
+CatWindow::CatWindow( int iWidth, int iHeight, std::string sWindowName )
+	: m_iWidth{ iWidth }, m_iHeight{ iHeight }, m_sWindowName{ sWindowName }
 {
 	initWindow();
 }
@@ -23,27 +20,27 @@ void CatWindow::initWindow()
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 
-	m_pWindow = glfwCreateWindow( m_nWidth, m_nHeight, m_sWindowName.c_str(), nullptr, nullptr );
+	m_pWindow = glfwCreateWindow( m_iWidth, m_iHeight, m_sWindowName.c_str(), nullptr, nullptr );
 	glfwSetWindowUserPointer( m_pWindow, this );
 	glfwSetFramebufferSizeCallback( m_pWindow, frameBufferResizeCallback );
 }
 
-vk::SurfaceKHR* CatWindow::createWindowSurface( const vk::Instance& rInstance, vk::SurfaceKHR* pSurface ) const
+void CatWindow::createWindowSurface( vk::Instance& instance, vk::SurfaceKHR* pSurface )
 {
 	VkSurfaceKHR tempSurface;
-	if ( glfwCreateWindowSurface( rInstance, m_pWindow, nullptr, &tempSurface ) != VK_SUCCESS )
+	if ( glfwCreateWindowSurface( instance, m_pWindow, nullptr, &tempSurface ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create window surface!" );
 	}
 	pSurface = new vk::SurfaceKHR( tempSurface );
 }
 
-void CatWindow::frameBufferResizeCallback( GLFWwindow* pWindow, int nWidth, int nHeight )
+void CatWindow::frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight )
 {
-	const auto catWindow = static_cast< CatWindow* >( glfwGetWindowUserPointer( pWindow ) );
+	auto catWindow = reinterpret_cast< CatWindow* >( glfwGetWindowUserPointer( pWindow ) );
 	catWindow->m_bFramebufferResized = true;
-	catWindow->m_nWidth = nWidth;
-	catWindow->m_nHeight = nHeight;
+	catWindow->m_iWidth = iWidth;
+	catWindow->m_iHeight = iHeight;
 }
 
 } // namespace cat

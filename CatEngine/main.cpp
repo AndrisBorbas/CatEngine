@@ -24,41 +24,34 @@
 #include "Vulkan/VulkanInit.hpp"
 #include "Vulkan/VulkanRendering.hpp"
 #include "utils.hpp"
-#include "Cat/CatDevice.hpp"
-#include "Cat/CatWindow.hpp"
 
 #if defined( _MSC_VER ) && ( _MSC_VER >= 1900 ) && !defined( IMGUI_DISABLE_WIN32_FUNCTIONS )
 #pragma comment( lib, "legacy_stdio_definitions" )
 #endif
 
-constexpr uint32_t WIDTH = 800;
-constexpr uint32_t HEIGHT = 600;
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
 
-constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+const int MAX_FRAMES_IN_FLIGHT = 2;
 
 const std::vector< const char* > validationLayers = { "VK_LAYER_KHRONOS_validation" };
 const std::vector< const char* > deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-constexpr vk::PresentModeKHR preferredPresentMode = vk::PresentModeKHR::eImmediate;
+const vk::PresentModeKHR preferredPresentMode = vk::PresentModeKHR::eImmediate;
 
 class HelloTriangleApplication
 {
 public:
 	void run()
 	{
-		// initWindow();
+		initWindow();
 		initVulkan();
 		mainLoop();
 		cleanup();
 	}
 
-	explicit HelloTriangleApplication();
-
 private:
-	// GLFWwindow* window_;
-	cat::CatWindow* m_pWindow = nullptr;
-
-	cat::CatDevice* m_pDevice = nullptr;
+	GLFWwindow* window_;
 
 	ImGui_ImplVulkanH_Window MainWindowData_;
 	uint32_t QueueFamily_ = (uint32_t)-1;
@@ -70,7 +63,7 @@ private:
 
 	vk::DebugUtilsMessengerEXT debugMessenger_;
 
-	vk::SurfaceKHR* m_pSurface = nullptr;
+	vk::SurfaceKHR surface_;
 
 	vk::PhysicalDevice physicalDevice_;
 	vk::Device device_;
@@ -135,23 +128,23 @@ private:
 
 	bool framebufferResized_ = false;
 
-	// void initWindow()
-	//{
-	//	glfwInit();
+	void initWindow()
+	{
+		glfwInit();
 
-	//	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-	//	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
+		glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+		glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 
-	//	window_ = glfwCreateWindow( WIDTH, HEIGHT, "Vulkan", nullptr, nullptr );
-	//	glfwSetWindowUserPointer( window_, this );
-	//	glfwSetFramebufferSizeCallback( window_, framebufferResizeCallback );
-	//}
+		window_ = glfwCreateWindow( WIDTH, HEIGHT, "Vulkan", nullptr, nullptr );
+		glfwSetWindowUserPointer( window_, this );
+		glfwSetFramebufferSizeCallback( window_, framebufferResizeCallback );
+	}
 
-	// static void framebufferResizeCallback( GLFWwindow* window, int width, int height )
-	//{
-	//	auto* app = static_cast< HelloTriangleApplication* >( glfwGetWindowUserPointer( window ) );
-	//	app->framebufferResized_ = true;
-	// }
+	static void framebufferResizeCallback( GLFWwindow* window, int width, int height )
+	{
+		auto* app = static_cast< HelloTriangleApplication* >( glfwGetWindowUserPointer( window ) );
+		app->framebufferResized_ = true;
+	}
 
 	void SetupVulkanWindow( ImGui_ImplVulkanH_Window* wd, VkSurfaceKHR surface, int width, int height )
 	{
@@ -217,15 +210,15 @@ private:
 
 		// 2: initialize imgui library
 
-		QueueFamilyIndices queueFamilyIndices = findQueueFamilies( physicalDevice_, *m_pSurface );
+		QueueFamilyIndices queueFamilyIndices = findQueueFamilies( physicalDevice_, surface_ );
 
 		QueueFamily_ = queueFamilyIndices.graphicsFamily.value();
 
 		int w, h;
-		glfwGetFramebufferSize( m_pWindow->getGLFWwindow(), &w, &h );
+		glfwGetFramebufferSize( window_, &w, &h );
 
 		ImGui_ImplVulkanH_Window* wd = &MainWindowData_;
-		wd->Surface = *m_pSurface;
+		wd->Surface = surface_;
 		wd->PresentMode = static_cast< VkPresentModeKHR >( preferredPresentMode );
 		const vk::Format requestSurfaceImageFormat[] = {
 			vk::Format::eB8G8R8A8Unorm,
@@ -244,7 +237,7 @@ private:
 		// this initializes the core structures of imgui
 		ImGui::CreateContext();
 
-		ImGui_ImplGlfw_InitForVulkan( m_pWindow->getGLFWwindow(), true );
+		ImGui_ImplGlfw_InitForVulkan( window_, true );
 
 		// this initializes imgui for Vulkan
 		ImGui_ImplVulkan_InitInfo init_info = {
@@ -285,21 +278,21 @@ private:
 		instance_ = createInstance( validationLayers );
 		debugMessenger_ = setupDebugMessenger( instance_ );
 
-		m_pSurface = m_pWindow->createWindowSurface( instance_, m_pSurface );
+		surface_ = createSurface( instance_, window_ );
 
-		physicalDevice_ = pickPhysicalDevice( instance_, *m_pSurface, deviceExtensions, msaaSamples_ );
+		physicalDevice_ = pickPhysicalDevice( instance_, surface_, deviceExtensions, msaaSamples_ );
 		device_ = createLogicalDevice(
-			instance_, *m_pSurface, physicalDevice_, graphicsQueue_, presentQueue_, deviceExtensions, validationLayers );
+			instance_, surface_, physicalDevice_, graphicsQueue_, presentQueue_, deviceExtensions, validationLayers );
 
-		swapchain_ = createSwapChain( device_, physicalDevice_, m_pWindow->getGLFWwindow(), *m_pSurface, swapchainImages_,
-			swapchainImageFormat_, swapchainExtent_, preferredPresentMode );
+		swapchain_ = createSwapChain( device_, physicalDevice_, window_, surface_, swapchainImages_, swapchainImageFormat_,
+			swapchainExtent_, preferredPresentMode );
 		swapchainImageViews_ = createImageViews( device_, swapchainImages_, swapchainImageFormat_, 1 );
 		renderPass_ = createRenderPass( device_, physicalDevice_, swapchainImageFormat_, msaaSamples_ );
 		descriptorSetLayout_ = createDescriptorSetLayout( device_ );
 		graphicsPipeline_ = createGraphicsPipeline(
 			device_, swapchainExtent_, descriptorSetLayout_, pipelineLayout_, renderPass_, msaaSamples_ );
 
-		commandPool_ = createCommandPool( device_, physicalDevice_, *m_pSurface );
+		commandPool_ = createCommandPool( device_, physicalDevice_, surface_ );
 		loadModel( "assets/models/viking_room.obj" );
 		std::tie( colorImage_, colorImageMemory_, colorImageView_ ) =
 			createColorResources( device_, physicalDevice_, swapchainImageFormat_, swapchainExtent_, msaaSamples_ );
@@ -407,10 +400,10 @@ private:
 	void recreateSwapChain()
 	{
 		int width = 0, height = 0;
-		glfwGetFramebufferSize( m_pWindow->getGLFWwindow(), &width, &height );
+		glfwGetFramebufferSize( window_, &width, &height );
 		while ( width == 0 || height == 0 )
 		{
-			glfwGetFramebufferSize( m_pWindow->getGLFWwindow(), &width, &height );
+			glfwGetFramebufferSize( window_, &width, &height );
 			glfwWaitEvents();
 		}
 
@@ -418,8 +411,8 @@ private:
 
 		cleanupSwapChain();
 
-		swapchain_ = createSwapChain( device_, physicalDevice_, m_pWindow->getGLFWwindow(), *m_pSurface, swapchainImages_,
-			swapchainImageFormat_, swapchainExtent_, preferredPresentMode );
+		swapchain_ = createSwapChain( device_, physicalDevice_, window_, surface_, swapchainImages_, swapchainImageFormat_,
+			swapchainExtent_, preferredPresentMode );
 		swapchainImageViews_ = createImageViews( device_, swapchainImages_, swapchainImageFormat_, 1 );
 		renderPass_ = createRenderPass( device_, physicalDevice_, swapchainImageFormat_, msaaSamples_ );
 		graphicsPipeline_ = createGraphicsPipeline(
@@ -490,7 +483,7 @@ private:
 
 	void mainLoop()
 	{
-		while ( !m_pWindow->shouldClose() )
+		while ( !glfwWindowShouldClose( window_ ) )
 		{
 			glfwPollEvents();
 			drawFrame();
@@ -679,7 +672,7 @@ private:
 
 		device_.destroy();
 
-		instance_.destroySurfaceKHR( *m_pSurface, nullptr );
+		instance_.destroySurfaceKHR( surface_, nullptr );
 
 #ifdef ENABLE_VALIDATION_LAYERS
 		DestroyDebugUtilsMessengerEXT( instance_, debugMessenger_, nullptr );
@@ -687,15 +680,11 @@ private:
 
 		instance_.destroy();
 
-		delete m_pSurface;
-		delete m_pWindow;
+		glfwDestroyWindow( window_ );
+
+		glfwTerminate();
 	}
 };
-
-HelloTriangleApplication::HelloTriangleApplication()
-	: m_pWindow( new cat::CatWindow( WIDTH, HEIGHT, "CatEngine" ) ), m_pDevice( new cat::CatDevice( m_pWindow ) )
-{
-}
 
 int main( int argc, char** argv )
 {
