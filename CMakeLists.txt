@@ -24,7 +24,7 @@ add_subdirectory(Libraries)
 
 include_directories(CatEngine)
 
-add_executable(CatEngine CatEngine/main.cpp CatEngine/Shaders.hpp CatEngine/Shaders.cpp CatEngine/utils.hpp CatEngine/Vulkan/VulkanDevices.hpp CatEngine/Vulkan/VulkanInit.hpp CatEngine/Vulkan/VulkanRendering.hpp CatEngine/Vulkan/VulkanRendering.cpp CatEngine/Vulkan/VulkanInit.cpp CatEngine/Defines.h CatEngine/Vulkan/VulkanDevices.cpp "CatEngine/Cat/CatWindow.hpp" "CatEngine/Cat/CatWindow.cpp")
+add_executable("CatEngine" "CatEngine/main.cpp" "CatEngine/Shaders.hpp" "CatEngine/Shaders.cpp" "CatEngine/utils.hpp" "CatEngine/Vulkan/VulkanDevices.hpp" "CatEngine/Vulkan/VulkanInit.hpp" "CatEngine/Vulkan/VulkanRendering.hpp" "CatEngine/Vulkan/VulkanRendering.cpp" "CatEngine/Vulkan/VulkanInit.cpp" "CatEngine/Defines.h" "CatEngine/Vulkan/VulkanDevices.cpp" "CatEngine/Cat/CatWindow.hpp" "CatEngine/Cat/CatWindow.cpp" "CatEngine/Cat/CatDevice.hpp" "CatEngine/Cat/CatDevice.cpp" "CatEngine/Cat/CatFrameInfo.hpp" "CatEngine/Cat/CatSwapChain.hpp" "CatEngine/Cat/CatSwapChain.cpp")
 
 ####Vulkan
 find_package(Vulkan REQUIRED)
