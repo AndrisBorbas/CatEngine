@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef CATENGINE_GLOBALS_HPP
+#define CATENGINE_GLOBALS_HPP
+
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif // NOMINMAX
@@ -27,4 +30,8 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <loguru.hpp>
+
+static constexpr vk::PresentModeKHR SELECTED_PRESENTMODE = vk::PresentModeKHR::eImmediate;
+static constexpr char SELECTED_PRESENTMODE_TEXT[] = "Immediate";
+
+#endif // CATENGINE_GLOBALS_HPP

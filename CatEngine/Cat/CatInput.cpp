@@ -14,14 +14,14 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, LveGameObject& gameO
 
 	if ( glm::dot( rotate, rotate ) > std::numeric_limits< float >::epsilon() )
 	{
-		gameObject.transform.rotation += lookSpeed * dt * glm::normalize( rotate );
+		gameObject.m_transform.rotation += lookSpeed * dt * glm::normalize( rotate );
 	}
 
 	// limit pitch values between about +/- 85ish degrees
-	gameObject.transform.rotation.x = glm::clamp( gameObject.transform.rotation.x, -1.5f, 1.5f );
-	gameObject.transform.rotation.y = glm::mod( gameObject.transform.rotation.y, glm::two_pi< float >() );
+	gameObject.m_transform.rotation.x = glm::clamp( gameObject.m_transform.rotation.x, -1.5f, 1.5f );
+	gameObject.m_transform.rotation.y = glm::mod( gameObject.m_transform.rotation.y, glm::two_pi< float >() );
 
-	float yaw = gameObject.transform.rotation.y;
+	float yaw = gameObject.m_transform.rotation.y;
 	const glm::vec3 forwardDir{ sin( yaw ), 0.f, cos( yaw ) };
 	const glm::vec3 rightDir{ forwardDir.z, 0.f, -forwardDir.x };
 	const glm::vec3 upDir{ 0.f, -1.f, 0.f };
@@ -36,7 +36,7 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, LveGameObject& gameO
 
 	if ( glm::dot( moveDir, moveDir ) > std::numeric_limits< float >::epsilon() )
 	{
-		gameObject.transform.translation += moveSpeed * dt * glm::normalize( moveDir );
+		gameObject.m_transform.translation += moveSpeed * dt * glm::normalize( moveDir );
 	}
 }
 } // namespace cat

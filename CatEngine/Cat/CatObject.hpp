@@ -1,6 +1,8 @@
 #ifndef CATENGINE_CATOBJECT_HPP
 #define CATENGINE_CATOBJECT_HPP
 
+#include "CatModel.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
@@ -24,11 +26,11 @@ struct TransformComponent
 class CatObject
 {
 public:
-	using id_t = uint64_t;
+	using id_t = uint32_t;
 
 	static CatObject createGameObject()
 	{
-		static id_t currentId = 0;
+		static id_t currentId = 1;
 		return CatObject{ currentId++ };
 	}
 
@@ -39,14 +41,14 @@ public:
 
 	id_t getId() { return m_id; }
 
-	std::shared_ptr< LveModel > model{};
-	glm::vec3 color{};
-	TransformComponent transform{};
+	std::shared_ptr< CatModel > m_pModel{};
+	glm::vec3 m_vColor{};
+	TransformComponent m_transform{};
 
 private:
 	CatObject( id_t objId ) : m_id{ objId } {}
 
-	uint64_t m_id;
+	id_t m_id;
 };
 } // namespace cat
 
