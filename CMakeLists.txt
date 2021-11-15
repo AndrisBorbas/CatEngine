@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.20)
 project(CatEngine)
 
 # Get OS information
@@ -24,7 +24,7 @@ add_subdirectory(Libraries)
 
 include_directories(CatEngine)
 
-add_executable(CatEngine CatEngine/main.cpp CatEngine/Shaders.hpp CatEngine/Shaders.cpp CatEngine/utils.hpp CatEngine/Vulkan/VulkanDevices.hpp CatEngine/Vulkan/VulkanInit.hpp CatEngine/Vulkan/VulkanRendering.hpp CatEngine/Vulkan/VulkanRendering.cpp CatEngine/Vulkan/VulkanInit.cpp CatEngine/Defines.h CatEngine/Vulkan/VulkanDevices.cpp "CatEngine/Cat/CatWindow.hpp" "CatEngine/Cat/CatWindow.cpp")
+add_executable(CatEngine CatEngine/main.cpp CatEngine/Shaders.hpp CatEngine/Shaders.cpp CatEngine/utils.hpp CatEngine/Vulkan/VulkanDevices.hpp CatEngine/Vulkan/VulkanInit.hpp CatEngine/Vulkan/VulkanRendering.hpp CatEngine/Vulkan/VulkanRendering.cpp CatEngine/Vulkan/VulkanInit.cpp CatEngine/Defines.h CatEngine/Vulkan/VulkanDevices.cpp "CatEngine/Cat/CatWindow.hpp" "CatEngine/Cat/CatWindow.cpp" CatEngine/Cat/CatCamera.cpp CatEngine/Cat/CatCamera.hpp CatEngine/Cat/CatInput.cpp CatEngine/Cat/CatInput.hpp CatEngine/Cat/CatObject.cpp CatEngine/Cat/CatObject.hpp)
 
 ####Vulkan
 find_package(Vulkan REQUIRED)

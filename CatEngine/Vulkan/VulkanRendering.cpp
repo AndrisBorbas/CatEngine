@@ -1,4 +1,4 @@
-﻿#include "../Defines.h"
+#include "../Defines.h"
 
 #include "VulkanRendering.hpp"
 
@@ -716,6 +716,7 @@ void updateUniformBuffer(uint32_t currentImage,
 						 std::vector<vk::DeviceMemory>& uniformBuffersMemory,
 						 vk::Extent2D& swapchainExtent)
 {
+	// Gets time only on first call
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();

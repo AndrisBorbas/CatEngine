@@ -2,8 +2,8 @@
 
 namespace cat
 {
-CatWindow::CatWindow( int iWidth, int iHeight, std::string sWindowName )
-	: m_iWidth{ iWidth }, m_iHeight{ iHeight }, m_sWindowName{ sWindowName }
+CatWindow::CatWindow( const int iWidth, const int iHeight, std::string sWindowName )
+	: m_sWindowName{ sWindowName }, m_iWidth{ iWidth }, m_iHeight{ iHeight }
 {
 	initWindow();
 }

@@ -39,6 +39,12 @@ const std::vector< const char* > deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION
 
 const vk::PresentModeKHR preferredPresentMode = vk::PresentModeKHR::eImmediate;
 
+struct GlobalUbo
+{
+	alignas( 16 ) glm::mat4 projectionView{ 1.f };
+	alignas( 16 ) glm::vec3 lightDirection = glm::normalize( glm::vec3{ 1.f, -3.f, -1.f } );
+};
+
 class HelloTriangleApplication
 {
 public:
@@ -56,7 +62,7 @@ private:
 	ImGui_ImplVulkanH_Window MainWindowData_;
 	uint32_t QueueFamily_ = (uint32_t)-1;
 	bool show_demo_window = true;
-	bool show_another_window = false;
+	bool show_another_window = true;
 	ImVec4 clear_color = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
 
 	vk::Instance instance_;
@@ -430,9 +436,9 @@ private:
 		createCommandBuffers( device_, commandBuffers_, swapChainFramebuffers_, commandPool_, renderPass_, swapchainExtent_,
 			graphicsPipeline_, vertexBuffer_, indexBuffer_, pipelineLayout_, descriptorSets_, indices_ );
 
-		//		ImGui_ImplVulkan_SetMinImageCount(2);
-		//		ImGui_ImplVulkanH_CreateOrResizeWindow(instance_, physicalDevice_, device_, &MainWindowData_,
-		//											   QueueFamily_, nullptr, width, height, 2);
+		// ImGui_ImplVulkan_SetMinImageCount(2);
+		// ImGui_ImplVulkanH_CreateOrResizeWindow(instance_, physicalDevice_, device_, &MainWindowData_, QueueFamily_, nullptr,
+		// width, height, 2);
 	}
 
 	void loadModel( const char* filename )
@@ -522,14 +528,14 @@ private:
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		//		if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
+		if ( show_demo_window ) ImGui::ShowDemoWindow( &show_demo_window );
 
 		{
-			char buf[128];
+			char title[128];
 
-			sprintf( buf, "%.4f ms / %.1f FPS###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate );
+			sprintf( title, "%.4f ms / %.1f FPS###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate );
 
-			ImGui::Begin( buf );
+			ImGui::Begin( title );
 
 			if ( ImGui::Button( "Viking Room" ) )
 			{
@@ -543,14 +549,15 @@ private:
 			}
 			ImGui::End();
 		}
-		//		if (show_another_window) {
-		//			ImGui::Begin("Another Window",
-		//						 &show_another_window);  // Pass a pointer to our bool variable (the window
-		// will have
-		//												 // a closing button that will clear the bool when
-		// clicked) 			ImGui::Text("Hello from another window!"); 			if (ImGui::Button("Close
-		// Me")) show_another_window = false; 			ImGui::End();
-		//		}
+		if ( show_another_window )
+		{
+			ImGui::Begin( "Another Window", &show_another_window );
+			// Pass a pointer to our bool variable (the window will have
+			// a closing button that will clear the bool when clicked)
+			ImGui::Text( "Hello from another window!" );
+			if ( ImGui::Button( "Close Me" ) ) show_another_window = false;
+			ImGui::End();
+		}
 
 		ImGui::Render();
 
