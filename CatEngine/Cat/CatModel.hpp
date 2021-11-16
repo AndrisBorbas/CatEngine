@@ -3,6 +3,7 @@
 
 
 #include "CatDevice.hpp"
+#include "CatBuffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -58,11 +59,11 @@ private:
 
 	CatDevice& m_rDevice;
 
-	std::unique_ptr< CatDevice > m_pVertexBuffer;
+	std::unique_ptr< CatBuffer > m_pVertexBuffer;
 	uint32_t m_nVertexCount;
 
 	bool m_bHasIndexBuffer = false;
-	std::unique_ptr< CatDevice > m_pIndexBuffer;
+	std::unique_ptr< CatBuffer > m_pIndexBuffer;
 	uint32_t m_nIndexCount;
 };
 } // namespace cat

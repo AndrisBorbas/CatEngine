@@ -21,23 +21,21 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeveri
 	return VK_FALSE;
 }
 
-vk::Result CreateDebugUtilsMessengerEXT( vk::Instance& instance,
+vk::Result CreateDebugUtilsMessengerEXT( vk::Instance& rInstance,
 	const vk::DebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 	const vk::AllocationCallbacks* pAllocator,
 	vk::DebugUtilsMessengerEXT* pDebugMessenger )
 {
-	auto dldi = vk::DispatchLoaderDynamic( instance, vkGetInstanceProcAddr );
-
-	return instance.createDebugUtilsMessengerEXT( pCreateInfo, pAllocator, pDebugMessenger, dldi );
+	auto dldy = vk::DispatchLoaderDynamic( rInstance, vkGetInstanceProcAddr );
+	return rInstance.createDebugUtilsMessengerEXT( pCreateInfo, pAllocator, pDebugMessenger, dldy );
 }
 
 void DestroyDebugUtilsMessengerEXT( const vk::Instance& rInstance,
 	vk::DebugUtilsMessengerEXT& rDebugMessenger,
 	const vk::AllocationCallbacks* pAllocator )
 {
-	auto dldi = vk::DispatchLoaderDynamic( rInstance, vkGetInstanceProcAddr );
-
-	rInstance.destroyDebugUtilsMessengerEXT( rDebugMessenger, pAllocator, dldi );
+	auto dldy = vk::DispatchLoaderDynamic( rInstance, vkGetInstanceProcAddr );
+	rInstance.destroyDebugUtilsMessengerEXT( rDebugMessenger, pAllocator, dldy );
 }
 
 
@@ -114,7 +112,7 @@ void CatDevice::createInstance()
 	hasGflwRequiredInstanceExtensions();
 }
 
-vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDevice& rPhysicalDevice )
+vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDevice rPhysicalDevice )
 {
 	vk::PhysicalDeviceProperties physicalDeviceProperties;
 	rPhysicalDevice.getProperties( &physicalDeviceProperties );
@@ -131,7 +129,7 @@ vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDe
 	return vk::SampleCountFlagBits::e1;
 }
 
-bool CatDevice::isDeviceSuitable( const vk::PhysicalDevice& rPhysicalDevice )
+bool CatDevice::isDeviceSuitable( const vk::PhysicalDevice rPhysicalDevice )
 {
 	if ( !findQueueFamilies( rPhysicalDevice ).isComplete() )
 	{
@@ -158,7 +156,7 @@ bool CatDevice::isDeviceSuitable( const vk::PhysicalDevice& rPhysicalDevice )
 	return true;
 }
 
-int CatDevice::rateDeviceSuitability( const vk::PhysicalDevice& rPhysicalDevice )
+int CatDevice::rateDeviceSuitability( const vk::PhysicalDevice rPhysicalDevice )
 {
 	if ( !isDeviceSuitable( rPhysicalDevice ) )
 	{
@@ -232,7 +230,7 @@ void CatDevice::createLogicalDevice()
 	QueueFamilyIndices indices = findQueueFamilies( m_physicalDevice );
 
 	std::vector< vk::DeviceQueueCreateInfo > queueCreateInfos;
-	std::set< uint32_t > uniqueQueueFamilies = { indices.m_nGraphicsFamily, indices.m_nPresentFamily };
+	std::set< uint32_t > uniqueQueueFamilies = { indices.m_nGraphicsFamily.value(), indices.m_nPresentFamily.value() };
 
 	float queuePriority = 1.0f;
 	for ( uint32_t queueFamily : uniqueQueueFamilies )
@@ -296,26 +294,9 @@ void CatDevice::createCommandPool()
 
 void CatDevice::createSurface()
 {
-	m_rWindow.createWindowSurface( m_instance, &m_surface );
-}
-
-bool CatDevice::isDeviceSuitable( vk::PhysicalDevice& rPhysicalDevice )
-{
-	QueueFamilyIndices indices = findQueueFamilies( rPhysicalDevice );
-
-	bool extensionsSupported = checkDeviceExtensionSupport( rPhysicalDevice );
-
-	bool swapChainAdequate = false;
-	if ( extensionsSupported )
-	{
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport( rPhysicalDevice );
-		swapChainAdequate = !swapChainSupport.m_aFormats.empty() && !swapChainSupport.m_aPresentModes.empty();
-	}
-
-	vk::PhysicalDeviceFeatures supportedFeatures;
-	rPhysicalDevice.getFeatures( &supportedFeatures );
-
-	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+	VkSurfaceKHR tempSurface = VkSurfaceKHR( m_surface );
+	m_rWindow.createWindowSurface( m_instance, &tempSurface );
+	m_surface = tempSurface;
 }
 
 void CatDevice::populateDebugMessengerCreateInfo( vk::DebugUtilsMessengerCreateInfoEXT& createInfo )
@@ -341,7 +322,7 @@ void CatDevice::setupDebugMessenger()
 		.pfnUserCallback = debugCallback,
 	};
 	populateDebugMessengerCreateInfo( createInfo );
-	if ( m_instance.createDebugUtilsMessengerEXT( &createInfo, nullptr, &m_debugMessenger ) != vk::Result::eSuccess )
+	if ( CreateDebugUtilsMessengerEXT( m_instance, &createInfo, nullptr, &m_debugMessenger ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to set up debug messenger!" );
 	}
@@ -420,7 +401,7 @@ void CatDevice::hasGflwRequiredInstanceExtensions()
 	}
 }
 
-bool CatDevice::checkDeviceExtensionSupport( const vk::PhysicalDevice& rPhysicalDevice )
+bool CatDevice::checkDeviceExtensionSupport( const vk::PhysicalDevice rPhysicalDevice )
 {
 	uint32_t extensionCount;
 	rPhysicalDevice.enumerateDeviceExtensionProperties( nullptr, &extensionCount, nullptr );
@@ -438,7 +419,7 @@ bool CatDevice::checkDeviceExtensionSupport( const vk::PhysicalDevice& rPhysical
 	return requiredExtensions.empty();
 }
 
-QueueFamilyIndices CatDevice::findQueueFamilies( const vk::PhysicalDevice& rPhysicalDevice )
+QueueFamilyIndices CatDevice::findQueueFamilies( const vk::PhysicalDevice rPhysicalDevice )
 {
 	QueueFamilyIndices indices;
 
@@ -472,7 +453,7 @@ QueueFamilyIndices CatDevice::findQueueFamilies( const vk::PhysicalDevice& rPhys
 	return indices;
 }
 
-SwapChainSupportDetails CatDevice::querySwapChainSupport( const vk::PhysicalDevice& rPhysicalDevice )
+SwapChainSupportDetails CatDevice::querySwapChainSupport( const vk::PhysicalDevice rPhysicalDevice )
 {
 	SwapChainSupportDetails details;
 	rPhysicalDevice.getSurfaceCapabilitiesKHR( m_surface, &details.m_capabilities );
@@ -518,7 +499,7 @@ vk::Format CatDevice::findSupportedFormat( const std::vector< vk::Format >& cand
 	throw std::runtime_error( "failed to find supported format!" );
 }
 
-uint32_t CatDevice::findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags& rProperties )
+uint32_t CatDevice::findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags rProperties )
 {
 	vk::PhysicalDeviceMemoryProperties memProperties;
 	m_physicalDevice.getMemoryProperties( &memProperties );
@@ -533,11 +514,11 @@ uint32_t CatDevice::findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags
 	throw std::runtime_error( "failed to find suitable m_pMemory type!" );
 }
 
-void CatDevice::createBuffer( vk::DeviceSize& size,
+void CatDevice::createBuffer( vk::DeviceSize size,
 	vk::BufferUsageFlags usage,
 	vk::MemoryPropertyFlags properties,
-	vk::Buffer& buffer,
-	vk::DeviceMemory& bufferMemory )
+	vk::Buffer buffer,
+	vk::DeviceMemory bufferMemory )
 {
 	vk::BufferCreateInfo bufferInfo{
 		.size = size,
@@ -585,7 +566,7 @@ vk::CommandBuffer CatDevice::beginSingleTimeCommands()
 	return commandBuffer;
 }
 
-void CatDevice::endSingleTimeCommands( vk::CommandBuffer& commandBuffer ) const
+void CatDevice::endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const
 {
 	vkEndCommandBuffer( commandBuffer );
 
@@ -600,7 +581,7 @@ void CatDevice::endSingleTimeCommands( vk::CommandBuffer& commandBuffer ) const
 	m_device.freeCommandBuffers( m_pCommandPool, 1, &commandBuffer );
 }
 
-void CatDevice::copyBuffer( vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size )
+void CatDevice::copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size )
 {
 	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -615,7 +596,7 @@ void CatDevice::copyBuffer( vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::De
 	endSingleTimeCommands( commandBuffer );
 }
 
-void CatDevice::copyBufferToImage( vk::Buffer& buffer, vk::Image& image, uint32_t width, uint32_t height, uint32_t layerCount )
+void CatDevice::copyBufferToImage( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount )
 {
 	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 

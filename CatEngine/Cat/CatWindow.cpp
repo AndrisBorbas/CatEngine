@@ -1,4 +1,5 @@
 #include "CatWindow.hpp"
+#include "loguru.hpp"
 
 namespace cat
 {
@@ -25,14 +26,12 @@ void CatWindow::initWindow()
 	glfwSetFramebufferSizeCallback( m_pWindow, frameBufferResizeCallback );
 }
 
-void CatWindow::createWindowSurface( vk::Instance& instance, vk::SurfaceKHR* pSurface )
+void CatWindow::createWindowSurface( vk::Instance instance, VkSurfaceKHR* pSurface )
 {
-	VkSurfaceKHR tempSurface;
-	if ( glfwCreateWindowSurface( instance, m_pWindow, nullptr, &tempSurface ) != VK_SUCCESS )
+	if ( glfwCreateWindowSurface( instance, m_pWindow, nullptr, pSurface ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create window surface!" );
 	}
-	pSurface = new vk::SurfaceKHR( tempSurface );
 }
 
 void CatWindow::frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight )

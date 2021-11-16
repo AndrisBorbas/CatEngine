@@ -32,7 +32,7 @@ public:
 	vk::DescriptorBufferInfo descriptorInfoForIndex( int index );
 	vk::Result invalidateIndex( int index );
 
-	vk::Buffer getBuffer() const { return m_Buffer; }
+	vk::Buffer getBuffer() const { return m_pBuffer; }
 	void* getMappedMemory() const { return m_pMapped; }
 	uint32_t getInstanceCount() const { return m_nInstanceCount; }
 	vk::DeviceSize getInstanceSize() const { return m_pInstanceSize; }
@@ -46,7 +46,7 @@ private:
 
 	CatDevice& m_rDevice;
 	void* m_pMapped = nullptr;
-	vk::Buffer m_Buffer = nullptr;
+	vk::Buffer m_pBuffer = nullptr;
 	vk::DeviceMemory m_pMemory = nullptr;
 
 	vk::DeviceSize m_pBufferSize;

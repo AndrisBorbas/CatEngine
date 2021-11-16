@@ -360,3 +360,5 @@ out/*
 build/*
 
 cmake-build-*/*
+
+!CatEngine/assets/*

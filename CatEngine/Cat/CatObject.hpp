@@ -28,7 +28,7 @@ class CatObject
 public:
 	using id_t = uint32_t;
 
-	static CatObject createGameObject()
+	static CatObject createObject()
 	{
 		static id_t currentId = 1;
 		return CatObject{ currentId++ };

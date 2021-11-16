@@ -9,16 +9,6 @@ namespace cat
 {
 class CatWindow
 {
-private:
-	GLFWwindow* m_pWindow;
-	std::string m_sWindowName;
-	int m_iWidth;
-	int m_iHeight;
-	bool m_bFramebufferResized;
-
-	void initWindow();
-	static void frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight );
-
 public:
 	CatWindow( int iWidth, int iHeight, std::string sWindowName );
 	~CatWindow();
@@ -32,7 +22,17 @@ public:
 	void resetWindowResizedFlag() { m_bFramebufferResized = false; }
 	GLFWwindow* getGLFWwindow() const { return m_pWindow; }
 
-	void createWindowSurface( vk::Instance& instance, vk::SurfaceKHR* surface );
+	void createWindowSurface( vk::Instance instance, VkSurfaceKHR* pSurface );
+
+private:
+	GLFWwindow* m_pWindow;
+	std::string m_sWindowName;
+	int m_iWidth;
+	int m_iHeight;
+	bool m_bFramebufferResized;
+
+	void initWindow();
+	static void frameBufferResizeCallback( GLFWwindow* pWindow, int iWidth, int iHeight );
 };
 } // namespace cat
 

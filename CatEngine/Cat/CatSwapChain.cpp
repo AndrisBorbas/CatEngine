@@ -399,12 +399,12 @@ vk::PresentModeKHR CatSwapChain::chooseSwapPresentMode( const std::vector< vk::P
 	{
 		if ( availablePresentMode == SELECTED_PRESENTMODE )
 		{
-			DLOG_F( INFO, SELECTED_PRESENTMODE_TEXT );
+			DLOG_F( INFO, "Using selected present mode: ", SELECTED_PRESENTMODE_TEXT );
 			return availablePresentMode;
 		}
 	}
 
-	DLOG_F( INFO, "Using present mode V-Sync" );
+	DLOG_F( INFO, "Using default present mode: V-Sync" );
 	return vk::PresentModeKHR::eFifo;
 }
 

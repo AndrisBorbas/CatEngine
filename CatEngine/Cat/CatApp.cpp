@@ -3,15 +3,13 @@
 #include "CatInput.hpp"
 #include "CatBuffer.hpp"
 #include "CatCamera.hpp"
-#include "simple_render_system.hpp"
+#include "CatRenderSystem.hpp"
 
-// libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-// std
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -44,32 +42,32 @@ void CatApp::run()
 	std::vector< std::unique_ptr< CatBuffer > > uboBuffers( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
 	for ( int i = 0; i < uboBuffers.size(); i++ )
 	{
-		uboBuffers[i] = std::make_unique< CatBuffer >(
-			lveDevice, sizeof( GlobalUbo ), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT );
+		uboBuffers[i] = std::make_unique< CatBuffer >( m_device, sizeof( GlobalUbo ), 1,
+			vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible );
 		uboBuffers[i]->map();
 	}
 
-	auto globalSetLayout = CatDescriptorSetLayout::Builder( lveDevice )
-							   .addBinding( 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT )
+	auto globalSetLayout = CatDescriptorSetLayout::Builder( m_device )
+							   .addBinding( 0, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex )
 							   .build();
 
-	std::vector< VkDescriptorSet > globalDescriptorSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
+	std::vector< vk::DescriptorSet > globalDescriptorSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
 	for ( int i = 0; i < globalDescriptorSets.size(); i++ )
 	{
 		auto bufferInfo = uboBuffers[i]->descriptorInfo();
-		CatDescriptorWriter( *globalSetLayout, *globalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
+		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
 	}
 
-	SimpleRenderSystem simpleRenderSystem{
-		lveDevice, lveRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+	CatRenderSystem simpleRenderSystem{
+		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 	CatCamera camera{};
 
-	auto viewerObject = CatObject::createGameObject();
-	viewerObject.transform.translation.z = -2.5f;
-	KeyboardMovementController cameraController{};
+	auto viewerObject = CatObject::createObject();
+	viewerObject.m_transform.translation.z = -2.5f;
+	CatInput cameraController{};
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	while ( !lveWindow.shouldClose() )
+	while ( !m_window.shouldClose() )
 	{
 		glfwPollEvents();
 
@@ -77,16 +75,22 @@ void CatApp::run()
 		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
 
-		cameraController.moveInPlaneXZ( lveWindow.getGLFWwindow(), frameTime, viewerObject );
-		camera.setViewYXZ( viewerObject.transform.translation, viewerObject.transform.rotation );
+		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, viewerObject );
+		camera.setViewYXZ( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
-		float aspect = lveRenderer.getAspectRatio();
+		float aspect = m_renderer.getAspectRatio();
 		camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.1f, 100.f );
 
-		if ( auto commandBuffer = lveRenderer.beginFrame() )
+		if ( auto commandBuffer = m_renderer.beginFrame() )
 		{
-			int frameIndex = lveRenderer.getFrameIndex();
-			FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex] };
+			uint64_t frameIndex = m_renderer.getFrameIndex();
+			CatFrameInfo frameInfo{
+				frameIndex,
+				frameTime,
+				commandBuffer,
+				camera,
+				globalDescriptorSets[frameIndex],
+			};
 
 			// update
 			GlobalUbo ubo{};
@@ -95,38 +99,38 @@ void CatApp::run()
 			uboBuffers[frameIndex]->flush();
 
 			// render
-			lveRenderer.beginSwapChainRenderPass( commandBuffer );
-			simpleRenderSystem.renderGameObjects( frameInfo, gameObjects );
-			lveRenderer.endSwapChainRenderPass( commandBuffer );
-			lveRenderer.endFrame();
+			m_renderer.beginSwapChainRenderPass( commandBuffer );
+			simpleRenderSystem.renderObjects( frameInfo, m_aObjects );
+			m_renderer.endSwapChainRenderPass( commandBuffer );
+			m_renderer.endFrame();
 		}
 	}
 
-	vkDeviceWaitIdle( lveDevice.device() );
+	vkDeviceWaitIdle( m_device.getDevice() );
 }
 
 void CatApp::loadGameObjects()
 {
-	std::shared_ptr< CatModel > lveModel = CatModel::createModelFromFile( lveDevice, "models/flat_vase.obj" );
-	auto flatVase = CatGameObject::createGameObject();
-	flatVase.model = lveModel;
-	flatVase.transform.translation = { -.5f, .5f, 0.f };
-	flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-	gameObjects.push_back( std::move( flatVase ) );
+	std::shared_ptr< CatModel > lveModel = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
+	auto flatVase = CatObject::createObject();
+	flatVase.m_pModel = lveModel;
+	flatVase.m_transform.translation = { -.5f, .5f, 0.f };
+	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
+	m_aObjects.push_back( std::move( flatVase ) );
 
-	lveModel = CatModel::createModelFromFile( lveDevice, "models/smooth_vase.obj" );
-	auto smoothVase = CatGameObject::createGameObject();
-	smoothVase.model = lveModel;
-	smoothVase.transform.translation = { .5f, .5f, 0.f };
-	smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-	gameObjects.push_back( std::move( smoothVase ) );
+	lveModel = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
+	auto smoothVase = CatObject::createObject();
+	smoothVase.m_pModel = lveModel;
+	smoothVase.m_transform.translation = { .5f, .5f, 0.f };
+	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
+	m_aObjects.push_back( std::move( smoothVase ) );
 
-	lveModel = CatModel::createModelFromFile( lveDevice, "models/quad.obj" );
-	auto floor = CatGameObject::createGameObject();
-	floor.model = lveModel;
-	floor.transform.translation = { 0.f, .5f, 0.f };
-	floor.transform.scale = { 3.f, 1.f, 3.f };
-	gameObjects.push_back( std::move( floor ) );
+	lveModel = CatModel::createModelFromFile( m_device, "assets/models/quad.obj" );
+	auto floor = CatObject::createObject();
+	floor.m_pModel = lveModel;
+	floor.m_transform.translation = { 0.f, .5f, 0.f };
+	floor.m_transform.scale = { 3.f, 1.f, 3.f };
+	m_aObjects.push_back( std::move( floor ) );
 }
 
 } // namespace cat
