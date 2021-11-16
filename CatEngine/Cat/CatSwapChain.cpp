@@ -399,7 +399,8 @@ vk::PresentModeKHR CatSwapChain::chooseSwapPresentMode( const std::vector< vk::P
 	{
 		if ( availablePresentMode == SELECTED_PRESENTMODE )
 		{
-			DLOG_F( INFO, "Using selected present mode: ", SELECTED_PRESENTMODE_TEXT );
+			DLOG_F(
+				INFO, ( std::string( "Using selected present mode: " ) + std::string( SELECTED_PRESENTMODE_TEXT ) ).c_str() );
 			return availablePresentMode;
 		}
 	}
