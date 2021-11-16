@@ -48,8 +48,8 @@ void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
 	const std::string& fragFilepath,
 	const PipelineConfigInfo& configInfo )
 {
-	assert( !configInfo.m_pPipelineLayout && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo" );
-	assert( !configInfo.m_pRenderPass && "Cannot create graphics pipeline: no renderPass provided in configInfo" );
+	assert( !!configInfo.m_pPipelineLayout && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo" );
+	assert( !!configInfo.m_pRenderPass && "Cannot create graphics pipeline: no renderPass provided in configInfo" );
 
 	auto vertCode = readFile( vertFilepath );
 	auto fragCode = readFile( fragFilepath );

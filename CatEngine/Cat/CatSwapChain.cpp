@@ -77,7 +77,7 @@ vk::Result CatSwapChain::acquireNextImage( uint32_t* imageIndex )
 
 vk::Result CatSwapChain::submitCommandBuffers( const vk::CommandBuffer* buffers, uint32_t* imageIndex )
 {
-	if ( !imagesInFlight[*imageIndex] )
+	if ( !!imagesInFlight[*imageIndex] )
 	{
 		m_rDevice.getDevice().waitForFences( 1, &imagesInFlight[*imageIndex], true, UINT64_MAX );
 	}

@@ -63,8 +63,8 @@ public:
 	void createBuffer( vk::DeviceSize size,
 		vk::BufferUsageFlags usage,
 		vk::MemoryPropertyFlags properties,
-		vk::Buffer buffer,
-		vk::DeviceMemory bufferMemory );
+		vk::Buffer& buffer,
+		vk::DeviceMemory& bufferMemory );
 	vk::CommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const;
 	void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );

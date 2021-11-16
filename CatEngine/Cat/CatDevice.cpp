@@ -517,8 +517,8 @@ uint32_t CatDevice::findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags
 void CatDevice::createBuffer( vk::DeviceSize size,
 	vk::BufferUsageFlags usage,
 	vk::MemoryPropertyFlags properties,
-	vk::Buffer buffer,
-	vk::DeviceMemory bufferMemory )
+	vk::Buffer& buffer,
+	vk::DeviceMemory& bufferMemory )
 {
 	vk::BufferCreateInfo bufferInfo{
 		.size = size,

@@ -55,14 +55,14 @@ void CatRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLay
 
 void CatRenderSystem::createPipeline( vk::RenderPass renderPass )
 {
-	assert( !m_pPipelineLayout && "Cannot create pipeline before pipeline layout" );
+	assert( !!m_pPipelineLayout && "Cannot create pipeline before pipeline layout" );
 
 	PipelineConfigInfo pipelineConfig{};
 	CatPipeline::defaultPipelineConfigInfo( pipelineConfig );
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv", pipelineConfig );
+		m_rDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
 }
 
 void CatRenderSystem::renderObjects( CatFrameInfo& frameInfo, std::vector< CatObject >& gameObjects )
