@@ -1,6 +1,6 @@
 #include "CatPipeline.hpp"
 
-#include "CatModel.hpp"
+#include "Cat/Objects/CatModel.hpp"
 
 #include <cassert>
 #include <fstream>

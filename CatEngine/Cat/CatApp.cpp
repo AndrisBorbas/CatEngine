@@ -1,8 +1,8 @@
 #include "CatApp.hpp"
 
-#include "CatInput.hpp"
-#include "CatBuffer.hpp"
-#include "CatCamera.hpp"
+#include "Cat/Objects/CatInput.hpp"
+#include "Cat/Rendering/CatBuffer.hpp"
+#include "Cat/Objects/CatCamera.hpp"
 #include "CatRenderSystem.hpp"
 
 #define GLM_FORCE_RADIANS

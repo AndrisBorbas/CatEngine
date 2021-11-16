@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATCAMERA_HPP
 #define CATENGINE_CATCAMERA_HPP
 
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 
 namespace cat
 {

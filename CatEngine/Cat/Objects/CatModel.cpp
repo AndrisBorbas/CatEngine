@@ -1,11 +1,11 @@
 #include "CatModel.hpp"
 
-#include "CatUtils.hpp"
+#include "Cat/CatUtils.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/hash.hpp>
+#include "glm/gtx/hash.hpp"
 
 #include <cassert>
 #include <cstring>

@@ -1,9 +1,7 @@
 #ifndef CATENGINE_CATDEVICE_HPP
 #define CATENGINE_CATDEVICE_HPP
 
-#include "Defines.h"
-
-#include "CatWindow.hpp"
+#include "Cat/CatWindow.hpp"
 
 #include <string>
 #include <vector>

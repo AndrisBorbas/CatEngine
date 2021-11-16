@@ -1,10 +1,10 @@
 #ifndef CATENGINE_CATAPP_HPP
 #define CATENGINE_CATAPP_HPP
 
-#include "CatDescriptors.hpp"
-#include "CatDevice.hpp"
-#include "CatObject.hpp"
-#include "CatRenderer.hpp"
+#include "Cat/Rendering/CatDescriptors.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/Objects/CatObject.hpp"
+#include "Cat/Rendering/CatRenderer.hpp"
 #include "CatWindow.hpp"
 
 #include <memory>

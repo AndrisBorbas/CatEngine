@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATFRAMEINFO_HPP
 #define CATENGINE_CATFRAMEINFO_HPP
 
-#include "CatCamera.hpp"
+#include "Cat/Objects/CatCamera.hpp"
 
 #include "vulkan/vulkan.hpp"
 

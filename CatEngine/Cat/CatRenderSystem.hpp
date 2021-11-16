@@ -1,11 +1,11 @@
 #ifndef CATENGINE_CATRENDERSYSTEM_HPP
 #define CATENGINE_CATRENDERSYSTEM_HPP
 
-#include "CatDevice.hpp"
-#include "CatCamera.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/Objects/CatCamera.hpp"
 #include "CatFrameInfo.hpp"
-#include "CatObject.hpp"
-#include "CatPipeline.hpp"
+#include "Cat/Objects/CatObject.hpp"
+#include "Cat/Rendering/CatPipeline.hpp"
 
 #include <memory>
 #include <vector>

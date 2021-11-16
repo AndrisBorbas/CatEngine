@@ -1,5 +1,7 @@
 #include "Cat/CatApp.hpp"
 
+#include <loguru.hpp>
+
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>

@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATBUFFER_HPP
 #define CATENGINE_CATBUFFER_HPP
 
-#include "CatDevice.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
 
 namespace cat
 {

@@ -3,7 +3,7 @@
 
 #include "CatDevice.hpp"
 #include "CatSwapChain.hpp"
-#include "CatWindow.hpp"
+#include "Cat/CatWindow.hpp"
 
 #include <cassert>
 #include <memory>

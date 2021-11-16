@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATINPUT_HPP
 #define CATENGINE_CATINPUT_HPP
 
-#include "CatWindow.hpp"
+#include "Cat/CatWindow.hpp"
 #include "CatObject.hpp"
 
 namespace cat

@@ -1,5 +1,7 @@
 #include "CatDevice.hpp"
 
+#include <loguru.hpp>
+
 #include <cstring>
 #include <iostream>
 #include <map>

@@ -2,12 +2,12 @@
 #define CATENGINE_CATMODEL_HPP
 
 
-#include "CatDevice.hpp"
-#include "CatBuffer.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/Rendering/CatBuffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 
 #include <memory>
 #include <vector>

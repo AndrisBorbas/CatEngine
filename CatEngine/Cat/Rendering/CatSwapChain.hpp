@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATSWAPCHAIN_HPP
 #define CATENGINE_CATSWAPCHAIN_HPP
 
-#include "CatDevice.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
 
 namespace cat
 {

@@ -1,5 +1,7 @@
 #include "CatSwapChain.hpp"
 
+#include <loguru.hpp>
+
 #include <array>
 #include <cstring>
 #include <iostream>

@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATPIPELINE_HPP
 #define CATENGINE_CATPIPELINE_HPP
 
-#include "CatDevice.hpp"
+#include "Cat/Rendering/CatDevice.hpp"
 
 #include <string>
 #include <vector>
