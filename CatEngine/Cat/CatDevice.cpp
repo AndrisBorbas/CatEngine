@@ -214,7 +214,7 @@ void CatDevice::pickPhysicalDevice()
 	if ( candidates.rbegin()->first > 0 )
 	{
 		m_physicalDevice = candidates.rbegin()->second;
-		std::cout << m_physicalDevice.getProperties().deviceName << std::endl;
+		LOG_F( INFO, m_physicalDevice.getProperties().deviceName );
 	}
 	else
 	{
@@ -222,7 +222,7 @@ void CatDevice::pickPhysicalDevice()
 	}
 
 	m_msaaSamples = getMaxUsableSampleCount( m_physicalDevice );
-	std::cout << "msaa: " << to_string( m_msaaSamples );
+	LOG_F( INFO, ( std::string( "MSAA: " ) + to_string( m_msaaSamples ) ).c_str() );
 }
 
 void CatDevice::createLogicalDevice()
