@@ -5,9 +5,12 @@
 #include "Cat/CatWindow.hpp"
 #include "Cat/Rendering/CatDescriptors.hpp"
 
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+
+#include <glm/vec3.hpp>
 
 #include <stdexcept>
 
@@ -35,7 +38,7 @@ public:
 	bool m_bShowDemoWindow = false;
 	bool m_bShowAnotherWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
-	void runExample();
+	void runExample( glm::vec3 vCameraPos );
 
 private:
 	CatDevice& m_rDevice;

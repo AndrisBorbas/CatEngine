@@ -82,7 +82,7 @@ void CatApp::run()
 		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
 
-		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, viewerObject );
+		cameraController.moveInPlaneXY( m_window.getGLFWwindow(), frameTime, viewerObject );
 		camera.setViewYXZ( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
 		float aspect = m_renderer.getAspectRatio();
@@ -121,7 +121,7 @@ void CatApp::run()
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
-			catImGui.runExample();
+			catImGui.runExample( viewerObject.m_transform.translation );
 
 			// as last step in render pass, record the imgui draw commands
 			catImGui.render( commandBuffer );
