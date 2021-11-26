@@ -21,7 +21,7 @@ public:
 	vk::Framebuffer getFrameBuffer( int index ) { return m_aSwapChainFramebuffers[index]; }
 	vk::RenderPass getRenderPass() { return m_pRenderPass; }
 	vk::ImageView getImageView( int index ) { return m_aSwapChainImageViews[index]; }
-	size_t imageCount() { return m_aSwapChainImages.size(); }
+	size_t getImageCount() { return m_aSwapChainImages.size(); }
 	vk::Format getSwapChainImageFormat() { return m_pSwapChainImageFormat; }
 	vk::Extent2D getSwapChainExtent() { return m_pSwapChainExtent; }
 	uint32_t width() { return m_pSwapChainExtent.width; }

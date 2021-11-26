@@ -49,6 +49,9 @@ public:
 	vk::SurfaceKHR getSurface() const { return m_surface; }
 	vk::Queue getGraphicsQueue() const { return m_graphicsQueue; }
 	vk::Queue getPresentQueue() const { return m_presentQueue; }
+	vk::Instance getInstance() const { return m_instance; }
+	vk::PhysicalDevice getPhysicalDevice() const { return m_physicalDevice; }
+	uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().m_nGraphicsFamily.value(); }
 
 	SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport( m_physicalDevice ); }
 	uint32_t findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags rProperties );

@@ -77,6 +77,8 @@ public:
 
 	void resetPool();
 
+	vk::DescriptorPool getDescriptorPool() const { return m_pDescriptorPool; }
+
 private:
 	CatDevice& m_rDevice;
 	vk::DescriptorPool m_pDescriptorPool;

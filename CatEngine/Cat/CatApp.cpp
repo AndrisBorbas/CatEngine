@@ -10,6 +10,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+#include "CatImGui.hpp"
+
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -58,6 +63,8 @@ void CatApp::run()
 		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
 	}
 
+	CatImGui catImGui{ m_window, m_device, m_renderer.getSwapChainRenderPass(), m_renderer.getImageCount() };
+
 	CatRenderSystem simpleRenderSystem{
 		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 	CatCamera camera{};
@@ -98,9 +105,27 @@ void CatApp::run()
 			uboBuffers[frameIndex]->writeToBuffer( &ubo );
 			uboBuffers[frameIndex]->flush();
 
-			// render
+			// tell imgui that we're starting a new frame
+			catImGui.newFrame();
+
+			// start new frame
 			m_renderer.beginSwapChainRenderPass( commandBuffer );
+
+			// render game objects first, so they will be rendered in the background. This
+			// is the best we can do for now.
+			// Once we cover offscreen rendering, we can render the scene to a image/texture rather than
+			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
+			// subwindow
 			simpleRenderSystem.renderObjects( frameInfo, m_aObjects );
+
+			// example code telling imgui what windows to render, and their contents
+			// this can be replaced with whatever code/classes you set up configuring your
+			// desired engine UI
+			catImGui.runExample();
+
+			// as last step in render pass, record the imgui draw commands
+			catImGui.render( commandBuffer );
+
 			m_renderer.endSwapChainRenderPass( commandBuffer );
 			m_renderer.endFrame();
 		}

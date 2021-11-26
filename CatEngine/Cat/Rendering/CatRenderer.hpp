@@ -22,6 +22,7 @@ public:
 
 	vk::RenderPass getSwapChainRenderPass() const { return m_pSwapChain->getRenderPass(); }
 	float getAspectRatio() const { return m_pSwapChain->extentAspectRatio(); }
+	uint32_t getImageCount() const { return m_pSwapChain->getImageCount(); }
 	bool isFrameInProgress() const { return m_bIsFrameStarted; }
 
 	vk::CommandBuffer getCurrentCommandBuffer() const

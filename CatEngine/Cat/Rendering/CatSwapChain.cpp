@@ -278,8 +278,8 @@ void CatSwapChain::createRenderPass()
 
 void CatSwapChain::createFramebuffers()
 {
-	m_aSwapChainFramebuffers.resize( imageCount() );
-	for ( size_t i = 0; i < imageCount(); i++ )
+	m_aSwapChainFramebuffers.resize( getImageCount() );
+	for ( size_t i = 0; i < getImageCount(); i++ )
 	{
 		std::array< vk::ImageView, 2 > attachments = { m_aSwapChainImageViews[i], m_aDepthImageViews[i] };
 
@@ -307,9 +307,9 @@ void CatSwapChain::createDepthResources()
 	m_pSwapChainDepthFormat = depthFormat;
 	vk::Extent2D swapChainExtent = getSwapChainExtent();
 
-	m_aDepthImages.resize( imageCount() );
-	m_aDepthImageMemorys.resize( imageCount() );
-	m_aDepthImageViews.resize( imageCount() );
+	m_aDepthImages.resize( getImageCount() );
+	m_aDepthImageMemorys.resize( getImageCount() );
+	m_aDepthImageViews.resize( getImageCount() );
 
 	for ( int i = 0; i < m_aDepthImages.size(); i++ )
 	{
@@ -360,7 +360,7 @@ void CatSwapChain::createSyncObjects()
 	imageAvailableSemaphores.resize( MAX_FRAMES_IN_FLIGHT );
 	renderFinishedSemaphores.resize( MAX_FRAMES_IN_FLIGHT );
 	inFlightFences.resize( MAX_FRAMES_IN_FLIGHT );
-	imagesInFlight.resize( imageCount(), VK_NULL_HANDLE );
+	imagesInFlight.resize( getImageCount(), VK_NULL_HANDLE );
 
 	vk::SemaphoreCreateInfo semaphoreInfo = {};
 
