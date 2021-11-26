@@ -53,12 +53,12 @@ void CatCamera::setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3
 
 void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 {
-	const float c3 = glm::cos( vRotation.y );
-	const float s3 = glm::sin( vRotation.y );
+	const float c3 = glm::cos( vRotation.z );
+	const float s3 = glm::sin( vRotation.z );
 	const float c2 = glm::cos( vRotation.x );
 	const float s2 = glm::sin( vRotation.x );
-	const float c1 = glm::cos( vRotation.z );
-	const float s1 = glm::sin( vRotation.z );
+	const float c1 = glm::cos( vRotation.y );
+	const float s1 = glm::sin( vRotation.y );
 	const glm::vec3 u{ ( c1 * c3 + s1 * s2 * s3 ), ( c2 * s3 ), ( c1 * s2 * s3 - c3 * s1 ) };
 	const glm::vec3 v{ ( c3 * s1 * s2 - c1 * s3 ), ( c2 * c3 ), ( c1 * c3 * s2 + s1 * s3 ) };
 	const glm::vec3 w{ ( c2 * s1 ), ( -s2 ), ( c1 * c2 ) };
