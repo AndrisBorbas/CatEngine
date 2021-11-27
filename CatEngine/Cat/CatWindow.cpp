@@ -23,6 +23,8 @@ void CatWindow::initWindow()
 
 	m_pWindow = glfwCreateWindow( m_iWidth, m_iHeight, m_sWindowName.c_str(), nullptr, nullptr );
 	glfwSetWindowUserPointer( m_pWindow, this );
+	// glfwSetCursorPosCallback( m_pWindow, mouseCallback );
+	// glfwSetInputMode( m_pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
 	glfwSetFramebufferSizeCallback( m_pWindow, frameBufferResizeCallback );
 }
 

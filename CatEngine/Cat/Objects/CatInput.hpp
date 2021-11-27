@@ -11,6 +11,7 @@ class CatInput
 public:
 	struct KeyMappings
 	{
+		int look = GLFW_MOUSE_BUTTON_RIGHT;
 		int moveLeft = GLFW_KEY_A;
 		int moveRight = GLFW_KEY_D;
 		int moveForward = GLFW_KEY_W;
@@ -23,11 +24,16 @@ public:
 		int lookDown = GLFW_KEY_DOWN;
 	};
 
-	void moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject );
+	void moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObject );
 
-	KeyMappings keys{};
-	float moveSpeed{ 3.f };
-	float lookSpeed{ 1.5f };
+private:
+	KeyMappings m_eKeys{};
+	float m_fMovementSpeed = 3.f;
+	float m_fMouseSensitivity = 0.01f;
+	glm::vec2 m_vMouseLastPos = { 0.f, 0.f };
+	bool m_bFirstMouse = true;
+	float m_fYaw = 0.f;
+	float m_fPitch = 0.f;
 };
 } // namespace cat
 

@@ -121,7 +121,7 @@ void CatApp::run()
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
-			catImGui.runExample( viewerObject.m_transform.translation );
+			catImGui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
 			// as last step in render pass, record the imgui draw commands
 			catImGui.render( commandBuffer );

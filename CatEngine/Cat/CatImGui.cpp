@@ -6,7 +6,8 @@ namespace cat
 // ok this just initializes imgui using the provided integration files. So in our case we need to
 // initialize the vulkan and glfw imgui implementations, since that's what our engine is built
 // using.
-CatImGui::CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount ) : m_rDevice{ device }
+CatImGui::CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount )
+	: m_rDevice{ device }, m_rWindow{ window }
 {
 	// set up a descriptor pool stored on this instance, see header for more comments on this.
 	//	vk::DescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -110,7 +111,7 @@ void CatImGui::render( vk::CommandBuffer commandBuffer )
 	ImGui_ImplVulkan_RenderDrawData( drawdata, commandBuffer );
 }
 
-void CatImGui::runExample( glm::vec3 vCameraPos )
+void CatImGui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
@@ -144,6 +145,7 @@ void CatImGui::runExample( glm::vec3 vCameraPos )
 		ImGui::Text( "counter = %d", counter );
 
 		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
+		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
 
 		ImGui::End();
 	}

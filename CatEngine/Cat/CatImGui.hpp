@@ -38,10 +38,11 @@ public:
 	bool m_bShowDemoWindow = false;
 	bool m_bShowAnotherWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
-	void runExample( glm::vec3 vCameraPos );
+	void runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot );
 
 private:
 	CatDevice& m_rDevice;
+	CatWindow& m_rWindow;
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 };
