@@ -66,6 +66,9 @@ void CatInput::moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObjec
 	if ( glfwGetKey( window, m_eKeys.moveUp ) == GLFW_PRESS ) moveDir += -vUp;
 	if ( glfwGetKey( window, m_eKeys.moveDown ) == GLFW_PRESS ) moveDir -= -vUp;
 
+	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_PRESS ) m_fMovementSpeed = 6.9f;
+	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_RELEASE ) m_fMovementSpeed = 3.0f;
+
 	if ( glm::dot( moveDir, moveDir ) > std::numeric_limits< float >::epsilon() )
 	{
 		gameObject.m_transform.translation += m_fMovementSpeed * dt * glm::normalize( moveDir );
