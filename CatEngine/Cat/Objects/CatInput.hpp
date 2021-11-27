@@ -29,7 +29,7 @@ public:
 private:
 	KeyMappings m_eKeys{};
 	float m_fMovementSpeed = 3.f;
-	float m_fMouseSensitivity = 0.01f;
+	float m_fMouseSensitivity = 0.0045f;
 	glm::vec2 m_vMouseLastPos = { 0.f, 0.f };
 	bool m_bFirstMouse = true;
 	float m_fYaw = 0.f;
