@@ -47,13 +47,13 @@ void CatInput::moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObjec
 	m_fYaw = glm::mod( m_fYaw, glm::two_pi< float >() );
 
 	glm::vec3 vFront;
-	vFront.y = cos( m_fYaw ) * cos( m_fPitch );
-	vFront.z = sin( m_fPitch );
-	vFront.x = sin( m_fYaw ) * cos( m_fPitch );
+	vFront.x = cos( m_fYaw ) * cos( m_fPitch );
+	vFront.y = sin( m_fPitch );
+	vFront.z = sin( m_fYaw ) * cos( m_fPitch );
 	// normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower
 	// movement.
 	vFront = glm::normalize( vFront );
-	glm::vec3 vRight = glm::normalize( glm::cross( vFront, glm::vec3{ 0.f, 0.f, 1.f } ) );
+	glm::vec3 vRight = glm::normalize( glm::cross( vFront, glm::vec3{ 0.f, 1.f, 0.f } ) );
 	glm::vec3 vUp = glm::normalize( glm::cross( vRight, vFront ) );
 
 	gameObject.m_transform.rotation = vFront;

@@ -140,7 +140,6 @@ void CatApp::loadGameObjects()
 	auto flatVase = CatObject::createObject();
 	flatVase.m_pModel = lveModel;
 	flatVase.m_transform.translation = { -.5f, .5f, 0.f };
-	flatVase.m_transform.rotation = { glm::radians( 90.0f ), 0.f, 0.f };
 	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_aObjects.push_back( std::move( flatVase ) );
 
@@ -148,7 +147,6 @@ void CatApp::loadGameObjects()
 	auto smoothVase = CatObject::createObject();
 	smoothVase.m_pModel = lveModel;
 	smoothVase.m_transform.translation = { .5f, .5f, 0.f };
-	smoothVase.m_transform.rotation = { glm::radians( 90.0f ), 0.f, 0.f };
 	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_aObjects.push_back( std::move( smoothVase ) );
 
@@ -156,8 +154,7 @@ void CatApp::loadGameObjects()
 	auto floor = CatObject::createObject();
 	floor.m_pModel = lveModel;
 	floor.m_transform.translation = { 0.f, .5f, 0.f };
-	floor.m_transform.rotation = { glm::radians( 90.0f ), 0.f, 0.f };
-	floor.m_transform.scale = { 3.f, 3.f, 1.f };
+	floor.m_transform.scale = { 3.f, 1.f, 3.f };
 	m_aObjects.push_back( std::move( floor ) );
 }
 

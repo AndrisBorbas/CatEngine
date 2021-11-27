@@ -54,6 +54,6 @@ void CatCamera::setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3
 
 void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 {
-	m_mxView = glm::lookAt( vPosition, vPosition + vRotation, glm::vec3{ 0.f, 0.f, 1.f } );
+	m_mxView = glm::lookAt( vPosition, vPosition + vRotation, glm::vec3{ 0.f, 1.f, 0.f } );
 }
 } // namespace cat
