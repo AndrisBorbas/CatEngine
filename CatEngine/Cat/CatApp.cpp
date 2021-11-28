@@ -98,6 +98,7 @@ void CatApp::run()
 				commandBuffer,
 				camera,
 				globalDescriptorSets[frameIndex],
+				m_mObjects,
 			};
 
 			// update
@@ -117,7 +118,7 @@ void CatApp::run()
 			// Once we cover offscreen rendering, we can render the scene to a image/texture rather than
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
-			simpleRenderSystem.renderObjects( frameInfo, m_aObjects );
+			simpleRenderSystem.renderObjects( frameInfo );
 
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
@@ -142,28 +143,28 @@ void CatApp::loadGameObjects()
 	floor.m_pModel = model;
 	floor.m_transform.translation = { 0.f, 0.f, 0.f };
 	floor.m_transform.scale = { 5.f, 1.f, 5.f };
-	m_aObjects.push_back( std::move( floor ) );
+	m_mObjects.emplace( floor.getId(), std::move( floor ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
 	auto flatVase = CatObject::createObject();
 	flatVase.m_pModel = model;
 	flatVase.m_transform.translation = { -.5f, -.5f, 0.f };
 	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
-	m_aObjects.push_back( std::move( flatVase ) );
+	m_mObjects.emplace( flatVase.getId(), std::move( flatVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
 	auto smoothVase = CatObject::createObject();
 	smoothVase.m_pModel = model;
 	smoothVase.m_transform.translation = { .5f, -.5f, 0.f };
 	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
-	m_aObjects.push_back( std::move( smoothVase ) );
+	m_mObjects.emplace( smoothVase.getId(), std::move( smoothVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/colored_cube.obj" );
 	auto cube = CatObject::createObject();
 	cube.m_pModel = model;
 	cube.m_transform.translation = { 1.5f, -.5f, 0.f };
 	cube.m_transform.scale = { .25f, .25f, .25f };
-	m_aObjects.push_back( std::move( cube ) );
+	m_mObjects.emplace( cube.getId(), std::move( cube ) );
 }
 
 } // namespace cat

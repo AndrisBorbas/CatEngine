@@ -27,6 +27,7 @@ class CatObject
 {
 public:
 	using id_t = uint32_t;
+	using Map = std::unordered_map< id_t, CatObject >;
 
 	static CatObject createObject()
 	{

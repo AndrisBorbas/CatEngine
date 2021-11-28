@@ -2,6 +2,7 @@
 #define CATENGINE_CATFRAMEINFO_HPP
 
 #include "Cat/Objects/CatCamera.hpp"
+#include "Cat/Objects/CatObject.hpp"
 
 #include "vulkan/vulkan.hpp"
 
@@ -15,6 +16,7 @@ struct CatFrameInfo
 	vk::CommandBuffer m_pCommandBuffer;
 	CatCamera& m_rCamera;
 	vk::DescriptorSet m_pGlobalDescriptorSet;
+	CatObject::Map& m_mObjects;
 };
 } // namespace cat
 

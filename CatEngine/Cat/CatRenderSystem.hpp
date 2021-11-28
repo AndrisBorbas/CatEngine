@@ -21,7 +21,7 @@ public:
 	CatRenderSystem( const CatRenderSystem& ) = delete;
 	CatRenderSystem& operator=( const CatRenderSystem& ) = delete;
 
-	void renderObjects( CatFrameInfo& frameInfo, std::vector< CatObject >& gameObjects );
+	void renderObjects( CatFrameInfo& frameInfo );
 
 private:
 	void createPipelineLayout( vk::DescriptorSetLayout globalSetLayout );

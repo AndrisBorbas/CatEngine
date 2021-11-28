@@ -65,15 +65,17 @@ void CatRenderSystem::createPipeline( vk::RenderPass renderPass )
 		m_rDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
 }
 
-void CatRenderSystem::renderObjects( CatFrameInfo& frameInfo, std::vector< CatObject >& gameObjects )
+void CatRenderSystem::renderObjects( CatFrameInfo& frameInfo )
 {
 	m_pPipeline->bind( frameInfo.m_pCommandBuffer );
 
 	frameInfo.m_pCommandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, m_pPipelineLayout, 0, 1, &frameInfo.m_pGlobalDescriptorSet, 0, nullptr );
 
-	for ( auto& obj : gameObjects )
+	for ( auto& kv : frameInfo.m_mObjects )
 	{
+		auto& obj = kv.second;
+		if ( obj.m_pModel == nullptr ) continue;
 		CatPushConstantData push{};
 		push.m_mxModel = obj.m_transform.mat4();
 		push.m_mxNormal = obj.m_transform.normalMatrix();

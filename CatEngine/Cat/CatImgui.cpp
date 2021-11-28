@@ -147,7 +147,7 @@ void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 
 		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
 		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
-		ImGui::DragFloat3( "pos", (float*)&m_rApp.getObjects()[0].m_transform.translation, 0.1f );
+		ImGui::DragFloat3( "pos", (float*)&m_rApp.getObjects().at( 1 ).m_transform.translation, 0.1f );
 
 		ImGui::End();
 	}

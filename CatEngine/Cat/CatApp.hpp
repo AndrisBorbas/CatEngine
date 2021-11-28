@@ -27,7 +27,7 @@ public:
 
 	void run();
 
-	std::vector< CatObject > const& getObjects() const { return m_aObjects; }
+	auto const& getObjects() const { return m_mObjects; }
 
 private:
 	void loadGameObjects();
@@ -38,7 +38,7 @@ private:
 
 	// note: order of declarations matters
 	std::unique_ptr< CatDescriptorPool > m_pGlobalPool{};
-	std::vector< CatObject > m_aObjects;
+	CatObject::Map m_mObjects;
 };
 } // namespace cat
 
