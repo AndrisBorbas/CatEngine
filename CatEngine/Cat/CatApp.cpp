@@ -13,7 +13,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-#include "CatImGui.hpp"
+#include "CatImgui.hpp"
 
 #include <array>
 #include <cassert>
@@ -63,13 +63,14 @@ void CatApp::run()
 		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
 	}
 
-	CatImGui catImGui{ m_window, m_device, m_renderer.getSwapChainRenderPass(), m_renderer.getImageCount() };
+	CatImgui imgui{ *this, m_window, m_device, m_renderer.getSwapChainRenderPass(), m_renderer.getImageCount() };
 
 	CatRenderSystem simpleRenderSystem{
 		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 	CatCamera camera{};
 
 	auto viewerObject = CatObject::createObject();
+	viewerObject.m_transform.translation.y = -1.5f;
 	viewerObject.m_transform.translation.z = -2.5f;
 	CatInput cameraController{};
 
@@ -106,7 +107,7 @@ void CatApp::run()
 			uboBuffers[frameIndex]->flush();
 
 			// tell imgui that we're starting a new frame
-			catImGui.newFrame();
+			imgui.newFrame();
 
 			// start new frame
 			m_renderer.beginSwapChainRenderPass( commandBuffer );
@@ -121,10 +122,10 @@ void CatApp::run()
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
-			catImGui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+			imgui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
 			// as last step in render pass, record the imgui draw commands
-			catImGui.render( commandBuffer );
+			imgui.render( commandBuffer );
 
 			m_renderer.endSwapChainRenderPass( commandBuffer );
 			m_renderer.endFrame();
@@ -136,26 +137,33 @@ void CatApp::run()
 
 void CatApp::loadGameObjects()
 {
-	std::shared_ptr< CatModel > lveModel = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
+	std::shared_ptr< CatModel > model = CatModel::createModelFromFile( m_device, "assets/models/quad.obj" );
+	auto floor = CatObject::createObject();
+	floor.m_pModel = model;
+	floor.m_transform.translation = { 0.f, 0.f, 0.f };
+	floor.m_transform.scale = { 5.f, 1.f, 5.f };
+	m_aObjects.push_back( std::move( floor ) );
+
+	model = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
 	auto flatVase = CatObject::createObject();
-	flatVase.m_pModel = lveModel;
-	flatVase.m_transform.translation = { -.5f, .5f, 0.f };
+	flatVase.m_pModel = model;
+	flatVase.m_transform.translation = { -.5f, -.5f, 0.f };
 	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_aObjects.push_back( std::move( flatVase ) );
 
-	lveModel = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
+	model = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
 	auto smoothVase = CatObject::createObject();
-	smoothVase.m_pModel = lveModel;
-	smoothVase.m_transform.translation = { .5f, .5f, 0.f };
+	smoothVase.m_pModel = model;
+	smoothVase.m_transform.translation = { .5f, -.5f, 0.f };
 	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_aObjects.push_back( std::move( smoothVase ) );
 
-	lveModel = CatModel::createModelFromFile( m_device, "assets/models/quad.obj" );
-	auto floor = CatObject::createObject();
-	floor.m_pModel = lveModel;
-	floor.m_transform.translation = { 0.f, .5f, 0.f };
-	floor.m_transform.scale = { 3.f, 1.f, 3.f };
-	m_aObjects.push_back( std::move( floor ) );
+	model = CatModel::createModelFromFile( m_device, "assets/models/colored_cube.obj" );
+	auto cube = CatObject::createObject();
+	cube.m_pModel = model;
+	cube.m_transform.translation = { 1.5f, -.5f, 0.f };
+	cube.m_transform.scale = { .25f, .25f, .25f };
+	m_aObjects.push_back( std::move( cube ) );
 }
 
 } // namespace cat

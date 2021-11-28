@@ -4,11 +4,14 @@
 #include "Cat/Rendering/CatDevice.hpp"
 #include "Cat/CatWindow.hpp"
 #include "Cat/Rendering/CatDescriptors.hpp"
+#include "Cat/CatApp.hpp"
 
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+
+#include "ImGuizmo.h"
 
 #include <glm/vec3.hpp>
 
@@ -24,11 +27,11 @@ static void check_vk_result( VkResult err )
 	if ( err < 0 ) abort();
 }
 
-class CatImGui
+class CatImgui
 {
 public:
-	CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount );
-	~CatImGui();
+	CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount );
+	~CatImgui();
 
 	void newFrame();
 
@@ -43,6 +46,7 @@ public:
 private:
 	CatDevice& m_rDevice;
 	CatWindow& m_rWindow;
+	CatApp& m_rApp;
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 };

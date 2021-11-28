@@ -15,10 +15,12 @@ void CatInput::moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObjec
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_RELEASE )
 	{
 		m_bFirstMouse = true;
+		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
 	}
 
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_PRESS )
 	{
+		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
 		double* pXPos = new double;
 		double* pYPos = new double;
 		glfwGetCursorPos( window, pXPos, pYPos );

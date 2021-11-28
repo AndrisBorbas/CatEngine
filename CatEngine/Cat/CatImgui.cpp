@@ -1,4 +1,4 @@
-#include "CatImGui.hpp"
+#include "CatImgui.hpp"
 
 namespace cat
 {
@@ -6,8 +6,8 @@ namespace cat
 // ok this just initializes imgui using the provided integration files. So in our case we need to
 // initialize the vulkan and glfw imgui implementations, since that's what our engine is built
 // using.
-CatImGui::CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount )
-	: m_rDevice{ device }, m_rWindow{ window }
+CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount )
+	: m_rDevice{ device }, m_rWindow{ window }, m_rApp{ app }
 {
 	// set up a descriptor pool stored on this instance, see header for more comments on this.
 	//	vk::DescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -66,11 +66,11 @@ CatImGui::CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderP
 		// pipeline cache is a potential future optimization, ignoring for now
 		.PipelineCache = nullptr,
 		.DescriptorPool = m_pDescriptorPool->getDescriptorPool(),
+		.MinImageCount = 2,
+		.ImageCount = imageCount,
 		// todo, I should probably get around to integrating a memory allocator library such as Vulkan
 		// memory allocator (VMA) sooner than later. We don't want to have to update adding an allocator
 		// in a ton of locations.
-		.MinImageCount = 2,
-		.ImageCount = imageCount,
 		.Allocator = nullptr,
 		.CheckVkResultFn = check_vk_result,
 	};
@@ -86,7 +86,7 @@ CatImGui::CatImGui( CatWindow& window, CatDevice& device, vk::RenderPass renderP
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
-CatImGui::~CatImGui()
+CatImgui::~CatImgui()
 {
 	//	vkDestroyDescriptorPool( lveDevice.device(), descriptorPool, nullptr );
 	ImGui_ImplVulkan_Shutdown();
@@ -94,24 +94,25 @@ CatImGui::~CatImGui()
 	ImGui::DestroyContext();
 }
 
-void CatImGui::newFrame()
+void CatImgui::newFrame()
 {
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 }
 
 // this tells imgui that we're done setting up the current frame,
 // then gets the draw data from imgui and uses it to record to the provided
 // command buffer the necessary draw commands
-void CatImGui::render( vk::CommandBuffer commandBuffer )
+void CatImgui::render( vk::CommandBuffer commandBuffer )
 {
 	ImGui::Render();
 	ImDrawData* drawdata = ImGui::GetDrawData();
 	ImGui_ImplVulkan_RenderDrawData( drawdata, commandBuffer );
 }
 
-void CatImGui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
+void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
@@ -146,6 +147,7 @@ void CatImGui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 
 		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
 		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
+		ImGui::DragFloat3( "pos", (float*)&m_rApp.getObjects()[0].m_transform.translation, 0.1f );
 
 		ImGui::End();
 	}

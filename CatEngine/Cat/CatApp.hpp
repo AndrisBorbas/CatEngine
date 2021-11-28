@@ -27,6 +27,8 @@ public:
 
 	void run();
 
+	std::vector< CatObject > const& getObjects() const { return m_aObjects; }
+
 private:
 	void loadGameObjects();
 

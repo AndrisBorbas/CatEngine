@@ -33,8 +33,8 @@ private:
 	float m_fMouseSensitivity = 0.0045f;
 	glm::vec2 m_vMouseLastPos = { 0.f, 0.f };
 	bool m_bFirstMouse = true;
-	float m_fYaw = 0.f;
-	float m_fPitch = 0.f;
+	float m_fYaw = -1.5f;
+	float m_fPitch = -.35f;
 };
 } // namespace cat
 

@@ -63,7 +63,7 @@ public:
 		vk::DescriptorPoolCreateFlags m_pPoolFlags{};
 	};
 
-	CatDescriptorPool( CatDevice& lveDevice,
+	CatDescriptorPool( CatDevice& rDevice,
 		uint32_t maxSets,
 		vk::DescriptorPoolCreateFlags poolFlags,
 		const std::vector< vk::DescriptorPoolSize >& poolSizes );
