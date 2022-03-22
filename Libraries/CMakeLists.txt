@@ -28,12 +28,13 @@ target_include_directories(tinyobjloader PUBLIC tinyobjloader-master)
 add_library(imgui STATIC)
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
 
-file(GLOB sources **/*.cpp)
+file(GLOB sources imgui/*.cpp)
 
 message("${sources}")
 
 target_sources(imgui PRIVATE
     "${sources}"
+
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_vulkan.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_glfw.cpp"
 
