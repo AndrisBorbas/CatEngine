@@ -47,8 +47,10 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -80,7 +82,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 
 	// upload fonts, this is done by recording and submitting a one time use command buffer
 	// which can be done easily bye using some existing helper functions on the lve device object
-	auto commandBuffer = device.beginSingleTimeCommands();
+	const auto commandBuffer = device.beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 	device.endSingleTimeCommands( commandBuffer );
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
@@ -111,6 +113,16 @@ void CatImgui::render( vk::CommandBuffer commandBuffer )
 	ImDrawData* drawdata = ImGui::GetDrawData();
 	ImGui_ImplVulkan_RenderDrawData( drawdata, commandBuffer );
 }
+
+void CatImgui::renderPlatforWindows()
+{
+	if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
+}
+
 
 void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 {

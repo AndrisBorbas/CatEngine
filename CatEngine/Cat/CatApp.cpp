@@ -38,18 +38,16 @@ CatApp::CatApp()
 	loadGameObjects();
 }
 
-CatApp::~CatApp()
-{
-}
+CatApp::~CatApp() = default;
 
 void CatApp::run()
 {
 	std::vector< std::unique_ptr< CatBuffer > > uboBuffers( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
-	for ( int i = 0; i < uboBuffers.size(); i++ )
+	for ( auto& uboBuffer : uboBuffers )
 	{
-		uboBuffers[i] = std::make_unique< CatBuffer >( m_device, sizeof( GlobalUbo ), 1,
+		uboBuffer = std::make_unique< CatBuffer >( m_device, sizeof( GlobalUbo ), 1,
 			vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible );
-		uboBuffers[i]->map();
+		uboBuffer->map();
 	}
 
 	auto globalSetLayout = CatDescriptorSetLayout::Builder( m_device )
@@ -57,7 +55,7 @@ void CatApp::run()
 							   .build();
 
 	std::vector< vk::DescriptorSet > globalDescriptorSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
-	for ( int i = 0; i < globalDescriptorSets.size(); i++ )
+	for ( size_t i = 0; i < globalDescriptorSets.size(); i++ )
 	{
 		auto bufferInfo = uboBuffers[i]->descriptorInfo();
 		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
@@ -108,7 +106,7 @@ void CatApp::run()
 			uboBuffers[frameIndex]->flush();
 
 			// tell imgui that we're starting a new frame
-			imgui.newFrame();
+			CatImgui::newFrame();
 
 			// start new frame
 			m_renderer.beginSwapChainRenderPass( commandBuffer );
@@ -131,6 +129,9 @@ void CatApp::run()
 			m_renderer.endSwapChainRenderPass( commandBuffer );
 			m_renderer.endFrame();
 		}
+
+		// Update and Render additional Platform Windows
+		CatImgui::renderPlatforWindows();
 	}
 
 	vkDeviceWaitIdle( m_device.getDevice() );

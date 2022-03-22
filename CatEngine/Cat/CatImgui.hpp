@@ -33,9 +33,10 @@ public:
 	CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount );
 	~CatImgui();
 
-	void newFrame();
+	static void newFrame();
 
 	void render( vk::CommandBuffer commandBuffer );
+	static void renderPlatforWindows();
 
 	// Example state
 	bool m_bShowDemoWindow = false;

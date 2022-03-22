@@ -11,8 +11,8 @@ namespace cat
 {
 struct CatFrameInfo
 {
-	uint64_t m_nFrameIndex;
-	float m_fFrameTime;
+	uint64_t m_nFrameIndex = 0;
+	float m_fFrameTime = 0.0f;
 	vk::CommandBuffer m_pCommandBuffer;
 	CatCamera& m_rCamera;
 	vk::DescriptorSet m_pGlobalDescriptorSet;
