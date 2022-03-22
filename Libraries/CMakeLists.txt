@@ -46,3 +46,11 @@ target_sources(imgui PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp"
     )
 target_link_libraries(imgui PUBLIC "glfw;Vulkan::Vulkan")
+
+add_library(ImGuizmo STATIC)
+target_sources(ImGuizmo PRIVATE
+    "ImGuizmo-1.83/ImGuizmo.h"
+    "ImGuizmo-1.83/ImGuizmo.cpp"
+    )
+target_include_directories(ImGuizmo PUBLIC "ImGuizmo-1.83")
+target_link_libraries(ImGuizmo imgui)
