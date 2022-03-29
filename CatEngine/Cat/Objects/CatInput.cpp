@@ -4,7 +4,7 @@
 
 namespace cat
 {
-void CatInput::moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObject )
+void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject )
 {
 	//	glm::vec3 rotate{ 0 };
 	//	if ( glfwGetKey( window, m_eKeys.lookRight ) == GLFW_PRESS ) rotate.z += 1.f;

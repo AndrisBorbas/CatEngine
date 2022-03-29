@@ -8,6 +8,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include <glm/gtc/constants.hpp>
 
 #include "imgui.h"
@@ -45,8 +46,8 @@ void CatApp::run()
 	std::vector< std::unique_ptr< CatBuffer > > uboBuffers( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
 	for ( auto& uboBuffer : uboBuffers )
 	{
-		uboBuffer = std::make_unique< CatBuffer >( m_device, sizeof( GlobalUbo ), 1,
-			vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible );
+		uboBuffer = std::make_unique< CatBuffer >( m_device, sizeof( GlobalUbo ), 1, vk::BufferUsageFlagBits::eUniformBuffer,
+			vk::MemoryPropertyFlagBits::eHostVisible );
 		uboBuffer->map();
 	}
 
@@ -81,11 +82,11 @@ void CatApp::run()
 		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
 
-		cameraController.moveInPlaneXY( m_window.getGLFWwindow(), frameTime, viewerObject );
+		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, viewerObject );
 		camera.setViewYXZ( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
 		float aspect = m_renderer.getAspectRatio();
-		camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.1f, 100.f );
+		camera.setPerspectiveProjection( glm::radians( 70.f ), aspect, 0.1f, 100.f );
 
 		if ( auto commandBuffer = m_renderer.beginFrame() )
 		{
@@ -117,6 +118,28 @@ void CatApp::run()
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
 			simpleRenderSystem.renderObjects( frameInfo );
+
+			static constexpr float identityMatrix[16] = {
+				1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f };
+
+			ImGuizmo::Enable( true );
+
+			ImGuizmo::SetRect( 0, 0, m_window.getExtent().width, m_window.getExtent().height );
+
+			float asd[16];
+			ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ), asd );
+
+			ImGuizmo::Manipulate( glm::value_ptr( camera.getView() ), glm::value_ptr( camera.getProjection() ),
+				ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, asd, nullptr, nullptr );
+
+			ImGuizmo::DecomposeMatrixToComponents( asd, glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ) );
+
+			ImGuizmo::DrawGrid(
+				glm::value_ptr( camera.getView() ), glm::value_ptr( camera.getProjection() ), identityMatrix, 16.f );
 
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your

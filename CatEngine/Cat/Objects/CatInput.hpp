@@ -25,7 +25,7 @@ public:
 		int lookDown = GLFW_KEY_DOWN;
 	};
 
-	void moveInPlaneXY( GLFWwindow* window, float dt, CatObject& gameObject );
+	void moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject );
 
 private:
 	KeyMappings m_eKeys{};

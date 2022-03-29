@@ -13,8 +13,8 @@ public:
 
 	void setPerspectiveProjection( float fFOVY, float fAspectRatio, float fNear, float fFar );
 
-	void setViewDirection( glm::vec3 vPosition, glm::vec3 vDirection, glm::vec3 vUp = glm::vec3{ 0.f, 0.f, 1.f } );
-	void setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3 vUp = glm::vec3{ 0.f, 0.f, 1.f } );
+	void setViewDirection( glm::vec3 vPosition, glm::vec3 vDirection, glm::vec3 vUp = glm::vec3{ 0.f, 1.f, 0.f } );
+	void setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3 vUp = glm::vec3{ 0.f, 1.f, 0.f } );
 	void setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation );
 
 	const glm::mat4& getProjection() const { return m_mxProjection; }
