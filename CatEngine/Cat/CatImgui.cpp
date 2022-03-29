@@ -176,4 +176,21 @@ void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 	}
 }
 
+void CatImgui::drawDebug( const glm::mat4 mView, const glm::mat4 mProj )
+{
+	ImGui::Begin( "View Matrix" );
+	ImGui::DragFloat3( "A", (float*)&mView[0] );
+	ImGui::DragFloat3( "B", (float*)&mView[1] );
+	ImGui::DragFloat3( "C", (float*)&mView[2] );
+	ImGui::DragFloat3( "D", (float*)&mView[3] );
+	ImGui::End();
+
+	ImGui::Begin( "Proj Matrix" );
+	ImGui::DragFloat3( "A", (float*)&mProj[0] );
+	ImGui::DragFloat3( "B", (float*)&mProj[1] );
+	ImGui::DragFloat3( "C", (float*)&mProj[2] );
+	ImGui::DragFloat3( "D", (float*)&mProj[3] );
+	ImGui::End();
+}
+
 } // namespace cat

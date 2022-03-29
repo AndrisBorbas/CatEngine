@@ -124,7 +124,11 @@ void CatApp::run()
 
 			ImGuizmo::Enable( true );
 
-			ImGuizmo::SetRect( 0, 0, m_window.getExtent().width, m_window.getExtent().height );
+			// ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
+
+			ImGuiIO& io = ImGui::GetIO();
+
+			ImGuizmo::SetRect( 0, 0, io.DisplaySize.x, io.DisplaySize.y );
 
 			float asd[16];
 			ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
@@ -145,6 +149,8 @@ void CatApp::run()
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
 			imgui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+
+			imgui.drawDebug( camera.getView(), camera.getProjection() );
 
 			// as last step in render pass, record the imgui draw commands
 			imgui.render( commandBuffer );

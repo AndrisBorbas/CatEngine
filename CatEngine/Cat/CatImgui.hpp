@@ -44,6 +44,8 @@ public:
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
 	void runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot );
 
+	void drawDebug( const glm::mat4 mView, const glm::mat4 mProj );
+
 private:
 	CatDevice& m_rDevice;
 	CatWindow& m_rWindow;
