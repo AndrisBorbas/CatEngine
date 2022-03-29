@@ -1,5 +1,6 @@
 #include "CatCamera.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace cat
 {
@@ -16,14 +17,22 @@ void CatCamera::setOrthographicProjection( float fLeft, float fRight, float fTop
 
 void CatCamera::setPerspectiveProjection( float fFOVY, float fAspectRatio, float fNear, float fFar )
 {
-	assert( glm::abs( fAspectRatio - std::numeric_limits< float >::epsilon() ) > 0.0f );
-	const float tanHalfFOVY = tan( fFOVY / 2.f );
-	m_mxProjection = glm::mat4{ 0.0f };
-	m_mxProjection[0][0] = 1.f / ( fAspectRatio * tanHalfFOVY );
-	m_mxProjection[1][1] = 1.f / ( tanHalfFOVY );
-	m_mxProjection[2][2] = fFar / ( fFar - fNear );
-	m_mxProjection[2][3] = 1.f;
-	m_mxProjection[3][2] = -( fFar * fNear ) / ( fFar - fNear );
+	m_mxProjection = glm::perspectiveRH_ZO( fFOVY, fAspectRatio, fNear, fFar );
+	m_mxProjection[1][1] *= -1.f;
+
+	//assert( glm::abs( fAspectRatio - std::numeric_limits< float >::epsilon() ) > 0.0f );
+	//const float tanHalfFOVY = tan( fFOVY / 2.f );
+	//m_mxProjection = glm::mat4{ 0.0f };
+	//m_mxProjection[0][0] = 1.f / ( fAspectRatio * tanHalfFOVY );
+	//m_mxProjection[1][1] = 1.f / ( tanHalfFOVY );
+	//m_mxProjection[2][2] = fFar / ( fFar - fNear );
+	//m_mxProjection[2][3] = 1.f;
+	//m_mxProjection[3][2] = -( fFar * fNear ) / ( fFar - fNear );
+}
+
+void CatCamera::setPerspectiveProjectionRH( float fFOVY, float fAspectRatio, float fNear, float fFar )
+{
+	m_mxProjection=glm::perspectiveRH_ZO( fFOVY, fAspectRatio, fNear, fFar );
 }
 
 void CatCamera::setViewDirection( glm::vec3 vPosition, glm::vec3 vDirection, glm::vec3 vUp )
@@ -54,7 +63,7 @@ void CatCamera::setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3
 
 void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 {
-	m_mxView = glm::lookAt( vPosition, vPosition + vRotation, glm::vec3{ 0.f, 1.f, 0.f } );
+	m_mxView = glm::lookAtLH( vPosition, vPosition + vRotation, glm::vec3{ 0.f, -1.f, 0.f } );
 
 	/*
 	const float c3 = glm::cos( vRotation.z );
@@ -80,5 +89,10 @@ void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 	m_mxView[3][1] = -glm::dot( v, vPosition );
 	m_mxView[3][2] = -glm::dot( w, vPosition );
 	*/
+}
+
+void CatCamera::setViewYXZRH( glm::vec3 vPosition, glm::vec3 vRotation )
+{
+	m_mxView = glm::lookAtLH( vPosition, vPosition + vRotation, glm::vec3{ 0.f, -1.f, 0.f } );
 }
 } // namespace cat

@@ -33,5 +33,6 @@
 
 static constexpr vk::PresentModeKHR SELECTED_PRESENTMODE = vk::PresentModeKHR::eImmediate;
 static constexpr char SELECTED_PRESENTMODE_TEXT[] = "Immediate";
+static constexpr float ID_MX[16] = { 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f };
 
 #endif // CATENGINE_GLOBALS_HPP

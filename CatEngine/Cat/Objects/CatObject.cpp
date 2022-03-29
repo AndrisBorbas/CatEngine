@@ -4,6 +4,16 @@ namespace cat
 {
 glm::mat4 TransformComponent::mat4()
 {
+	auto m = glm::mat4( *ID_MX );
+
+	m = glm::translate( m, translation );
+	m = glm::scale( m, scale );
+	m = glm::rotate( m, rotation.y, { 0.f, 1.f, 0.f } );
+	m = glm::rotate( m, rotation.x, { 1.f, 0.f, 0.f } );
+	m = glm::rotate( m, rotation.z, { 0.f, 0.f, 1.f } );
+
+	return m;
+
 	const float c3 = glm::cos( rotation.z );
 	const float s3 = glm::sin( rotation.z );
 	const float c2 = glm::cos( rotation.x );

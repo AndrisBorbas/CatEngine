@@ -7,6 +7,7 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/constants.hpp>
@@ -86,7 +87,7 @@ void CatApp::run()
 		camera.setViewYXZ( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
 		float aspect = m_renderer.getAspectRatio();
-		camera.setPerspectiveProjection( glm::radians( 70.f ), aspect, 0.1f, 100.f );
+		camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.1f, 100.f );
 
 		if ( auto commandBuffer = m_renderer.beginFrame() )
 		{
@@ -119,38 +120,45 @@ void CatApp::run()
 			// subwindow
 			simpleRenderSystem.renderObjects( frameInfo );
 
-			static constexpr float identityMatrix[16] = {
-				1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f };
-
 			ImGuizmo::Enable( true );
 
 			// ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
 
 			ImGuiIO& io = ImGui::GetIO();
 
-			ImGuizmo::SetRect( 0, 0, io.DisplaySize.x, io.DisplaySize.y );
+			ImGuizmo::SetRect(
+				ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y, io.DisplaySize.x, io.DisplaySize.y );
 
 			float asd[16];
 			ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
-				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation * glm::pi<float>() /180.f ),
 				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ), asd );
 
-			ImGuizmo::Manipulate( glm::value_ptr( camera.getView() ), glm::value_ptr( camera.getProjection() ),
+			auto camera2 = camera;
+
+			camera2.setPerspectiveProjectionRH( glm::radians( 50.f ), aspect, 0.1f, 100.f );
+			camera2.setViewYXZRH( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+
+			ImGuizmo::Manipulate( glm::value_ptr( camera2.getView() ), glm::value_ptr( camera2.getProjection() ),
 				ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, asd, nullptr, nullptr );
 
 			ImGuizmo::DecomposeMatrixToComponents( asd, glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
 				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation ),
 				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ) );
 
+			m_mObjects.at( 1 ).m_transform.rotation / glm::pi< float >() * 180.f;
+
 			ImGuizmo::DrawGrid(
-				glm::value_ptr( camera.getView() ), glm::value_ptr( camera.getProjection() ), identityMatrix, 16.f );
+				glm::value_ptr( camera2.getView() ), glm::value_ptr( camera2.getProjection() ), ID_MX, 16.f );
 
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
 			imgui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
-			imgui.drawDebug( camera.getView(), camera.getProjection() );
+			imgui.drawDebug( camera.getView(), camera2.getView() );
+
+			
 
 			// as last step in render pass, record the imgui draw commands
 			imgui.render( commandBuffer );
