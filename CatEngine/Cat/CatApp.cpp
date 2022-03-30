@@ -24,13 +24,7 @@
 
 namespace cat
 {
-struct GlobalUbo
-{
-	glm::mat4 projectionView{ 1.f };
-	glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; // w is intensity
-	glm::vec3 lightPosition{ -1.f };
-	alignas( 16 ) glm::vec4 lightColor{ 1.f }; // w is light intensity
-};
+
 CatApp::CatApp()
 {
 	m_pGlobalPool = CatDescriptorPool::Builder( m_device )
@@ -70,9 +64,10 @@ void CatApp::run()
 	CatCamera camera{};
 
 	auto viewerObject = CatObject::createObject();
-	viewerObject.m_transform.translation.y = -1.5f;
-	viewerObject.m_transform.translation.z = -2.5f;
+	viewerObject.m_transform.translation = { 0.f, 1.5f, 2.5f };
 	CatInput cameraController{};
+
+	GlobalUbo ubo{};
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while ( !m_window.shouldClose() )
@@ -98,11 +93,12 @@ void CatApp::run()
 				commandBuffer,
 				camera,
 				globalDescriptorSets[frameIndex],
+				ubo,
 				m_mObjects,
 			};
 
 			// update
-			GlobalUbo ubo{};
+
 			ubo.projectionView = camera.getProjection() * camera.getView();
 			uboBuffers[frameIndex]->writeToBuffer( &ubo );
 			uboBuffers[frameIndex]->flush();
@@ -113,6 +109,13 @@ void CatApp::run()
 			// start new frame
 			m_renderer.beginSwapChainRenderPass( commandBuffer );
 
+			auto cameraLH = camera;
+
+			cameraLH.setPerspectiveProjectionRH( glm::radians( 50.f ), aspect, 0.1f, 100.f );
+			cameraLH.setViewYXZRH( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+
+			ImGuizmo::DrawGrid( glm::value_ptr( cameraLH.getView() ), glm::value_ptr( cameraLH.getProjection() ), ID_MX, 16.f );
+
 			// render game objects first, so they will be rendered in the background. This
 			// is the best we can do for now.
 			// Once we cover offscreen rendering, we can render the scene to a image/texture rather than
@@ -121,44 +124,35 @@ void CatApp::run()
 			simpleRenderSystem.renderObjects( frameInfo );
 
 			ImGuizmo::Enable( true );
-
-			// ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
-
+			ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
 			ImGuiIO& io = ImGui::GetIO();
-
 			ImGuizmo::SetRect(
 				ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y, io.DisplaySize.x, io.DisplaySize.y );
 
+			glm::vec3 flush{ 1.f, 1.f, 1.f };
 			float asd[16];
-			ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
-				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation * glm::pi<float>() /180.f ),
-				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ), asd );
-
-			auto camera2 = camera;
-
-			camera2.setPerspectiveProjectionRH( glm::radians( 50.f ), aspect, 0.1f, 100.f );
-			camera2.setViewYXZRH( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
-
-			ImGuizmo::Manipulate( glm::value_ptr( camera2.getView() ), glm::value_ptr( camera2.getProjection() ),
+			/*ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation * glm::pi< float >() / 180.f ),
+				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ), asd );*/
+			ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( ubo.lightPosition ),
+				glm::value_ptr( glm::vec3{ 0.f, 0.f, 0.f } ), glm::value_ptr( glm::vec3{ 1.f, 1.f, 1.f } ), asd );
+			ImGuizmo::Manipulate( glm::value_ptr( cameraLH.getView() ), glm::value_ptr( cameraLH.getProjection() ),
 				ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, asd, nullptr, nullptr );
-
-			ImGuizmo::DecomposeMatrixToComponents( asd, glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
+			/*ImGuizmo::DecomposeMatrixToComponents( asd, glm::value_ptr( m_mObjects.at( 1 ).m_transform.translation ),
 				glm::value_ptr( m_mObjects.at( 1 ).m_transform.rotation ),
 				glm::value_ptr( m_mObjects.at( 1 ).m_transform.scale ) );
+			m_mObjects.at( 1 ).m_transform.rotation / glm::pi< float >() * 180.f;*/
 
-			m_mObjects.at( 1 ).m_transform.rotation / glm::pi< float >() * 180.f;
-
-			ImGuizmo::DrawGrid(
-				glm::value_ptr( camera2.getView() ), glm::value_ptr( camera2.getProjection() ), ID_MX, 16.f );
+			ImGuizmo::DecomposeMatrixToComponents(
+				asd, glm::value_ptr( ubo.lightPosition ), glm::value_ptr( flush ), glm::value_ptr( flush ) );
 
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
-			imgui.runExample( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+			imgui.drawWindows( frameInfo, viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
 
-			imgui.drawDebug( camera.getView(), camera2.getView() );
+			imgui.drawDebug( camera.getView(), cameraLH.getView() );
 
-			
 
 			// as last step in render pass, record the imgui draw commands
 			imgui.render( commandBuffer );
@@ -168,7 +162,7 @@ void CatApp::run()
 		}
 
 		// Update and Render additional Platform Windows
-		CatImgui::renderPlatforWindows();
+		CatImgui::renderPlatformWindows();
 	}
 
 	vkDeviceWaitIdle( m_device.getDevice() );
@@ -186,21 +180,21 @@ void CatApp::loadGameObjects()
 	model = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
 	auto flatVase = CatObject::createObject();
 	flatVase.m_pModel = model;
-	flatVase.m_transform.translation = { -.5f, -.5f, 0.f };
+	flatVase.m_transform.translation = { -.5f, .5f, 0.f };
 	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_mObjects.emplace( flatVase.getId(), std::move( flatVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
 	auto smoothVase = CatObject::createObject();
 	smoothVase.m_pModel = model;
-	smoothVase.m_transform.translation = { .5f, -.5f, 0.f };
+	smoothVase.m_transform.translation = { .5f, .5f, 0.f };
 	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
 	m_mObjects.emplace( smoothVase.getId(), std::move( smoothVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/colored_cube.obj" );
 	auto cube = CatObject::createObject();
 	cube.m_pModel = model;
-	cube.m_transform.translation = { 1.5f, -.5f, 0.f };
+	cube.m_transform.translation = { 1.5f, .5f, 0.f };
 	cube.m_transform.scale = { .25f, .25f, .25f };
 	m_mObjects.emplace( cube.getId(), std::move( cube ) );
 }

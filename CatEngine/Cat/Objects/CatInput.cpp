@@ -39,7 +39,7 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 			m_vMouseLastPos.x = *pXPos;
 			m_vMouseLastPos.y = *pYPos;
 
-			m_fYaw -= fXOffset * m_fMouseSensitivity;
+			m_fYaw += fXOffset * m_fMouseSensitivity;
 			m_fPitch += fYOffset * m_fMouseSensitivity;
 		}
 		free( pXPos );
@@ -61,12 +61,12 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 	gameObject.m_transform.rotation = vFront;
 
 	glm::vec3 moveDir{ 0.f };
-	if ( glfwGetKey( window, m_eKeys.moveForward ) == GLFW_PRESS ) moveDir += -vFront;
-	if ( glfwGetKey( window, m_eKeys.moveBackward ) == GLFW_PRESS ) moveDir -= -vFront;
+	if ( glfwGetKey( window, m_eKeys.moveForward ) == GLFW_PRESS ) moveDir += vFront;
+	if ( glfwGetKey( window, m_eKeys.moveBackward ) == GLFW_PRESS ) moveDir -= vFront;
 	if ( glfwGetKey( window, m_eKeys.moveRight ) == GLFW_PRESS ) moveDir += vRight;
 	if ( glfwGetKey( window, m_eKeys.moveLeft ) == GLFW_PRESS ) moveDir -= vRight;
-	if ( glfwGetKey( window, m_eKeys.moveUp ) == GLFW_PRESS ) moveDir += -vUp;
-	if ( glfwGetKey( window, m_eKeys.moveDown ) == GLFW_PRESS ) moveDir -= -vUp;
+	if ( glfwGetKey( window, m_eKeys.moveUp ) == GLFW_PRESS ) moveDir += vUp;
+	if ( glfwGetKey( window, m_eKeys.moveDown ) == GLFW_PRESS ) moveDir -= vUp;
 
 	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_PRESS ) m_fMovementSpeed = 6.9f;
 	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_RELEASE ) m_fMovementSpeed = 3.0f;

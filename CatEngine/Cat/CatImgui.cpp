@@ -1,5 +1,7 @@
 #include "CatImgui.hpp"
 
+#include "CatFrameInfo.hpp"
+
 namespace cat
 {
 
@@ -114,7 +116,7 @@ void CatImgui::render( vk::CommandBuffer commandBuffer )
 	ImGui_ImplVulkan_RenderDrawData( drawdata, commandBuffer );
 }
 
-void CatImgui::renderPlatforWindows()
+void CatImgui::renderPlatformWindows()
 {
 	if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
 	{
@@ -124,7 +126,7 @@ void CatImgui::renderPlatforWindows()
 }
 
 
-void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
+void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
@@ -159,7 +161,7 @@ void CatImgui::runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 
 		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
 		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
-		ImGui::DragFloat3( "pos", (float*)&m_rApp.getObjects().at( 1 ).m_transform.translation, 0.1f );
+		ImGui::DragFloat3( "pos", (float*)&frameInfo.m_rUBO.lightPosition, 0.1f );
 
 		ImGui::End();
 	}

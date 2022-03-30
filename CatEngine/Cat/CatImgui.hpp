@@ -5,7 +5,7 @@
 #include "Cat/CatWindow.hpp"
 #include "Cat/Rendering/CatDescriptors.hpp"
 #include "Cat/CatApp.hpp"
-
+#include "CatFrameInfo.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -36,13 +36,13 @@ public:
 	static void newFrame();
 
 	void render( vk::CommandBuffer commandBuffer );
-	static void renderPlatforWindows();
+	static void renderPlatformWindows();
 
 	// Example state
 	bool m_bShowDemoWindow = false;
 	bool m_bShowAnotherWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
-	void runExample( glm::vec3 vCameraPos, glm::vec3 vCameraRot );
+	void drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot );
 
 	void drawDebug( const glm::mat4 mView, const glm::mat4 mProj );
 
