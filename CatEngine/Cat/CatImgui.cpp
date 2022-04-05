@@ -139,9 +139,8 @@ void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::
 		static int counter = 0;
 
 		char title[128];
-
-		sprintf( title, "%.4f ms / %.1f FPS###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate );
-
+		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
+			frameInfo.m_nFrameIndex );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -162,6 +161,29 @@ void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::
 		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
 		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
 		ImGui::DragFloat3( "pos", (float*)&frameInfo.m_rUBO.lightPosition, 0.1f );
+
+		ImGui::End();
+	}
+	{
+		ImGui::Begin( "Objects" );
+
+		if ( ImGui::BeginListBox( "##ObjectsLB", ImVec2( -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() ) ) )
+		{
+			// static CatObject::id_t currentItemIdx = 0;
+			for ( auto& [key, object] : frameInfo.m_mObjects )
+			{
+				const bool isSelected = ( frameInfo.m_selectedItemId == key );
+				if ( ImGui::Selectable( object.getName().c_str(), isSelected ) )
+				{
+					// currentItemIdx = key;
+					frameInfo.m_selectedItemId = key;
+				}
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if ( isSelected ) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndListBox();
+		}
 
 		ImGui::End();
 	}

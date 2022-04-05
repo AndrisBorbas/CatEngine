@@ -6,28 +6,14 @@ namespace cat
 {
 void CatCamera::setOrthographicProjection( float fLeft, float fRight, float fTop, float fBottom, float fNear, float fFar )
 {
-	m_mxProjection = glm::mat4{ 1.0f };
-	m_mxProjection[0][0] = 2.f / ( fRight - fLeft );
-	m_mxProjection[1][1] = 2.f / ( fBottom - fTop );
-	m_mxProjection[2][2] = 1.f / ( fFar - fNear );
-	m_mxProjection[3][0] = -( fRight + fLeft ) / ( fRight - fLeft );
-	m_mxProjection[3][1] = -( fBottom + fTop ) / ( fBottom - fTop );
-	m_mxProjection[3][2] = -fNear / ( fFar - fNear );
+	m_mxProjection = glm::orthoRH_ZO( fLeft, fRight, fBottom, fTop, fNear, fFar );
+	m_mxProjection[1][1] *= -1.f;
 }
 
 void CatCamera::setPerspectiveProjection( float fFOVY, float fAspectRatio, float fNear, float fFar )
 {
 	m_mxProjection = glm::perspectiveRH_ZO( fFOVY, fAspectRatio, fNear, fFar );
 	m_mxProjection[1][1] *= -1.f;
-
-	// assert( glm::abs( fAspectRatio - std::numeric_limits< float >::epsilon() ) > 0.0f );
-	// const float tanHalfFOVY = tan( fFOVY / 2.f );
-	// m_mxProjection = glm::mat4{ 0.0f };
-	// m_mxProjection[0][0] = 1.f / ( fAspectRatio * tanHalfFOVY );
-	// m_mxProjection[1][1] = 1.f / ( tanHalfFOVY );
-	// m_mxProjection[2][2] = fFar / ( fFar - fNear );
-	// m_mxProjection[2][3] = 1.f;
-	// m_mxProjection[3][2] = -( fFar * fNear ) / ( fFar - fNear );
 }
 
 void CatCamera::setPerspectiveProjectionRH( float fFOVY, float fAspectRatio, float fNear, float fFar )

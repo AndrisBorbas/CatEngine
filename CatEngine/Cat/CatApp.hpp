@@ -6,9 +6,11 @@
 #include "Cat/Objects/CatObject.hpp"
 #include "Cat/Rendering/CatRenderer.hpp"
 #include "CatWindow.hpp"
+#include "CatFrameInfo.hpp"
 
 #include <memory>
 #include <vector>
+
 
 namespace cat
 {
@@ -27,7 +29,8 @@ public:
 
 	void run();
 
-	auto const& getObjects() const { return m_mObjects; }
+	[[nodiscard]] auto const& getObjects() const { return m_mObjects; }
+	[[nodiscard]] auto const& getFrameInfo() const { return *m_pFrameInfo; }
 
 private:
 	void loadGameObjects();
@@ -39,6 +42,8 @@ private:
 	// note: order of declarations matters
 	std::unique_ptr< CatDescriptorPool > m_pGlobalPool{};
 	CatObject::Map m_mObjects;
+
+	std::unique_ptr< CatFrameInfo > m_pFrameInfo = nullptr;
 };
 } // namespace cat
 

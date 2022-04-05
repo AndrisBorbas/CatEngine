@@ -9,7 +9,6 @@
 
 namespace cat
 {
-
 struct TransformComponent
 {
 	glm::vec3 translation{};
@@ -29,10 +28,10 @@ public:
 	using id_t = uint32_t;
 	using Map = std::unordered_map< id_t, CatObject >;
 
-	static CatObject createObject()
+	[[nodiscard]] static CatObject createObject( const std::string& name )
 	{
 		static id_t currentId = 1;
-		return CatObject{ currentId++ };
+		return CatObject{ currentId++, name };
 	}
 
 	CatObject( const CatObject& ) = delete;
@@ -40,16 +39,18 @@ public:
 	CatObject( CatObject&& ) = default;
 	CatObject& operator=( CatObject&& ) = default;
 
-	id_t getId() { return m_id; }
+	[[nodiscard]] id_t getId() const { return m_id; }
+	[[nodiscard]] std::string getName() const { return m_name; }
 
 	std::shared_ptr< CatModel > m_pModel{};
 	glm::vec3 m_vColor{};
 	TransformComponent m_transform{};
 
 private:
-	CatObject( id_t objId ) : m_id{ objId } {}
+	CatObject( const id_t objId, const std::string& name ) : m_id{ objId }, m_name( name ) {}
 
-	id_t m_id;
+	const id_t m_id;
+	std::string m_name;
 };
 } // namespace cat
 
