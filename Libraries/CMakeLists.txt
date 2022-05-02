@@ -55,3 +55,6 @@ target_sources(ImGuizmo PRIVATE
     )
 target_include_directories(ImGuizmo PUBLIC "ImGuizmo-1.83")
 target_link_libraries(ImGuizmo imgui)
+
+add_library(json INTERFACE)
+target_include_directories(json INTERFACE json)

@@ -24,12 +24,12 @@ add_subdirectory(Libraries)
 
 include_directories(CatEngine)
 
-add_executable(CatEngine CatEngine/main.cpp "CatEngine/Cat/CatWindow.hpp" "CatEngine/Cat/CatWindow.cpp" CatEngine/Cat/Objects/CatCamera.cpp CatEngine/Cat/Objects/CatCamera.hpp CatEngine/Cat/Objects/CatInput.cpp CatEngine/Cat/Objects/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/Rendering/CatDevice.cpp CatEngine/Cat/Rendering/CatDevice.hpp CatEngine/Cat/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/Rendering/CatBuffer.cpp CatEngine/Cat/Rendering/CatBuffer.hpp CatEngine/Cat/Rendering/CatDescriptors.cpp CatEngine/Cat/Rendering/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/Rendering/CatPipeline.cpp CatEngine/Cat/Rendering/CatPipeline.hpp CatEngine/Cat/Rendering/CatRenderer.cpp CatEngine/Cat/Rendering/CatRenderer.hpp CatEngine/Cat/Rendering/CatSwapChain.cpp CatEngine/Cat/Rendering/CatSwapChain.hpp CatEngine/Cat/CatRenderSystem.cpp CatEngine/Cat/CatRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImGui.cpp CatEngine/Cat/CatImGui.hpp)
+add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngine/Cat/CatWindow.cpp CatEngine/Cat/Objects/CatCamera.cpp CatEngine/Cat/Objects/CatCamera.hpp CatEngine/Cat/Objects/CatInput.cpp CatEngine/Cat/Objects/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/Rendering/CatDevice.cpp CatEngine/Cat/Rendering/CatDevice.hpp CatEngine/Cat/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/Rendering/CatBuffer.cpp CatEngine/Cat/Rendering/CatBuffer.hpp CatEngine/Cat/Rendering/CatDescriptors.cpp CatEngine/Cat/Rendering/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/Rendering/CatPipeline.cpp CatEngine/Cat/Rendering/CatPipeline.hpp CatEngine/Cat/Rendering/CatRenderer.cpp CatEngine/Cat/Rendering/CatRenderer.hpp CatEngine/Cat/Rendering/CatSwapChain.cpp CatEngine/Cat/Rendering/CatSwapChain.hpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.cpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImGui.cpp CatEngine/Cat/CatImGui.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.cpp)
 
 ####Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image loguru imgui ImGuizmo)
+target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image loguru imgui ImGuizmo json)
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
 
 
