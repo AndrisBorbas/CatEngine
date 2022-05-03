@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 
+#include "loguru.hpp"
+
 namespace cat
 {
 class CatRenderer
@@ -20,24 +22,26 @@ public:
 	CatRenderer( const CatRenderer& ) = delete;
 	CatRenderer& operator=( const CatRenderer& ) = delete;
 
-	vk::RenderPass getSwapChainRenderPass() const { return m_pSwapChain->getRenderPass(); }
-	float getAspectRatio() const { return m_pSwapChain->extentAspectRatio(); }
-	uint32_t getImageCount() const { return m_pSwapChain->getImageCount(); }
-	bool isFrameInProgress() const { return m_bIsFrameStarted; }
+	[[nodiscard]] vk::RenderPass getSwapChainRenderPass() const { return m_pSwapChain->getRenderPass(); }
+	[[nodiscard]] float getAspectRatio() const { return m_pSwapChain->extentAspectRatio(); }
+	[[nodiscard]] size_t getImageCount() const { return m_pSwapChain->getImageCount(); }
+	[[nodiscard]] bool isFrameInProgress() const { return m_bIsFrameStarted; }
 
-	vk::CommandBuffer getCurrentCommandBuffer() const
+	[[nodiscard]] vk::CommandBuffer getCurrentCommandBuffer() const
 	{
-		assert( m_bIsFrameStarted && "Cannot get command buffer when frame not in progress" );
+		CHECK_F( m_bIsFrameStarted, "Cannot get command buffer when frame not in progress" );
 		return m_pCommandBuffers[m_nCurrentFrameIndex];
 	}
 
-	uint64_t getFrameIndex() const
+	[[nodiscard]] short getFrameIndex() const
 	{
-		assert( m_bIsFrameStarted && "Cannot get frame index when frame not in progress" );
+		CHECK_F( m_bIsFrameStarted, "Cannot get frame index when frame not in progress" );
 		return m_nCurrentFrameIndex;
 	}
 
-	vk::CommandBuffer beginFrame();
+	[[nodiscard]] uint64_t getFrameNumber() const { return m_nFrameNumber; }
+
+	[[nodiscard]] vk::CommandBuffer beginFrame();
 	void endFrame();
 	void beginSwapChainRenderPass( vk::CommandBuffer commandBuffer );
 	void endSwapChainRenderPass( vk::CommandBuffer commandBuffer );
@@ -53,7 +57,8 @@ private:
 	std::vector< vk::CommandBuffer > m_pCommandBuffers;
 
 	uint32_t m_nCurrentImageIndex;
-	uint64_t m_nCurrentFrameIndex{ 0 };
+	short m_nCurrentFrameIndex{ 0 };
+	uint64_t m_nFrameNumber{ 0 };
 	bool m_bIsFrameStarted{ false };
 };
 } // namespace cat

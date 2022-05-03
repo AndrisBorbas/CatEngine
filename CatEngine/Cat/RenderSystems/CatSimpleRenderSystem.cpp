@@ -1,4 +1,4 @@
-#include "CatRenderSystem.hpp"
+#include "CatSimpleRenderSystem.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -17,19 +17,21 @@ struct CatPushConstantData
 	glm::mat4 m_mxNormal{ 1.f };
 };
 
-CatRenderSystem::CatRenderSystem( CatDevice& device, vk::RenderPass renderPass, vk::DescriptorSetLayout globalSetLayout )
+CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
+	vk::RenderPass renderPass,
+	vk::DescriptorSetLayout globalSetLayout )
 	: m_rDevice{ device }
 {
 	createPipelineLayout( globalSetLayout );
 	createPipeline( renderPass );
 }
 
-CatRenderSystem::~CatRenderSystem()
+CatSimpleRenderSystem::~CatSimpleRenderSystem()
 {
 	vkDestroyPipelineLayout( m_rDevice.getDevice(), m_pPipelineLayout, nullptr );
 }
 
-void CatRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
+void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
 {
 	vk::PushConstantRange pushConstantRange{
 		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
@@ -53,7 +55,7 @@ void CatRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLay
 	}
 }
 
-void CatRenderSystem::createPipeline( vk::RenderPass renderPass )
+void CatSimpleRenderSystem::createPipeline( vk::RenderPass renderPass )
 {
 	assert( !!m_pPipelineLayout && "Cannot create pipeline before pipeline layout" );
 
@@ -62,19 +64,18 @@ void CatRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
+		m_rDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
 }
 
-void CatRenderSystem::renderObjects( CatFrameInfo& frameInfo )
+void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 {
 	m_pPipeline->bind( frameInfo.m_pCommandBuffer );
 
 	frameInfo.m_pCommandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, m_pPipelineLayout, 0, 1, &frameInfo.m_pGlobalDescriptorSet, 0, nullptr );
 
-	for ( auto& kv : frameInfo.m_mObjects )
+	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
-		auto& obj = kv.second;
 		if ( obj.m_pModel == nullptr ) continue;
 		CatPushConstantData push{};
 		push.m_mxModel = obj.m_transform.mat4();

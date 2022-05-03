@@ -10,7 +10,6 @@
 
 namespace cat
 {
-
 // local callback functions
 
 static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -18,7 +17,8 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeveri
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData )
 {
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+	// std::cerr << "-- validation layer error: " << pCallbackData->pMessage << std::endl;
+	LOG_F( WARNING, "-- validation layer error: %s", pCallbackData->pMessage );
 
 	return VK_FALSE;
 }
@@ -649,5 +649,4 @@ void CatDevice::createImageWithInfo( const vk::ImageCreateInfo& imageInfo,
 
 	m_device.bindImageMemory( image, imageMemory, 0 );
 }
-
 } // namespace cat

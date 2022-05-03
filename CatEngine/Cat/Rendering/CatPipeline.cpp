@@ -128,15 +128,15 @@ void CatPipeline::bind( vk::CommandBuffer commandBuffer )
 void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 {
 	configInfo.m_pInputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
-	configInfo.m_pInputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
+	configInfo.m_pInputAssemblyInfo.primitiveRestartEnable = false;
 
 	configInfo.m_pViewportInfo.viewportCount = 1;
 	configInfo.m_pViewportInfo.pViewports = nullptr;
 	configInfo.m_pViewportInfo.scissorCount = 1;
 	configInfo.m_pViewportInfo.pScissors = nullptr;
 
-	configInfo.m_pRasterizationInfo.depthClampEnable = VK_FALSE;
-	configInfo.m_pRasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
+	configInfo.m_pRasterizationInfo.depthClampEnable = false;
+	configInfo.m_pRasterizationInfo.rasterizerDiscardEnable = false;
 	configInfo.m_pRasterizationInfo.polygonMode = vk::PolygonMode::eFill;
 	configInfo.m_pRasterizationInfo.lineWidth = 1.0f;
 	configInfo.m_pRasterizationInfo.cullMode = vk::CullModeFlagBits::eNone;
@@ -185,6 +185,19 @@ void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 	configInfo.m_aDynamicStateEnables = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
 	configInfo.m_pDynamicStateInfo.pDynamicStates = configInfo.m_aDynamicStateEnables.data();
 	configInfo.m_pDynamicStateInfo.dynamicStateCount = static_cast< uint32_t >( configInfo.m_aDynamicStateEnables.size() );
+	configInfo.m_pDynamicStateInfo.flags = {};
 }
 
+void CatPipeline::enableAlphaBlending( PipelineConfigInfo& configInfo )
+{
+	configInfo.m_pColorBlendAttachment.blendEnable = true;
+	configInfo.m_pColorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG
+														| vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+	configInfo.m_pColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+	configInfo.m_pColorBlendAttachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+	configInfo.m_pColorBlendAttachment.colorBlendOp = vk::BlendOp::eAdd;
+	configInfo.m_pColorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+	configInfo.m_pColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+	configInfo.m_pColorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
+}
 } // namespace cat

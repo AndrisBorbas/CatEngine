@@ -16,11 +16,16 @@ public:
 	CatWindow( const CatWindow& ) = delete;
 	CatWindow& operator=( const CatWindow& ) = delete;
 
-	bool shouldClose() { return glfwWindowShouldClose( m_pWindow ); }
-	vk::Extent2D getExtent() { return { static_cast< uint32_t >( m_iWidth ), static_cast< uint32_t >( m_iHeight ) }; }
-	bool wasWindowResized() { return m_bFramebufferResized; }
+	[[nodiscard]] bool shouldClose() { return glfwWindowShouldClose( m_pWindow ); }
+
+	[[nodiscard]] vk::Extent2D getExtent()
+	{
+		return { static_cast< uint32_t >( m_iWidth ), static_cast< uint32_t >( m_iHeight ) };
+	}
+
+	[[nodiscard]] bool wasWindowResized() { return m_bFramebufferResized; }
 	void resetWindowResizedFlag() { m_bFramebufferResized = false; }
-	GLFWwindow* getGLFWwindow() const { return m_pWindow; }
+	[[nodiscard]] GLFWwindow* getGLFWwindow() const { return m_pWindow; }
 
 	void createWindowSurface( vk::Instance instance, VkSurfaceKHR* pSurface );
 

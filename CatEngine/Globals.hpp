@@ -30,6 +30,11 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <json.hpp>
+
+// for convenience
+using json = nlohmann::json;
+
 
 static constexpr vk::PresentModeKHR SELECTED_PRESENTMODE = vk::PresentModeKHR::eImmediate;
 static constexpr char SELECTED_PRESENTMODE_TEXT[] = "Immediate";

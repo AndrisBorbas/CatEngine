@@ -24,6 +24,7 @@ int main( int argc, char** argv )
 		app.run();
 	} catch ( const std::exception& e )
 	{
+		ABORT_F( e.what() );
 		std::cerr << e.what() << '\n';
 		return EXIT_FAILURE;
 	}

@@ -19,7 +19,6 @@
 
 namespace cat
 {
-
 static void check_vk_result( VkResult err )
 {
 	if ( err == 0 ) return;
@@ -30,7 +29,7 @@ static void check_vk_result( VkResult err )
 class CatImgui
 {
 public:
-	CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount );
+	CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount );
 	~CatImgui();
 
 	static void newFrame();
@@ -40,9 +39,9 @@ public:
 
 	// Example state
 	bool m_bShowDemoWindow = false;
-	bool m_bShowAnotherWindow = false;
+	bool m_bShowDebugWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
-	void drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot );
+	void drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot );
 
 	void drawDebug( const glm::mat4 mView, const glm::mat4 mProj );
 
@@ -53,7 +52,6 @@ private:
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 };
-
 } // namespace cat
 
 #endif // CATENGINE_CATIMGUI_HPP

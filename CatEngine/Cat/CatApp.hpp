@@ -30,7 +30,10 @@ public:
 	void run();
 
 	[[nodiscard]] auto const& getObjects() const { return m_mObjects; }
-	[[nodiscard]] auto const& getFrameInfo() const { return *m_pFrameInfo; }
+	[[nodiscard]] CatFrameInfo& getFrameInfo() const { return *m_pFrameInfo; }
+
+	void saveLevel( const std::string& sFileName ) const;
+	void loadLevel( const std::string& sFileName, bool bClearPrevious = true );
 
 private:
 	void loadGameObjects();

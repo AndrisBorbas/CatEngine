@@ -10,7 +10,6 @@
 
 namespace cat
 {
-
 struct QueueFamilyIndices
 {
 	std::optional< uint32_t > m_nGraphicsFamily;
@@ -44,19 +43,18 @@ public:
 	CatDevice( CatDevice&& ) = delete;
 	CatDevice& operator=( CatDevice&& ) = delete;
 
-	vk::CommandPool getCommandPool() const { return m_pCommandPool; }
-	vk::Device getDevice() const { return m_device; }
-	vk::SurfaceKHR getSurface() const { return m_surface; }
-	vk::Queue getGraphicsQueue() const { return m_graphicsQueue; }
-	vk::Queue getPresentQueue() const { return m_presentQueue; }
-	vk::Instance getInstance() const { return m_instance; }
-	vk::PhysicalDevice getPhysicalDevice() const { return m_physicalDevice; }
-	uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().m_nGraphicsFamily.value(); }
-
-	SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport( m_physicalDevice ); }
-	uint32_t findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags rProperties );
-	QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies( m_physicalDevice ); }
-	vk::Format findSupportedFormat( const std::vector< vk::Format >& candidates,
+	[[nodiscard]] vk::CommandPool getCommandPool() const { return m_pCommandPool; }
+	[[nodiscard]] vk::Device getDevice() const { return m_device; }
+	[[nodiscard]] vk::SurfaceKHR getSurface() const { return m_surface; }
+	[[nodiscard]] vk::Queue getGraphicsQueue() const { return m_graphicsQueue; }
+	[[nodiscard]] vk::Queue getPresentQueue() const { return m_presentQueue; }
+	[[nodiscard]] vk::Instance getInstance() const { return m_instance; }
+	[[nodiscard]] vk::PhysicalDevice getPhysicalDevice() const { return m_physicalDevice; }
+	[[nodiscard]] uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().m_nGraphicsFamily.value(); }
+	[[nodiscard]] SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport( m_physicalDevice ); }
+	[[nodiscard]] uint32_t findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags rProperties );
+	[[nodiscard]] QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies( m_physicalDevice ); }
+	[[nodiscard]] vk::Format findSupportedFormat( const std::vector< vk::Format >& candidates,
 		vk::ImageTiling tiling,
 		vk::FormatFeatureFlags features );
 
@@ -66,7 +64,7 @@ public:
 		vk::MemoryPropertyFlags properties,
 		vk::Buffer& buffer,
 		vk::DeviceMemory& bufferMemory );
-	vk::CommandBuffer beginSingleTimeCommands();
+	[[nodiscard]] vk::CommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const;
 	void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
 	void copyBufferToImage( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount );

@@ -5,7 +5,6 @@
 
 namespace cat
 {
-
 class CatCamera
 {
 public:
@@ -19,12 +18,15 @@ public:
 	void setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation );
 	void setViewYXZRH( glm::vec3 vPosition, glm::vec3 vRotation );
 
-	const glm::mat4& getProjection() const { return m_mxProjection; }
-	const glm::mat4& getView() const { return m_mxView; }
+	[[nodiscard]] const glm::mat4& getProjection() const { return m_mxProjection; }
+	[[nodiscard]] const glm::mat4& getView() const { return m_mxView; }
+	[[nodiscard]] const glm::mat4& getInverseView() const { return m_mxInverseViewMatrix; }
+	[[nodiscard]] glm::vec3 getPosition() const { return { m_mxInverseViewMatrix[3] }; }
 
 private:
 	glm::mat4 m_mxProjection{ 1.f };
 	glm::mat4 m_mxView{ 1.f };
+	glm::mat4 m_mxInverseViewMatrix{ 1.f };
 };
 } // namespace cat
 

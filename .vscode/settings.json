@@ -1,3 +1,7 @@
 {
-	"cSpell.enabled": false
+	"cSpell.enabled": false,
+	"files.associations": {
+		"vector": "cpp",
+		"algorithm": "cpp"
+	}
 }

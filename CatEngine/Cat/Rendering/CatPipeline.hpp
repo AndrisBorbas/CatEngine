@@ -14,6 +14,9 @@ struct PipelineConfigInfo
 	PipelineConfigInfo( const PipelineConfigInfo& ) = delete;
 	PipelineConfigInfo& operator=( const PipelineConfigInfo& ) = delete;
 
+	std::vector< vk::VertexInputBindingDescription > m_aBindingDescriptions{};
+	std::vector< vk::VertexInputAttributeDescription > m_aAttributeDescriptions{};
+
 	vk::PipelineViewportStateCreateInfo m_pViewportInfo;
 	vk::PipelineInputAssemblyStateCreateInfo m_pInputAssemblyInfo;
 	vk::PipelineRasterizationStateCreateInfo m_pRasterizationInfo;
@@ -43,6 +46,7 @@ public:
 	void bind( vk::CommandBuffer commandBuffer );
 
 	static void defaultPipelineConfigInfo( PipelineConfigInfo& configInfo );
+	static void enableAlphaBlending( PipelineConfigInfo& configInfo );
 
 private:
 	static std::vector< char > readFile( const std::string& filepath );

@@ -97,7 +97,7 @@ vk::CommandBuffer CatRenderer::beginFrame()
 
 void CatRenderer::endFrame()
 {
-	assert( m_bIsFrameStarted && "Can't call endFrame while frame is not in progress" );
+	CHECK_F( m_bIsFrameStarted && "Can't call endFrame while frame is not in progress" );
 	auto commandBuffer = getCurrentCommandBuffer();
 	commandBuffer.end();
 
@@ -113,16 +113,17 @@ void CatRenderer::endFrame()
 	}
 
 	m_bIsFrameStarted = false;
-	m_nCurrentFrameIndex = ( m_nCurrentFrameIndex + 1 ) % CatSwapChain::MAX_FRAMES_IN_FLIGHT;
+	m_nFrameNumber++;
+	m_nCurrentFrameIndex = m_nFrameNumber % CatSwapChain::MAX_FRAMES_IN_FLIGHT;
 }
 
 void CatRenderer::beginSwapChainRenderPass( vk::CommandBuffer commandBuffer )
 {
-	assert( m_bIsFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress" );
-	assert( commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame" );
+	CHECK_F( m_bIsFrameStarted, "Can't call beginSwapChainRenderPass if frame is not in progress" );
+	CHECK_F( commandBuffer == getCurrentCommandBuffer(), "Can't begin render pass on command buffer from a different frame" );
 
 	std::array< vk::ClearValue, 2 > clearValues{};
-	clearValues[0].setColor( std::array< float, 4 >{ 0.01f, 0.01f, 0.0125f, 0.0f } );
+	clearValues[0].setColor( std::array< float, 4 >{ 0.01f, 0.01f, 0.0125f, 1.0f } );
 	clearValues[1].setDepthStencil( { 1.0f, 0 } );
 
 	vk::RenderPassBeginInfo renderPassInfo{
@@ -157,8 +158,8 @@ void CatRenderer::beginSwapChainRenderPass( vk::CommandBuffer commandBuffer )
 
 void CatRenderer::endSwapChainRenderPass( vk::CommandBuffer commandBuffer )
 {
-	assert( m_bIsFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress" );
-	assert( commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame" );
+	CHECK_F( m_bIsFrameStarted, "Can't call endSwapChainRenderPass if frame is not in progress" );
+	CHECK_F( commandBuffer == getCurrentCommandBuffer(), "Can't end render pass on command buffer from a different frame" );
 	commandBuffer.endRenderPass();
 }
 } // namespace cat

@@ -138,10 +138,14 @@ std::vector< vk::VertexInputAttributeDescription > CatModel::Vertex::getAttribut
 {
 	std::vector< vk::VertexInputAttributeDescription > attributeDescriptions{};
 
-	attributeDescriptions.push_back( { 0, 0, vk::Format::eR32G32B32Sfloat, (uint32_t)offsetof( Vertex, m_vPosition ) } );
-	attributeDescriptions.push_back( { 1, 0, vk::Format::eR32G32B32Sfloat, (uint32_t)offsetof( Vertex, m_vColor ) } );
-	attributeDescriptions.push_back( { 2, 0, vk::Format::eR32G32B32Sfloat, (uint32_t)offsetof( Vertex, m_vNormal ) } );
-	attributeDescriptions.push_back( { 3, 0, vk::Format::eR32G32Sfloat, (uint32_t)offsetof( Vertex, m_vUV ) } );
+	attributeDescriptions.push_back(
+		{ 0, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vPosition ) ) } );
+	attributeDescriptions.push_back(
+		{ 1, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vColor ) ) } );
+	attributeDescriptions.push_back(
+		{ 2, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vNormal ) ) } );
+	attributeDescriptions.push_back(
+		{ 3, 0, vk::Format::eR32G32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vUV ) ) } );
 
 	return attributeDescriptions;
 }
@@ -200,7 +204,7 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 				};
 			}
 
-			if ( uniqueVertices.count( vertex ) == 0 )
+			if ( !uniqueVertices.contains( vertex ) )
 			{
 				uniqueVertices[vertex] = static_cast< uint32_t >( m_aVertices.size() );
 				m_aVertices.push_back( vertex );

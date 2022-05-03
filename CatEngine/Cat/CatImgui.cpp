@@ -1,14 +1,17 @@
 #include "CatImgui.hpp"
 
+#include "CatApp.hpp"
+#include "CatApp.hpp"
+#include "CatApp.hpp"
+#include "CatApp.hpp"
 #include "CatFrameInfo.hpp"
 
 namespace cat
 {
-
 // ok this just initializes imgui using the provided integration files. So in our case we need to
 // initialize the vulkan and glfw imgui implementations, since that's what our engine is built
 // using.
-CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, uint32_t imageCount )
+CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount )
 	: m_rDevice{ device }, m_rWindow{ window }, m_rApp{ app }
 {
 	// set up a descriptor pool stored on this instance, see header for more comments on this.
@@ -71,7 +74,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 		.PipelineCache = nullptr,
 		.DescriptorPool = m_pDescriptorPool->getDescriptorPool(),
 		.MinImageCount = 2,
-		.ImageCount = imageCount,
+		.ImageCount = static_cast< uint32_t >( imageCount ),
 		// todo, I should probably get around to integrating a memory allocator library such as Vulkan
 		// memory allocator (VMA) sooner than later. We don't want to have to update adding an allocator
 		// in a ton of locations.
@@ -126,7 +129,7 @@ void CatImgui::renderPlatformWindows()
 }
 
 
-void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot )
+void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot )
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
@@ -136,47 +139,71 @@ void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::
 	// window.
 	{
 		static float f = 0.0f;
-		static int counter = 0;
 
 		char title[128];
 		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-			frameInfo.m_nFrameIndex );
+			pFrameInfo.m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
-		ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
+		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
 		ImGui::Checkbox( "Demo Window",
 			&m_bShowDemoWindow ); // Edit bools storing our window open/close state
-		ImGui::Checkbox( "Another Window", &m_bShowAnotherWindow );
+		ImGui::Checkbox( "Debug Window", &m_bShowDebugWindow );
 
-		ImGui::SliderFloat( "float", &f, 0.0f, 1.0f ); // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3( "clear color",
-			(float*)&m_vClearColor ); // Edit 3 floats representing a color
+		// ImGui::SliderFloat( "float", &f, 0.0f, 1.0f ); // Edit 1 float using a slider from 0.0f to 1.0f
+		// ImGui::ColorEdit3( "clear color",
+		//	reinterpret_cast< float* >( &m_vClearColor ) ); // Edit 3 floats representing a color
 
-		if ( ImGui::Button( "Button" ) ) // Buttons return true when clicked (most widgets return true
-										 // when edited/activated)
-			counter++;
+		// if ( ImGui::Button( "Button" ) ) // Buttons return true when clicked (most widgets return true
+		//	// when edited/activated)
+		//	counter++;
+		// ImGui::SameLine();
+		// ImGui::Text( "counter = %d", counter );
+
+		ImGui::DragFloat3( "camera position", reinterpret_cast< float* >( &vCameraPos ) );
+		ImGui::DragFloat3( "camera rotation", reinterpret_cast< float* >( &vCameraRot ) );
+		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
+
+		static char buf[32] = "asd";
+		ImGui::InputTextWithHint( "##Lavel Name", "Filename", buf, 32, ImGuiInputTextFlags_CharsNoBlank );
+		if ( ImGui::Button( "Load Level" ) )
+		{
+			std::string name( buf );
+			if ( !name.ends_with( ".json" ) )
+			{
+				name += ".json";
+			}
+			m_rApp.loadLevel( name );
+			pFrameInfo.updateSelectedItemId( pFrameInfo.m_mObjects.begin()->first );
+			ImGui::End();
+			return;
+		}
 		ImGui::SameLine();
-		ImGui::Text( "counter = %d", counter );
-
-		ImGui::DragFloat3( "camera position", (float*)&vCameraPos );
-		ImGui::DragFloat3( "camera rotation", (float*)&vCameraRot );
-		ImGui::DragFloat3( "pos", (float*)&frameInfo.m_rUBO.lightPosition, 0.1f );
+		if ( ImGui::Button( "Save Level" ) )
+		{
+			std::string name( buf );
+			if ( !name.ends_with( ".json" ) )
+			{
+				name += ".json";
+			}
+			m_rApp.saveLevel( name );
+		}
 
 		ImGui::End();
 	}
 	{
 		ImGui::Begin( "Objects" );
 
-		if ( ImGui::BeginListBox( "##ObjectsLB", ImVec2( -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() ) ) )
+		if ( ImGui::BeginListBox( "##ObjectsLB", ImVec2( -FLT_MIN, -FLT_MIN ) ) )
 		{
 			// static CatObject::id_t currentItemIdx = 0;
-			for ( auto& [key, object] : frameInfo.m_mObjects )
+			for ( auto& [key, object] : pFrameInfo.m_mObjects )
 			{
-				const bool isSelected = ( frameInfo.m_selectedItemId == key );
+				const bool isSelected = ( pFrameInfo.m_selectedItemId == key );
 				if ( ImGui::Selectable( object.getName().c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
-					frameInfo.m_selectedItemId = key;
+					pFrameInfo.updateSelectedItemId( key );
 				}
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -187,34 +214,38 @@ void CatImgui::drawWindows( CatFrameInfo& frameInfo, glm::vec3 vCameraPos, glm::
 
 		ImGui::End();
 	}
-
-	// 3. Show another simple window.
-	if ( m_bShowAnotherWindow )
 	{
-		ImGui::Begin( "Another Window",
-			&m_bShowAnotherWindow ); // Pass a pointer to our bool variable (the window will have a
-									 // closing button that will clear the bool when clicked)
-		ImGui::Text( "Hello from another window!" );
-		if ( ImGui::Button( "Close Me" ) ) m_bShowAnotherWindow = false;
+		ImGui::Begin( "SelectedObject" );
+
+		ImGui::DragFloat3( "Position",
+			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.translation ),
+			0.1f );
+		ImGui::DragFloat3( "Rotation",
+			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.rotation ), 0.1f );
+		ImGui::DragFloat3( "Scale",
+			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.scale ), 0.1f );
+
 		ImGui::End();
 	}
 }
 
 void CatImgui::drawDebug( const glm::mat4 mView, const glm::mat4 mProj )
 {
-	ImGui::Begin( "View Matrix" );
-	ImGui::DragFloat3( "A", (float*)&mView[0] );
-	ImGui::DragFloat3( "B", (float*)&mView[1] );
-	ImGui::DragFloat3( "C", (float*)&mView[2] );
-	ImGui::DragFloat3( "D", (float*)&mView[3] );
-	ImGui::End();
+	if ( m_bShowDebugWindow )
+	{
+		ImGui::Begin( "View Matrix", &m_bShowDebugWindow );
+		ImGui::DragFloat3( "A", (float*)&mView[0] );
+		ImGui::DragFloat3( "B", (float*)&mView[1] );
+		ImGui::DragFloat3( "C", (float*)&mView[2] );
+		ImGui::DragFloat3( "D", (float*)&mView[3] );
+		ImGui::End();
 
-	ImGui::Begin( "Proj Matrix" );
-	ImGui::DragFloat3( "A", (float*)&mProj[0] );
-	ImGui::DragFloat3( "B", (float*)&mProj[1] );
-	ImGui::DragFloat3( "C", (float*)&mProj[2] );
-	ImGui::DragFloat3( "D", (float*)&mProj[3] );
-	ImGui::End();
+		ImGui::Begin( "Proj Matrix", &m_bShowDebugWindow );
+		ImGui::DragFloat3( "A", (float*)&mProj[0] );
+		ImGui::DragFloat3( "B", (float*)&mProj[1] );
+		ImGui::DragFloat3( "C", (float*)&mProj[2] );
+		ImGui::DragFloat3( "D", (float*)&mProj[3] );
+		ImGui::End();
+	}
 }
-
 } // namespace cat

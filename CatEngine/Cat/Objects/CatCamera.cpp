@@ -52,6 +52,8 @@ void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 {
 	m_mxView = glm::lookAtRH( vPosition, vPosition + vRotation, glm::vec3{ 0.f, 1.f, 0.f } );
 
+	m_mxInverseViewMatrix = glm::inverse( m_mxView );
+
 	/*
 	const float c3 = glm::cos( vRotation.z );
 	const float s3 = glm::sin( vRotation.z );
@@ -81,5 +83,7 @@ void CatCamera::setViewYXZ( glm::vec3 vPosition, glm::vec3 vRotation )
 void CatCamera::setViewYXZRH( glm::vec3 vPosition, glm::vec3 vRotation )
 {
 	m_mxView = glm::lookAtRH( vPosition, vPosition + vRotation, glm::vec3{ 0.f, 1.f, 0.f } );
+
+	m_mxInverseViewMatrix = glm::inverse( m_mxView );
 }
 } // namespace cat
