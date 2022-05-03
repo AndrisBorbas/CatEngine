@@ -173,7 +173,7 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 			{
 				name += ".json";
 			}
-			m_rApp.loadLevel( name );
+			m_rApp.loadLevel( name, false );
 			pFrameInfo.updateSelectedItemId( pFrameInfo.m_mObjects.begin()->first );
 			ImGui::End();
 			return;
@@ -197,10 +197,12 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 		if ( ImGui::BeginListBox( "##ObjectsLB", ImVec2( -FLT_MIN, -FLT_MIN ) ) )
 		{
 			// static CatObject::id_t currentItemIdx = 0;
+			int i = 0;
 			for ( auto& [key, object] : pFrameInfo.m_mObjects )
 			{
+				++i;
 				const bool isSelected = ( pFrameInfo.m_selectedItemId == key );
-				if ( ImGui::Selectable( object.getName().c_str(), isSelected ) )
+				if ( ImGui::Selectable( ( std::to_string( i ) + ": " + object.getName() ).c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
 					pFrameInfo.updateSelectedItemId( key );

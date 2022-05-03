@@ -9,7 +9,7 @@
 
 namespace cat
 {
-static constexpr auto MAX_LIGHTS = 10;
+static constexpr auto MAX_LIGHTS = 16;
 
 struct PointLight
 {
