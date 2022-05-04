@@ -34,6 +34,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 	float m_fFrameTime = 0.0f;
 	vk::CommandBuffer m_pCommandBuffer;
 	CatCamera& m_rCamera;
+	CatObject& m_rCameraObject;
 	vk::DescriptorSet m_pGlobalDescriptorSet;
 	GlobalUbo& m_rUBO;
 	CatObject::Map& m_mObjects;
@@ -41,6 +42,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 
 	CatFrameInfo_t( vk::CommandBuffer commandBuffer,
 		CatCamera& rCamera,
+		CatObject& rCameraObject,
 		vk::DescriptorSet globalDescriptorSet,
 		GlobalUbo& rUBO,
 		CatObject::Map& mObjects,
@@ -53,6 +55,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		  m_fFrameTime( fFrameTime ),
 		  m_pCommandBuffer( commandBuffer ),
 		  m_rCamera( rCamera ),
+		  m_rCameraObject( rCameraObject ),
 		  m_pGlobalDescriptorSet( globalDescriptorSet ),
 		  m_rUBO( rUBO ),
 		  m_mObjects( mObjects ),

@@ -17,11 +17,16 @@ int main( int argc, char** argv )
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = 1;
 
-	cat::CatApp app{};
+	cat::CreateEditorInstance();
 
 	try
 	{
-		app.run();
+		// Main Loop
+		cat::GetEditorInstance()->run();
+
+
+		cat::DestroyGameInstance();
+
 	} catch ( const std::exception& e )
 	{
 		ABORT_F( e.what() );

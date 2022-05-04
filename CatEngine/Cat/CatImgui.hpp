@@ -41,7 +41,7 @@ public:
 	bool m_bShowDemoWindow = false;
 	bool m_bShowDebugWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
-	void drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot );
+	void drawWindows();
 
 	void drawDebug( const glm::mat4 mView, const glm::mat4 mProj );
 

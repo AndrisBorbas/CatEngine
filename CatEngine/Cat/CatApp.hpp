@@ -48,7 +48,11 @@ private:
 
 	std::unique_ptr< CatFrameInfo > m_pFrameInfo = nullptr;
 };
-} // namespace cat
 
+[[nodiscard]] extern CatApp* GetEditorInstance();
+extern void CreateEditorInstance();
+extern void DestroyGameInstance();
+
+} // namespace cat
 
 #endif // CATENGINE_CATAPP_HPP

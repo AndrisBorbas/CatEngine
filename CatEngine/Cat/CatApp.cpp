@@ -28,6 +28,27 @@
 
 namespace cat
 {
+CatApp* GlobalEditorInstance = nullptr;
+
+CatApp* GetEditorInstance()
+{
+	return GlobalEditorInstance;
+}
+
+void CreateEditorInstance()
+{
+	GlobalEditorInstance = new CatApp();
+}
+
+void DestroyGameInstance()
+{
+	if ( GlobalEditorInstance )
+	{
+		delete GlobalEditorInstance;
+		GlobalEditorInstance = nullptr;
+	}
+}
+
 CatApp::CatApp()
 {
 	m_pGlobalPool = CatDescriptorPool::Builder( m_device )
@@ -74,7 +95,7 @@ void CatApp::run()
 
 	GlobalUbo ubo{};
 
-	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, globalDescriptorSets[0], ubo, m_mObjects );
+	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, viewerObject, globalDescriptorSets[0], ubo, m_mObjects );
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while ( !m_window.shouldClose() )
@@ -85,15 +106,17 @@ void CatApp::run()
 		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
 
-		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, viewerObject );
-		camera.setViewYXZ( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, getFrameInfo().m_rCameraObject );
+		camera.setViewYXZ(
+			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
 
 		float aspect = m_renderer.getAspectRatio();
 		camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.1f, 100.f );
 
 		auto imguizmoCamera = camera;
 		imguizmoCamera.setPerspectiveProjectionRH( glm::radians( 50.f ), aspect, 0.1f, 100.f );
-		imguizmoCamera.setViewYXZRH( viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+		imguizmoCamera.setViewYXZRH(
+			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
 
 		if ( auto commandBuffer = m_renderer.beginFrame() )
 		{
@@ -153,7 +176,7 @@ void CatApp::run()
 			// example code telling imgui what windows to render, and their contents
 			// this can be replaced with whatever code/classes you set up configuring your
 			// desired engine UI
-			imgui.drawWindows( getFrameInfo(), viewerObject.m_transform.translation, viewerObject.m_transform.rotation );
+			imgui.drawWindows();
 
 			imgui.drawDebug( camera.getView(), imguizmoCamera.getView() );
 
@@ -179,7 +202,7 @@ void CatApp::saveLevel( const std::string& sFileName ) const
 	int i = 0;
 	for ( auto& [key, obj] : getFrameInfo().m_mObjects )
 	{
-		auto curr = std::to_string( obj.getId() ) /*+ " : " + obj.getName()*/;
+		auto curr = std::to_string( obj.getId() ) /* + " : " + obj.getName() */;
 
 		objects[i]["name"] = obj.getName();
 		objects[i]["file"] = obj.getFileName();
@@ -219,7 +242,6 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 
 	json objects;
 	objects = file["objects"];
-	int i = 0;
 	for ( auto& object : objects )
 	{
 		if ( object["file"] == "Camera" )
@@ -291,7 +313,7 @@ void CatApp::loadGameObjects()
 
 	for ( int i = 0; i < lightColors.size(); i++ )
 	{
-		auto pointLight = CatObject::makePointLight( std::string( "Light" ) + std::to_string( i ), 0.2f );
+		auto pointLight = CatObject::makePointLight( std::string( "Light" ), 0.2f );
 		pointLight.m_vColor = lightColors[i];
 		auto rotateLight =
 			glm::rotate( glm::mat4( 1.f ), ( i * glm::two_pi< float >() ) / lightColors.size(), { 0.f, -1.f, 0.f } );

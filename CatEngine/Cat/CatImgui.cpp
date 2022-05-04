@@ -5,6 +5,7 @@
 #include "CatApp.hpp"
 #include "CatApp.hpp"
 #include "CatFrameInfo.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace cat
 {
@@ -129,7 +130,7 @@ void CatImgui::renderPlatformWindows()
 }
 
 
-void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm::vec3 vCameraRot )
+void CatImgui::drawWindows()
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
@@ -142,7 +143,7 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 
 		char title[128];
 		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-			pFrameInfo.m_nFrameNumber );
+			m_rApp.getFrameInfo().m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -160,8 +161,10 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 		// ImGui::SameLine();
 		// ImGui::Text( "counter = %d", counter );
 
-		ImGui::DragFloat3( "camera position", reinterpret_cast< float* >( &vCameraPos ) );
-		ImGui::DragFloat3( "camera rotation", reinterpret_cast< float* >( &vCameraRot ) );
+		ImGui::DragFloat3( "camera position",
+			reinterpret_cast< float* >( &m_rApp.getFrameInfo().m_rCameraObject.m_transform.translation ), 0.1f );
+		ImGui::DragFloat3( "camera rotation",
+			reinterpret_cast< float* >( &m_rApp.getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
 		static char buf[32] = "asd";
@@ -174,7 +177,7 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 				name += ".json";
 			}
 			m_rApp.loadLevel( name, false );
-			pFrameInfo.updateSelectedItemId( pFrameInfo.m_mObjects.begin()->first );
+			m_rApp.getFrameInfo().updateSelectedItemId( m_rApp.getFrameInfo().m_mObjects.begin()->first );
 			ImGui::End();
 			return;
 		}
@@ -198,15 +201,17 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
-			for ( auto& [key, object] : pFrameInfo.m_mObjects )
+			for ( auto& [key, object] : m_rApp.getFrameInfo().m_mObjects )
 			{
 				++i;
-				const bool isSelected = ( pFrameInfo.m_selectedItemId == key );
-				if ( ImGui::Selectable( ( std::to_string( i ) + ": " + object.getName() ).c_str(), isSelected ) )
+				ImGui::PushID( i );
+				const bool isSelected = ( m_rApp.getFrameInfo().m_selectedItemId == key );
+				if ( ImGui::Selectable( ( object.getName() ).c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
-					pFrameInfo.updateSelectedItemId( key );
+					m_rApp.getFrameInfo().updateSelectedItemId( key );
 				}
+				ImGui::PopID();
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if ( isSelected ) ImGui::SetItemDefaultFocus();
@@ -220,12 +225,17 @@ void CatImgui::drawWindows( CatFrameInfo& pFrameInfo, glm::vec3 vCameraPos, glm:
 		ImGui::Begin( "SelectedObject" );
 
 		ImGui::DragFloat3( "Position",
-			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.translation ),
+			reinterpret_cast< float* >(
+				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.translation ),
 			0.1f );
 		ImGui::DragFloat3( "Rotation",
-			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.rotation ), 0.1f );
+			reinterpret_cast< float* >(
+				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.rotation ),
+			0.1f );
 		ImGui::DragFloat3( "Scale",
-			reinterpret_cast< float* >( &pFrameInfo.m_mObjects.at( pFrameInfo.m_selectedItemId ).m_transform.scale ), 0.1f );
+			reinterpret_cast< float* >(
+				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.scale ),
+			0.1f );
 
 		ImGui::End();
 	}

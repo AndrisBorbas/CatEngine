@@ -42,8 +42,8 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 			m_fYaw += fXOffset * m_fMouseSensitivity;
 			m_fPitch += fYOffset * m_fMouseSensitivity;
 		}
-		free( pXPos );
-		free( pYPos );
+		delete pXPos;
+		delete pYPos;
 	}
 	m_fPitch = glm::clamp( m_fPitch, -1.5f, 1.5f );
 	m_fYaw = glm::mod( m_fYaw, glm::two_pi< float >() );
