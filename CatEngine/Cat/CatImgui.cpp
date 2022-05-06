@@ -7,6 +7,10 @@
 #include "CatFrameInfo.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include <thread>
+#include <future>
+#include <functional>
+
 namespace cat
 {
 // ok this just initializes imgui using the provided integration files. So in our case we need to
@@ -143,7 +147,7 @@ void CatImgui::drawWindows()
 
 		char title[128];
 		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-			m_rApp.getFrameInfo().m_nFrameNumber );
+			GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -162,9 +166,9 @@ void CatImgui::drawWindows()
 		// ImGui::Text( "counter = %d", counter );
 
 		ImGui::DragFloat3( "camera position",
-			reinterpret_cast< float* >( &m_rApp.getFrameInfo().m_rCameraObject.m_transform.translation ), 0.1f );
+			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.translation ), 0.1f );
 		ImGui::DragFloat3( "camera rotation",
-			reinterpret_cast< float* >( &m_rApp.getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
+			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
 		static char buf[32] = "asd";
@@ -176,8 +180,22 @@ void CatImgui::drawWindows()
 			{
 				name += ".json";
 			}
-			m_rApp.loadLevel( name, false );
-			m_rApp.getFrameInfo().updateSelectedItemId( m_rApp.getFrameInfo().m_mObjects.begin()->first );
+			LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+
+			std::packaged_task tLoadLevel(
+				[=]( const std::string& name, bool bClearExisting )
+				{
+					LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+					GetEditorInstance()->loadLevel( name, bClearExisting );
+					GetEditorInstance()->getFrameInfo().updateSelectedItemId(
+						GetEditorInstance()->getFrameInfo().m_mObjects.begin()->first );
+				} );
+
+			GetEditorInstance()->m_jLevelLoad = tLoadLevel.get_future();
+
+			std::thread{ std::move( tLoadLevel ), name, false }.detach();
+
+
 			ImGui::End();
 			return;
 		}
@@ -189,7 +207,7 @@ void CatImgui::drawWindows()
 			{
 				name += ".json";
 			}
-			m_rApp.saveLevel( name );
+			GetEditorInstance()->saveLevel( name );
 		}
 
 		ImGui::End();
@@ -201,15 +219,15 @@ void CatImgui::drawWindows()
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
-			for ( auto& [key, object] : m_rApp.getFrameInfo().m_mObjects )
+			for ( auto& [key, object] : GetEditorInstance()->getFrameInfo().m_mObjects )
 			{
 				++i;
 				ImGui::PushID( i );
-				const bool isSelected = ( m_rApp.getFrameInfo().m_selectedItemId == key );
+				const bool isSelected = ( GetEditorInstance()->getFrameInfo().m_selectedItemId == key );
 				if ( ImGui::Selectable( ( object.getName() ).c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
-					m_rApp.getFrameInfo().updateSelectedItemId( key );
+					GetEditorInstance()->getFrameInfo().updateSelectedItemId( key );
 				}
 				ImGui::PopID();
 
@@ -225,16 +243,22 @@ void CatImgui::drawWindows()
 		ImGui::Begin( "SelectedObject" );
 
 		ImGui::DragFloat3( "Position",
-			reinterpret_cast< float* >(
-				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.translation ),
+			reinterpret_cast< float* >( &GetEditorInstance()
+											 ->getFrameInfo()
+											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+											 .m_transform.translation ),
 			0.1f );
 		ImGui::DragFloat3( "Rotation",
-			reinterpret_cast< float* >(
-				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.rotation ),
+			reinterpret_cast< float* >( &GetEditorInstance()
+											 ->getFrameInfo()
+											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+											 .m_transform.rotation ),
 			0.1f );
 		ImGui::DragFloat3( "Scale",
-			reinterpret_cast< float* >(
-				&m_rApp.getFrameInfo().m_mObjects.at( m_rApp.getFrameInfo().m_selectedItemId ).m_transform.scale ),
+			reinterpret_cast< float* >( &GetEditorInstance()
+											 ->getFrameInfo()
+											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+											 .m_transform.scale ),
 			0.1f );
 
 		ImGui::End();

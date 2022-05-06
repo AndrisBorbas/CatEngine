@@ -122,6 +122,17 @@ void CatApp::run()
 		{
 			short frameIndex = m_renderer.getFrameIndex();
 
+			if ( m_jLevelLoad.valid() )
+			{
+				using namespace std::chrono_literals;
+				auto status = m_jLevelLoad.wait_for( 1ns );
+				if ( status == std::future_status::ready )
+				{
+					LOG_F( INFO, "Frame: %llu, level loaded", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+					m_jLevelLoad = {};
+				}
+			}
+
 			m_pFrameInfo->update(
 				commandBuffer, globalDescriptorSets[frameIndex], frameTime, frameIndex, m_renderer.getFrameNumber() );
 
@@ -230,6 +241,8 @@ void CatApp::saveLevel( const std::string& sFileName ) const
 
 void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious /* = true */ )
 {
+	LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+
 	if ( bClearPrevious )
 	{
 		m_mObjects.clear();

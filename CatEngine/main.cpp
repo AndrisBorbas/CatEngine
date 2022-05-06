@@ -19,20 +19,20 @@ int main( int argc, char** argv )
 
 	cat::CreateEditorInstance();
 
-	try
-	{
-		// Main Loop
-		cat::GetEditorInstance()->run();
+	/*try
+	{*/
+	// Main Loop
+	cat::GetEditorInstance()->run();
 
 
-		cat::DestroyGameInstance();
+	cat::DestroyGameInstance();
 
-	} catch ( const std::exception& e )
+	/*} catch ( const std::exception& e )
 	{
 		ABORT_F( e.what() );
 		std::cerr << e.what() << '\n';
 		return EXIT_FAILURE;
-	}
+	}*/
 
 	return EXIT_SUCCESS;
 }

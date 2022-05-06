@@ -1,6 +1,8 @@
 #ifndef CATENGINE_CATAPP_HPP
 #define CATENGINE_CATAPP_HPP
 
+#include <future>
+
 #include "Cat/Rendering/CatDescriptors.hpp"
 #include "Cat/Rendering/CatDevice.hpp"
 #include "Cat/Objects/CatObject.hpp"
@@ -34,6 +36,8 @@ public:
 
 	void saveLevel( const std::string& sFileName ) const;
 	void loadLevel( const std::string& sFileName, bool bClearPrevious = true );
+
+	std::future< void > m_jLevelLoad;
 
 private:
 	void loadGameObjects();
