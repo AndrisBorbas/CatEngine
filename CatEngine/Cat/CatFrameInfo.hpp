@@ -49,7 +49,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		const float fFrameTime = 0.0f,
 		const short nFrameIndex = 0,
 		const uint64_t nFrameNumber = 0,
-		const CatObject::id_t& selectedItemId = 1 )
+		const CatObject::id_t& selectedItemId = 0 )
 		: m_nFrameIndex( nFrameIndex ),
 		  m_nFrameNumber( nFrameNumber ),
 		  m_fFrameTime( fFrameTime ),

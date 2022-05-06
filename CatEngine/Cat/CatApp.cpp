@@ -55,7 +55,7 @@ CatApp::CatApp()
 						.setMaxSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT )
 						.addPoolSize( vk::DescriptorType::eUniformBuffer, CatSwapChain::MAX_FRAMES_IN_FLIGHT )
 						.build();
-	loadGameObjects();
+	// loadGameObjects();
 }
 
 CatApp::~CatApp() = default;
@@ -106,6 +106,37 @@ void CatApp::run()
 		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
 
+		if ( m_jLevelLoad.valid() )
+		{
+			using namespace std::chrono_literals;
+			auto status = m_jLevelLoad.wait_for( 0ns );
+			if ( status == std::future_status::ready )
+			{
+				LOG_F( INFO, "Frame: %llu, level loaded", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+				m_jLevelLoad = {};
+			}
+		}
+
+		for ( auto& jModel : m_aLoadingObjects )
+		{
+			using namespace std::chrono_literals;
+			if ( jModel.valid() && jModel.wait_for( 0ns ) == std::future_status::ready )
+			{
+				auto [object, model] = jModel.get();
+				auto obj = CatObject::createObject( object["name"], object["file"] );
+				obj.m_pModel = model;
+				obj.m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
+				obj.m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
+				obj.m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
+				obj.m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
+				m_mObjects.emplace( obj.getId(), std::move( obj ) );
+				LOG_F( INFO, "Frame: %llu, obj loaded: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
+					object["name"].get< std::string >().c_str() );
+				jModel = {};
+			}
+		}
+
+
 		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, getFrameInfo().m_rCameraObject );
 		camera.setViewYXZ(
 			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
@@ -121,17 +152,6 @@ void CatApp::run()
 		if ( auto commandBuffer = m_renderer.beginFrame() )
 		{
 			short frameIndex = m_renderer.getFrameIndex();
-
-			if ( m_jLevelLoad.valid() )
-			{
-				using namespace std::chrono_literals;
-				auto status = m_jLevelLoad.wait_for( 1ns );
-				if ( status == std::future_status::ready )
-				{
-					LOG_F( INFO, "Frame: %llu, level loaded", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
-					m_jLevelLoad = {};
-				}
-			}
 
 			m_pFrameInfo->update(
 				commandBuffer, globalDescriptorSets[frameIndex], frameTime, frameIndex, m_renderer.getFrameNumber() );
@@ -168,20 +188,24 @@ void CatApp::run()
 
 			// glm::vec3 flush{ 1.f, 1.f, 1.f };
 			float mxManipulate[16];
-			ImGuizmo::RecomposeMatrixFromComponents(
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ), mxManipulate );
-			auto isManipulated = ImGuizmo::Manipulate( glm::value_ptr( imguizmoCamera.getView() ),
-				glm::value_ptr( imguizmoCamera.getProjection() ), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, mxManipulate, nullptr,
-				nullptr );
-			ImGuizmo::DecomposeMatrixToComponents( mxManipulate,
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
-				glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ) );
-			if ( isManipulated )
+			if ( getFrameInfo().m_selectedItemId != 0 )
 			{
-				// m_mObjects.at( frameInfo.m_selectedItemId ).m_transform.rotation *= ( glm::pi< float >() * 180.f );
+				ImGuizmo::RecomposeMatrixFromComponents(
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ), mxManipulate );
+				auto isManipulated = ImGuizmo::Manipulate( glm::value_ptr( imguizmoCamera.getView() ),
+					glm::value_ptr( imguizmoCamera.getProjection() ), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, mxManipulate,
+					nullptr, nullptr );
+				ImGuizmo::DecomposeMatrixToComponents( mxManipulate,
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ) );
+
+				if ( isManipulated )
+				{
+					// m_mObjects.at( frameInfo.m_selectedItemId ).m_transform.rotation *= ( glm::pi< float >() * 180.f );
+				}
 			}
 
 			// example code telling imgui what windows to render, and their contents
@@ -272,14 +296,21 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 		}
 		else
 		{
-			std::shared_ptr< CatModel > model = CatModel::createModelFromFile( m_device, object["file"] );
-			auto obj = CatObject::createObject( object["name"], object["file"] );
-			obj.m_pModel = model;
-			obj.m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
-			obj.m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
-			obj.m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
-			obj.m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
-			m_mObjects.emplace( obj.getId(), std::move( obj ) );
+			std::packaged_task tLoadModel(
+				[]( nlohmann::basic_json<> object )
+				{
+					LOG_F( INFO, "Frame: %llu, started model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
+						object["file"].get< std::string >().c_str() );
+					std::shared_ptr< CatModel > model =
+						CatModel::createModelFromFile( GetEditorInstance()->m_device, object["file"] );
+					LOG_F( INFO, "Frame: %llu, finished model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
+						object["file"].get< std::string >().c_str() );
+					return std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > >{ object, model };
+				} );
+
+			m_aLoadingObjects.push_back( tLoadModel.get_future() );
+
+			std::thread{ std::move( tLoadModel ), object }.detach();
 		}
 	}
 }

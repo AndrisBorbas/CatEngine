@@ -1,6 +1,8 @@
 #ifndef CATENGINE_CATDEVICE_HPP
 #define CATENGINE_CATDEVICE_HPP
 
+#include <mutex>
+
 #include "Cat/CatWindow.hpp"
 
 #include <string>
@@ -75,6 +77,8 @@ public:
 		vk::DeviceMemory& imageMemory );
 
 	vk::PhysicalDeviceProperties m_properties;
+
+	inline static std::mutex m_mutex{};
 
 private:
 	void createInstance();

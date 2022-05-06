@@ -18,7 +18,7 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeveri
 	void* pUserData )
 {
 	// std::cerr << "-- validation layer error: " << pCallbackData->pMessage << std::endl;
-	LOG_F( WARNING, "-- validation layer error: %s", pCallbackData->pMessage );
+	LOG_F( WARNING, "-- validation layer error: %s\n", pCallbackData->pMessage );
 
 	return VK_FALSE;
 }
@@ -577,6 +577,7 @@ void CatDevice::endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const
 		.pCommandBuffers = &commandBuffer,
 	};
 
+	const std::lock_guard lock( m_mutex );
 	m_graphicsQueue.submit( 1, &submitInfo, VK_NULL_HANDLE );
 	m_graphicsQueue.waitIdle();
 

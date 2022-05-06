@@ -37,7 +37,8 @@ public:
 	void saveLevel( const std::string& sFileName ) const;
 	void loadLevel( const std::string& sFileName, bool bClearPrevious = true );
 
-	std::future< void > m_jLevelLoad;
+	std::future< void > m_jLevelLoad{};
+	std::vector< std::future< std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
 private:
 	void loadGameObjects();

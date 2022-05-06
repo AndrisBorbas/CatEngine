@@ -240,28 +240,31 @@ void CatImgui::drawWindows()
 		ImGui::End();
 	}
 	{
-		ImGui::Begin( "SelectedObject" );
+		if ( GetEditorInstance()->getFrameInfo().m_selectedItemId != 0 )
+		{
+			ImGui::Begin( "SelectedObject" );
 
-		ImGui::DragFloat3( "Position",
-			reinterpret_cast< float* >( &GetEditorInstance()
-											 ->getFrameInfo()
-											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-											 .m_transform.translation ),
-			0.1f );
-		ImGui::DragFloat3( "Rotation",
-			reinterpret_cast< float* >( &GetEditorInstance()
-											 ->getFrameInfo()
-											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-											 .m_transform.rotation ),
-			0.1f );
-		ImGui::DragFloat3( "Scale",
-			reinterpret_cast< float* >( &GetEditorInstance()
-											 ->getFrameInfo()
-											 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-											 .m_transform.scale ),
-			0.1f );
+			ImGui::DragFloat3( "Position",
+				reinterpret_cast< float* >( &GetEditorInstance()
+												 ->getFrameInfo()
+												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_transform.translation ),
+				0.1f );
+			ImGui::DragFloat3( "Rotation",
+				reinterpret_cast< float* >( &GetEditorInstance()
+												 ->getFrameInfo()
+												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_transform.rotation ),
+				0.1f );
+			ImGui::DragFloat3( "Scale",
+				reinterpret_cast< float* >( &GetEditorInstance()
+												 ->getFrameInfo()
+												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_transform.scale ),
+				0.1f );
 
-		ImGui::End();
+			ImGui::End();
+		}
 	}
 }
 
