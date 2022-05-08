@@ -172,6 +172,12 @@ int CatDevice::rateDeviceSuitability( const vk::PhysicalDevice rPhysicalDevice )
 	rPhysicalDevice.getFeatures( &deviceFeatures );
 
 	// Application can't function without geometry shaders
+	if ( !deviceFeatures.fillModeNonSolid )
+	{
+		return 0;
+	}
+
+	// Application can't function without geometry shaders
 	if ( !deviceFeatures.geometryShader )
 	{
 		return 0;
@@ -246,7 +252,11 @@ void CatDevice::createLogicalDevice()
 		queueCreateInfos.push_back( queueCreateInfo );
 	}
 
-	vk::PhysicalDeviceFeatures deviceFeatures = { .samplerAnisotropy = VK_TRUE };
+	vk::PhysicalDeviceFeatures deviceFeatures = {
+		.fillModeNonSolid = true,
+		.wideLines = true,
+		.samplerAnisotropy = true,
+	};
 
 	vk::DeviceCreateInfo createInfo = {
 		.queueCreateInfoCount = static_cast< uint32_t >( queueCreateInfos.size() ),

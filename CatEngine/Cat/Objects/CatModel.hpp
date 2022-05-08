@@ -1,7 +1,6 @@
 #ifndef CATENGINE_CATMODEL_HPP
 #define CATENGINE_CATMODEL_HPP
 
-
 #include "Cat/Rendering/CatDevice.hpp"
 #include "Cat/Rendering/CatBuffer.hpp"
 

@@ -1,4 +1,4 @@
-#include "CatSimpleRenderSystem.hpp"
+#include "CatWireframeRenderSystem.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -19,7 +19,7 @@ struct CatPushConstantData
 	glm::mat4 m_mxNormal{ 1.f };
 };
 
-CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
+CatWireframeRenderSystem::CatWireframeRenderSystem( CatDevice& device,
 	vk::RenderPass renderPass,
 	vk::DescriptorSetLayout globalSetLayout )
 	: m_rDevice{ device }
@@ -28,15 +28,15 @@ CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
 	createPipeline( renderPass );
 }
 
-CatSimpleRenderSystem::~CatSimpleRenderSystem()
+CatWireframeRenderSystem::~CatWireframeRenderSystem()
 {
 	vkDestroyPipelineLayout( m_rDevice.getDevice(), m_pPipelineLayout, nullptr );
 }
 
-void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
+void CatWireframeRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
 {
 	vk::PushConstantRange pushConstantRange{
-		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eCompute | vk::ShaderStageFlagBits::eFragment,
 		.offset = 0,
 		.size = sizeof( CatPushConstantData ),
 	};
@@ -57,19 +57,21 @@ void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout global
 	}
 }
 
-void CatSimpleRenderSystem::createPipeline( vk::RenderPass renderPass )
+void CatWireframeRenderSystem::createPipeline( vk::RenderPass renderPass )
 {
 	assert( !!m_pPipelineLayout && "Cannot create pipeline before pipeline layout" );
 
 	PipelineConfigInfo pipelineConfig{};
 	CatPipeline::defaultPipelineConfigInfo( pipelineConfig );
+	CatPipeline::enableAlphaBlending( pipelineConfig );
+	CatPipeline::enableWireframe( pipelineConfig );
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
 		m_rDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
 }
 
-void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
+void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 {
 	m_pPipeline->bind( frameInfo.m_pCommandBuffer );
 
@@ -79,15 +81,18 @@ void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
 		if ( obj->m_pModel == nullptr ) continue;
-		if ( dynamic_cast< CatVolume* >( obj.get() ) != nullptr ) continue;
-		CatPushConstantData push{};
-		push.m_mxModel = obj->m_transform.mat4();
-		push.m_mxNormal = obj->m_transform.normalMatrix();
+		if ( auto volume = dynamic_cast< CatVolume* >( obj.get() ) )
+		{
+			CatPushConstantData push{};
+			push.m_mxModel = volume->m_transform.mat4();
+			push.m_mxNormal = volume->m_transform.normalMatrix();
 
-		frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
-			vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ), &push );
-		obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
-		obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
+			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
+				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
+				&push );
+			volume->m_pModel->bind( frameInfo.m_pCommandBuffer );
+			volume->m_pModel->draw( frameInfo.m_pCommandBuffer );
+		}
 	}
 }
 } // namespace cat

@@ -40,6 +40,8 @@ public:
 	std::future< void > m_jLevelLoad{};
 	std::vector< std::future< std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
+	[[nodiscard]] auto getDevice() { return &m_device; }
+
 private:
 	void loadGameObjects();
 

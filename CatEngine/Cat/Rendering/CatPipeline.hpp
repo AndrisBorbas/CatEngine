@@ -38,6 +38,11 @@ public:
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo );
+	CatPipeline( CatDevice& device,
+		const std::string& vertFilepath,
+		const std::string& fragFilepath,
+		const std::string& compFilepath,
+		const PipelineConfigInfo& configInfo );
 	~CatPipeline();
 
 	CatPipeline( const CatPipeline& ) = delete;
@@ -47,6 +52,7 @@ public:
 
 	static void defaultPipelineConfigInfo( PipelineConfigInfo& configInfo );
 	static void enableAlphaBlending( PipelineConfigInfo& configInfo );
+	static void enableWireframe( PipelineConfigInfo& configInfo );
 
 private:
 	static std::vector< char > readFile( const std::string& filepath );
@@ -55,12 +61,18 @@ private:
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo );
 
+	void createGraphicsPipeline( const std::string& vertFilepath,
+		const std::string& fragFilepath,
+		const std::string& compFilepath,
+		const PipelineConfigInfo& configInfo );
+
 	void createShaderModule( const std::vector< char >& code, vk::ShaderModule* shaderModule );
 
 	CatDevice& m_rDevice;
 	vk::Pipeline m_pGraphicsPipeline;
 	vk::ShaderModule m_pVertShaderModule;
 	vk::ShaderModule m_pFragShaderModule;
+	vk::ShaderModule m_pCompShaderModule;
 };
 } // namespace cat
 

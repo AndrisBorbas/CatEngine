@@ -6,15 +6,19 @@
 
 namespace cat
 {
+CatObject::id_t CatObject::currentId = 1;
+
 glm::mat4 TransformComponent::mat4() const
 {
-	auto m = glm::mat4( *ID_MX );
+	auto m = glm::mat4( 1.0f );
+
+	const auto rotationRad = glm::radians( rotation );
 
 	m = glm::translate( m, translation );
+	m = glm::rotate( m, rotationRad.y, { 0.f, 1.f, 0.f } );
+	m = glm::rotate( m, rotationRad.x, { 1.f, 0.f, 0.f } );
+	m = glm::rotate( m, rotationRad.z, { 0.f, 0.f, 1.f } );
 	m = glm::scale( m, scale );
-	m = glm::rotate( m, rotation.y, { 0.f, 1.f, 0.f } );
-	m = glm::rotate( m, rotation.x, { 1.f, 0.f, 0.f } );
-	m = glm::rotate( m, rotation.z, { 0.f, 0.f, 1.f } );
 
 	return m;
 }
@@ -50,16 +54,21 @@ glm::mat3 TransformComponent::normalMatrix() const
 	};
 }
 
-CatObject CatObject::makePointLight( const std::string& sName /* = "Light" */,
-	const float fIntensity /* = 10.f */,
-	const float fRadius /* = .1f */,
-	const glm::vec3 vColor /* = glm::vec3( 1.f ) */ )
+void CatObject::updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale )
 {
-	CatObject gameObj = CatObject::createObject( sName, sName );
-	gameObj.m_vColor = vColor;
-	gameObj.m_transform.scale.x = fRadius;
-	gameObj.m_pPointLight = std::make_unique< PointLightComponent >();
-	gameObj.m_pPointLight->lightIntensity = fIntensity;
-	return gameObj;
+	m_transform.translation = vTranslation;
+	m_transform.rotation = vRotation;
+	m_transform.scale = vScale;
+}
+
+void CatObject::updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation )
+{
+	m_transform.translation = vTranslation;
+	m_transform.rotation = vRotation;
+}
+
+void CatObject::updateTransform( const glm::vec3& vTranslation )
+{
+	m_transform.translation = vTranslation;
 }
 } // namespace cat

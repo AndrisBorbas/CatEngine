@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "loguru.hpp"
+#include "Cat/Objects/CatLight.hpp"
 
 namespace cat
 {
@@ -79,21 +80,22 @@ void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUb
 	int lightIndex = 0;
 	for ( auto& [key, obj] : rFrameInfo.m_mObjects )
 	{
-		if ( obj.m_pPointLight == nullptr ) continue;
-
-		CHECK_F( lightIndex < MAX_LIGHTS, "Point lights exceed maximum specified" );
-
-		// update light position
-		if ( bIsRotating )
+		if ( const auto light = dynamic_cast< CatLight* >( obj.get() ) )
 		{
-			obj.m_transform.translation = glm::vec3( rotateLight * glm::vec4( obj.m_transform.translation, 1.f ) );
+			CHECK_F( lightIndex < MAX_LIGHTS, "Point lights exceed maximum specified" );
+
+			// update light position
+			if ( bIsRotating )
+			{
+				light->m_transform.translation = glm::vec3( rotateLight * glm::vec4( light->m_transform.translation, 1.f ) );
+			}
+
+			// copy light to ubo
+			ubo.pointLights[lightIndex].position = glm::vec4( light->m_transform.translation, 1.f );
+			ubo.pointLights[lightIndex].color = glm::vec4( light->m_vColor, light->m_transform.scale.x );
+
+			lightIndex += 1;
 		}
-
-		// copy light to ubo
-		ubo.pointLights[lightIndex].position = glm::vec4( obj.m_transform.translation, 1.f );
-		ubo.pointLights[lightIndex].color = glm::vec4( obj.m_vColor, obj.m_pPointLight->lightIntensity );
-
-		lightIndex += 1;
 	}
 	ubo.numLights = lightIndex;
 }
@@ -103,12 +105,13 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	std::map< float, CatObject::id_t > sorted;
 	for ( auto& [key, obj] : rFrameInfo.m_mObjects )
 	{
-		if ( obj.m_pPointLight == nullptr ) continue;
-
-		// calculate distance
-		auto offset = rFrameInfo.m_rCamera.getPosition() - obj.m_transform.translation;
-		float disSquared = glm::dot( offset, offset );
-		sorted[disSquared] = obj.getId();
+		if ( const auto light = dynamic_cast< CatLight* >( obj.get() ) )
+		{
+			// calculate distance
+			auto offset = rFrameInfo.m_rCamera.getPosition() - light->m_transform.translation;
+			float disSquared = glm::dot( offset, offset );
+			sorted[disSquared] = light->getId();
+		}
 	}
 
 	m_pPipeline->bind( rFrameInfo.m_pCommandBuffer );
@@ -119,18 +122,18 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	// iterate through sorted lights in reverse order
 	for ( auto it = sorted.rbegin(); it != sorted.rend(); ++it )
 	{
-		// use game obj id to find light object
-		auto& obj = rFrameInfo.m_mObjects.at( it->second );
+		if ( const auto light = dynamic_cast< CatLight* >( rFrameInfo.m_mObjects.at( it->second ).get() ) )
+		{
+			PointLightPushConstants push{};
+			push.position = glm::vec4( light->m_transform.translation, 1.f );
+			push.color = glm::vec4( light->m_vColor, light->m_transform.scale.x );
+			push.radius = light->m_transform.scale.y;
 
-		PointLightPushConstants push{};
-		push.position = glm::vec4( obj.m_transform.translation, 1.f );
-		push.color = glm::vec4( obj.m_vColor, obj.m_pPointLight->lightIntensity );
-		push.radius = obj.m_transform.scale.x;
-
-		rFrameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
-			vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( PointLightPushConstants ),
-			&push );
-		rFrameInfo.m_pCommandBuffer.draw( 6, 1, 0, 0 );
+			rFrameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
+				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( PointLightPushConstants ),
+				&push );
+			rFrameInfo.m_pCommandBuffer.draw( 6, 1, 0, 0 );
+		}
 	}
 }
 } // namespace cat

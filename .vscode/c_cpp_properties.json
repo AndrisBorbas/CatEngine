@@ -5,6 +5,7 @@
 			"includePath": [
 				"${workspaceFolder}/**",
 				"C:/SDKs/VulkanSDK/**",
+				"${workspaceFolder}/CatEngine/**",
 				"${workspaceFolder}/Libraries/**"
 			],
 			"defines": ["_DEBUG", "UNICODE", "_UNICODE"],

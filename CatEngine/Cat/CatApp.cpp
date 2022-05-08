@@ -25,6 +25,9 @@
 #include <stdexcept>
 
 #include "loguru.hpp"
+#include "Objects/CatLight.hpp"
+#include "Objects/CatVolume.hpp"
+#include "RenderSystems/CatWireframeRenderSystem.hpp"
 
 namespace cat
 {
@@ -56,6 +59,14 @@ CatApp::CatApp()
 						.addPoolSize( vk::DescriptorType::eUniformBuffer, CatSwapChain::MAX_FRAMES_IN_FLIGHT )
 						.build();
 	// loadGameObjects();
+
+
+	std::shared_ptr< CatModel > model = CatModel::createModelFromFile( m_device, "assets/models/cube.obj" );
+	auto cube = CatVolume::create( "Volume", "assets/models/cube.obj" );
+	cube->m_pModel = model;
+	cube->m_transform.translation = { 1.5f, .5f, 0.f };
+	cube->m_transform.scale = { 1.0f, 1.0f, 1.0f };
+	m_mObjects.emplace( cube->getId(), std::move( cube ) );
 }
 
 CatApp::~CatApp() = default;
@@ -87,15 +98,20 @@ void CatApp::run()
 		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 	CatPointLightRenderSystem pointLightRenderSystem{
 		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+	CatWireframeRenderSystem wireframeRenderSystem{
+		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
 	CatCamera camera{};
-	auto viewerObject = CatObject::createObject( "Camera", "Camera" );
-	viewerObject.m_transform.translation = { 0.f, 1.5f, 2.5f };
+	auto viewerObject = CatObject::create( "Camera", "Camera" );
+	viewerObject->m_transform.translation = { 0.f, 1.5f, 2.5f };
 	CatInput cameraController{};
 
 	GlobalUbo ubo{};
 
-	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, viewerObject, globalDescriptorSets[0], ubo, m_mObjects );
+	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, *viewerObject, globalDescriptorSets[0], ubo, m_mObjects );
+
+	auto operation = ImGuizmo::UNIVERSAL;
+	auto mode = ImGuizmo::WORLD;
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while ( !m_window.shouldClose() )
@@ -123,13 +139,21 @@ void CatApp::run()
 			if ( jModel.valid() && jModel.wait_for( 0ns ) == std::future_status::ready )
 			{
 				auto [object, model] = jModel.get();
-				auto obj = CatObject::createObject( object["name"], object["file"] );
-				obj.m_pModel = model;
-				obj.m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
-				obj.m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
-				obj.m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
-				obj.m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
-				m_mObjects.emplace( obj.getId(), std::move( obj ) );
+				std::unique_ptr< CatObject > obj;
+				if ( object["name"].contains( "Volume" ) )
+				{
+					obj = CatVolume::create( object["name"], object["file"] );
+				}
+				else
+				{
+					obj = CatObject::create( object["name"], object["file"] );
+					obj->m_pModel = model;
+				}
+				obj->m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
+				obj->m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
+				obj->m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
+				obj->m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
+				m_mObjects.emplace( obj->getId(), std::move( obj ) );
 				LOG_F( INFO, "Frame: %llu, obj loaded: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
 					object["name"].get< std::string >().c_str() );
 				jModel = {};
@@ -177,8 +201,9 @@ void CatApp::run()
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
 			simpleRenderSystem.renderObjects( getFrameInfo() );
-			pointLightRenderSystem.update( getFrameInfo(), ubo, false );
+			pointLightRenderSystem.update( getFrameInfo(), ubo, true );
 			pointLightRenderSystem.render( getFrameInfo() );
+			wireframeRenderSystem.renderObjects( getFrameInfo() );
 
 			ImGuizmo::Enable( true );
 			ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
@@ -186,21 +211,28 @@ void CatApp::run()
 			ImGuizmo::SetRect(
 				ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y, io.DisplaySize.x, io.DisplaySize.y );
 
-			// glm::vec3 flush{ 1.f, 1.f, 1.f };
+			if ( ImGui::IsKeyPressed( ImGuiKey_1 ) ) operation = ImGuizmo::TRANSLATE;
+			if ( ImGui::IsKeyPressed( ImGuiKey_2 ) ) operation = ImGuizmo::ROTATE;
+			if ( ImGui::IsKeyPressed( ImGuiKey_3 ) ) operation = ImGuizmo::SCALE;
+			if ( ImGui::IsKeyPressed( ImGuiKey_4 ) ) operation = ImGuizmo::UNIVERSAL;
+
+			if ( ImGui::IsKeyPressed( ImGuiKey_8 ) ) mode = ImGuizmo::LOCAL;
+			if ( ImGui::IsKeyPressed( ImGuiKey_9 ) ) mode = ImGuizmo::WORLD;
+
+			glm::vec3 flush{ 1.f, 1.f, 1.f };
 			float mxManipulate[16];
 			if ( getFrameInfo().m_selectedItemId != 0 )
 			{
 				ImGuizmo::RecomposeMatrixFromComponents(
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ), mxManipulate );
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.translation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.rotation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.scale ), mxManipulate );
 				auto isManipulated = ImGuizmo::Manipulate( glm::value_ptr( imguizmoCamera.getView() ),
-					glm::value_ptr( imguizmoCamera.getProjection() ), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, mxManipulate,
-					nullptr, nullptr );
+					glm::value_ptr( imguizmoCamera.getProjection() ), operation, mode, mxManipulate, nullptr, nullptr );
 				ImGuizmo::DecomposeMatrixToComponents( mxManipulate,
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.translation ),
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.rotation ),
-					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId ).m_transform.scale ) );
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.translation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.rotation ),
+					glm::value_ptr( m_mObjects.at( getFrameInfo().m_selectedItemId )->m_transform.scale ) );
 
 				if ( isManipulated )
 				{
@@ -237,20 +269,20 @@ void CatApp::saveLevel( const std::string& sFileName ) const
 	int i = 0;
 	for ( auto& [key, obj] : getFrameInfo().m_mObjects )
 	{
-		auto curr = std::to_string( obj.getId() ) /* + " : " + obj.getName() */;
+		auto curr = std::to_string( obj->getId() ) /* + " : " + obj->getName() */;
 
-		objects[i]["name"] = obj.getName();
-		objects[i]["file"] = obj.getFileName();
+		objects[i]["name"] = obj->getName();
+		objects[i]["file"] = obj->getFileName();
 
-		objects[i]["transform"]["t"] = obj.m_transform.translation;
-		objects[i]["transform"]["r"] = obj.m_transform.rotation;
-		objects[i]["transform"]["s"] = obj.m_transform.scale;
+		objects[i]["transform"]["t"] = obj->m_transform.translation;
+		objects[i]["transform"]["r"] = obj->m_transform.rotation;
+		objects[i]["transform"]["s"] = obj->m_transform.scale;
 
-		objects[i]["color"] = obj.m_vColor;
-		if ( obj.m_pPointLight != nullptr )
+		objects[i]["color"] = obj->m_vColor;
+		/*if ( const auto light = dynamic_cast< CatLight* >( &obj ) )
 		{
-			objects[i]["lightIntensity"] = obj.m_pPointLight->lightIntensity;
-		}
+			objects[i]["lightIntensity"] = light->m_transform.scale.x;
+		}*/
 
 		++i;
 	}
@@ -287,12 +319,12 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 		}
 		else if ( object["file"].get< std::string >().starts_with( "Light" ) )
 		{
-			auto pointLight = CatObject::makePointLight( object["name"], object["lightIntensity"] );
-			pointLight.m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
-			pointLight.m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
-			pointLight.m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
-			pointLight.m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
-			m_mObjects.emplace( pointLight.getId(), std::move( pointLight ) );
+			auto pointLight = CatLight::create( object["name"] );
+			pointLight->m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );
+			pointLight->m_transform.rotation = glm::make_vec3( &object["transform"]["r"].get< std::vector< float > >()[0] );
+			pointLight->m_transform.scale = glm::make_vec3( &object["transform"]["s"].get< std::vector< float > >()[0] );
+			pointLight->m_vColor = glm::make_vec3( &object["color"].get< std::vector< float > >()[0] );
+			m_mObjects.emplace( pointLight->getId(), std::move( pointLight ) );
 		}
 		else
 		{
@@ -318,33 +350,33 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 void CatApp::loadGameObjects()
 {
 	std::shared_ptr< CatModel > model = CatModel::createModelFromFile( m_device, "assets/models/quad.obj" );
-	auto floor = CatObject::createObject( "Floor", "assets/models/quad.obj" );
-	floor.m_pModel = model;
-	floor.m_transform.translation = { 0.f, 0.f, 0.f };
-	floor.m_transform.scale = { 5.f, 1.f, 5.f };
-	floor.m_transform.rotation = { glm::radians( 180.0f ), 0.0f, 0.0f };
-	m_mObjects.emplace( floor.getId(), std::move( floor ) );
+	auto floor = CatObject::create( "Floor", "assets/models/quad.obj" );
+	floor->m_pModel = model;
+	floor->m_transform.translation = { 0.f, 0.f, 0.f };
+	floor->m_transform.scale = { 5.f, 1.f, 5.f };
+	floor->m_transform.rotation = { -180.0f, 0.0f, 0.0f };
+	m_mObjects.emplace( floor->getId(), std::move( floor ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/flat_vase.obj" );
-	auto flatVase = CatObject::createObject( "FlatVase", "assets/models/flat_vase.obj" );
-	flatVase.m_pModel = model;
-	flatVase.m_transform.translation = { -.5f, .5f, 0.f };
-	flatVase.m_transform.scale = { 3.f, 1.5f, 3.f };
-	m_mObjects.emplace( flatVase.getId(), std::move( flatVase ) );
+	auto flatVase = CatObject::create( "FlatVase", "assets/models/flat_vase.obj" );
+	flatVase->m_pModel = model;
+	flatVase->m_transform.translation = { -.5f, .5f, 0.f };
+	flatVase->m_transform.scale = { 3.f, 1.5f, 3.f };
+	m_mObjects.emplace( flatVase->getId(), std::move( flatVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/smooth_vase.obj" );
-	auto smoothVase = CatObject::createObject( "SmoothVase", "assets/models/smooth_vase.obj" );
-	smoothVase.m_pModel = model;
-	smoothVase.m_transform.translation = { .5f, .5f, 0.f };
-	smoothVase.m_transform.scale = { 3.f, 1.5f, 3.f };
-	m_mObjects.emplace( smoothVase.getId(), std::move( smoothVase ) );
+	auto smoothVase = CatObject::create( "SmoothVase", "assets/models/smooth_vase.obj" );
+	smoothVase->m_pModel = model;
+	smoothVase->m_transform.translation = { .5f, .5f, 0.f };
+	smoothVase->m_transform.scale = { 3.f, 1.5f, 3.f };
+	m_mObjects.emplace( smoothVase->getId(), std::move( smoothVase ) );
 
 	model = CatModel::createModelFromFile( m_device, "assets/models/colored_cube.obj" );
-	auto cube = CatObject::createObject( "Cube", "assets/models/colored_cube.obj" );
-	cube.m_pModel = model;
-	cube.m_transform.translation = { 1.5f, .5f, 0.f };
-	cube.m_transform.scale = { .25f, .25f, .25f };
-	m_mObjects.emplace( cube.getId(), std::move( cube ) );
+	auto cube = CatObject::create( "Cube", "assets/models/colored_cube.obj" );
+	cube->m_pModel = model;
+	cube->m_transform.translation = { 1.5f, .5f, 0.f };
+	cube->m_transform.scale = { .25f, .25f, .25f };
+	m_mObjects.emplace( cube->getId(), std::move( cube ) );
 
 	std::vector< glm::vec3 > lightColors{
 		{ 1.f, .1f, .1f },
@@ -357,12 +389,11 @@ void CatApp::loadGameObjects()
 
 	for ( int i = 0; i < lightColors.size(); i++ )
 	{
-		auto pointLight = CatObject::makePointLight( std::string( "Light" ), 0.2f );
-		pointLight.m_vColor = lightColors[i];
+		auto pointLight = CatLight::create( "Light", "Light", lightColors[i], 0.2f );
 		auto rotateLight =
 			glm::rotate( glm::mat4( 1.f ), ( i * glm::two_pi< float >() ) / lightColors.size(), { 0.f, -1.f, 0.f } );
-		pointLight.m_transform.translation = glm::vec3( rotateLight * glm::vec4( -1.f, 1.f, -1.f, 1.f ) );
-		m_mObjects.emplace( pointLight.getId(), std::move( pointLight ) );
+		pointLight->m_transform.translation = glm::vec3( rotateLight * glm::vec4( -1.f, 1.f, -1.f, 1.f ) );
+		m_mObjects.try_emplace( pointLight->getId(), std::move( pointLight ) );
 	}
 }
 } // namespace cat

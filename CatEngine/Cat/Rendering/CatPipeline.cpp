@@ -18,6 +18,16 @@ CatPipeline::CatPipeline( CatDevice& device,
 	createGraphicsPipeline( vertFilepath, fragFilepath, configInfo );
 }
 
+CatPipeline::CatPipeline( CatDevice& device,
+	const std::string& vertFilepath,
+	const std::string& fragFilepath,
+	const std::string& compFilePath,
+	const PipelineConfigInfo& configInfo )
+	: m_rDevice{ device }
+{
+	createGraphicsPipeline( vertFilepath, fragFilepath, compFilePath, configInfo );
+}
+
 CatPipeline::~CatPipeline()
 {
 	m_rDevice.getDevice().destroy( m_pVertShaderModule );
@@ -72,6 +82,79 @@ void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
 	static const int nShaderStages = 2;
 
 	vk::PipelineShaderStageCreateInfo shaderStages[nShaderStages] = { vertShaderStageInfo, fragShaderStageInfo };
+
+	auto bindingDescriptions = CatModel::Vertex::getBindingDescriptions();
+	auto attributeDescriptions = CatModel::Vertex::getAttributeDescriptions();
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
+		.vertexBindingDescriptionCount = static_cast< uint32_t >( bindingDescriptions.size() ),
+		.pVertexBindingDescriptions = bindingDescriptions.data(),
+		.vertexAttributeDescriptionCount = static_cast< uint32_t >( attributeDescriptions.size() ),
+		.pVertexAttributeDescriptions = attributeDescriptions.data(),
+	};
+
+	vk::GraphicsPipelineCreateInfo pipelineInfo{
+		.stageCount = nShaderStages,
+		.pStages = shaderStages,
+		.pVertexInputState = &vertexInputInfo,
+		.pInputAssemblyState = &configInfo.m_pInputAssemblyInfo,
+		.pViewportState = &configInfo.m_pViewportInfo,
+		.pRasterizationState = &configInfo.m_pRasterizationInfo,
+		.pMultisampleState = &configInfo.m_pMultisampleInfo,
+		.pDepthStencilState = &configInfo.m_pDepthStencilInfo,
+		.pColorBlendState = &configInfo.m_pColorBlendInfo,
+		.pDynamicState = &configInfo.m_pDynamicStateInfo,
+		.layout = configInfo.m_pPipelineLayout,
+		.renderPass = configInfo.m_pRenderPass,
+		.subpass = configInfo.m_nSubpass,
+		.basePipelineHandle = nullptr,
+		.basePipelineIndex = -1,
+	};
+
+	if ( m_rDevice.getDevice().createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
+		 != vk::Result::eSuccess )
+	{
+		throw std::runtime_error( "failed to create graphics pipeline" );
+	}
+}
+
+void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
+	const std::string& fragFilepath,
+	const std::string& compFilepath,
+	const PipelineConfigInfo& configInfo )
+{
+	assert( !!configInfo.m_pPipelineLayout && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo" );
+	assert( !!configInfo.m_pRenderPass && "Cannot create graphics pipeline: no renderPass provided in configInfo" );
+
+	auto vertCode = readFile( vertFilepath );
+	auto compCode = readFile( compFilepath );
+	auto fragCode = readFile( fragFilepath );
+
+	createShaderModule( vertCode, &m_pVertShaderModule );
+	createShaderModule( compCode, &m_pCompShaderModule );
+	createShaderModule( fragCode, &m_pFragShaderModule );
+
+	vk::PipelineShaderStageCreateInfo vertShaderStageInfo{
+		.stage = vk::ShaderStageFlagBits::eVertex,
+		.module = m_pVertShaderModule,
+		.pName = "main",
+	};
+
+	vk::PipelineShaderStageCreateInfo compShaderStageInfo{
+		.stage = vk::ShaderStageFlagBits::eCompute,
+		.module = m_pCompShaderModule,
+		.pName = "main",
+	};
+
+	vk::PipelineShaderStageCreateInfo fragShaderStageInfo{
+		.stage = vk::ShaderStageFlagBits::eFragment,
+		.module = m_pFragShaderModule,
+		.pName = "main",
+	};
+
+	static const int nShaderStages = 3;
+
+	vk::PipelineShaderStageCreateInfo shaderStages[nShaderStages] = {
+		vertShaderStageInfo, fragShaderStageInfo, compShaderStageInfo };
 
 	auto bindingDescriptions = CatModel::Vertex::getBindingDescriptions();
 	auto attributeDescriptions = CatModel::Vertex::getAttributeDescriptions();
@@ -200,4 +283,11 @@ void CatPipeline::enableAlphaBlending( PipelineConfigInfo& configInfo )
 	configInfo.m_pColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
 	configInfo.m_pColorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
 }
+
+void CatPipeline::enableWireframe( PipelineConfigInfo& configInfo )
+{
+	configInfo.m_pRasterizationInfo.polygonMode = vk::PolygonMode::eLine;
+	configInfo.m_pRasterizationInfo.lineWidth = 2.0f;
+}
+
 } // namespace cat

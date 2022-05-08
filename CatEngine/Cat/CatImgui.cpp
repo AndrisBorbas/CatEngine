@@ -224,7 +224,7 @@ void CatImgui::drawWindows()
 				++i;
 				ImGui::PushID( i );
 				const bool isSelected = ( GetEditorInstance()->getFrameInfo().m_selectedItemId == key );
-				if ( ImGui::Selectable( ( object.getName() ).c_str(), isSelected ) )
+				if ( ImGui::Selectable( ( object->getName() ).c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
 					GetEditorInstance()->getFrameInfo().updateSelectedItemId( key );
@@ -248,19 +248,19 @@ void CatImgui::drawWindows()
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
 												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-												 .m_transform.translation ),
+												 ->m_transform.translation ),
 				0.1f );
 			ImGui::DragFloat3( "Rotation",
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
 												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-												 .m_transform.rotation ),
+												 ->m_transform.rotation ),
 				0.1f );
 			ImGui::DragFloat3( "Scale",
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
 												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
-												 .m_transform.scale ),
+												 ->m_transform.scale ),
 				0.1f );
 
 			ImGui::End();
