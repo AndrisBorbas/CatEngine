@@ -83,8 +83,8 @@ void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
 
 	vk::PipelineShaderStageCreateInfo shaderStages[nShaderStages] = { vertShaderStageInfo, fragShaderStageInfo };
 
-	auto bindingDescriptions = CatModel::Vertex::getBindingDescriptions();
-	auto attributeDescriptions = CatModel::Vertex::getAttributeDescriptions();
+	auto& bindingDescriptions = configInfo.m_aBindingDescriptions;
+	auto& attributeDescriptions = configInfo.m_aAttributeDescriptions;
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
 		.vertexBindingDescriptionCount = static_cast< uint32_t >( bindingDescriptions.size() ),
 		.pVertexBindingDescriptions = bindingDescriptions.data(),
@@ -269,6 +269,9 @@ void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 	configInfo.m_pDynamicStateInfo.pDynamicStates = configInfo.m_aDynamicStateEnables.data();
 	configInfo.m_pDynamicStateInfo.dynamicStateCount = static_cast< uint32_t >( configInfo.m_aDynamicStateEnables.size() );
 	configInfo.m_pDynamicStateInfo.flags = {};
+
+	configInfo.m_aBindingDescriptions = CatModel::Vertex::getBindingDescriptions();
+	configInfo.m_aAttributeDescriptions = CatModel::Vertex::getAttributeDescriptions();
 }
 
 void CatPipeline::enableAlphaBlending( PipelineConfigInfo& configInfo )

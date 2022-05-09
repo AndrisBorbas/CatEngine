@@ -36,7 +36,7 @@ CatWireframeRenderSystem::~CatWireframeRenderSystem()
 void CatWireframeRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
 {
 	vk::PushConstantRange pushConstantRange{
-		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eCompute | vk::ShaderStageFlagBits::eFragment,
+		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
 		.offset = 0,
 		.size = sizeof( CatPushConstantData ),
 	};

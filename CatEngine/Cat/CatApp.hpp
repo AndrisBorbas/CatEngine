@@ -41,6 +41,7 @@ public:
 	std::vector< std::future< std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
 	[[nodiscard]] auto getDevice() { return &m_device; }
+	[[nodiscard]] auto getRenderer() { return &m_renderer; }
 
 private:
 	void loadGameObjects();

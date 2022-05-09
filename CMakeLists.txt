@@ -18,6 +18,8 @@ elseif (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4244 /wd4146")
 endif ()
 
+message("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+
 set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(Libraries)
@@ -31,6 +33,11 @@ find_package(Vulkan REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image loguru imgui ImGuizmo json)
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
+
+if(MSVC)
+  target_compile_options(${PROJECT_NAME} PUBLIC "/ZI")
+  target_link_options(${PROJECT_NAME} PUBLIC "/INCREMENTAL")
+endif()
 
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD

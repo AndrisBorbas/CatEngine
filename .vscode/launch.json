@@ -8,10 +8,10 @@
 			"name": "(Windows) Launch",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/cmake-build-debug/CatEngine.exe",
+			"program": "${workspaceFolder}/out/build/x64-Debug/CatEngine.exe",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${fileDirname}",
+			"cwd": "${workspaceFolder}/out/build/x64-Debug/",
 			"environment": [],
 			"console": "externalTerminal"
 		}
