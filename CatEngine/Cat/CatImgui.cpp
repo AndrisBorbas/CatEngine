@@ -81,7 +81,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 		.Subpass = 0,
 		.MinImageCount = 2,
 		.ImageCount = static_cast< uint32_t >( imageCount ),
-		.MSAASamples = VK_SAMPLE_COUNT_8_BIT,
+		.MSAASamples = VK_SAMPLE_COUNT_1_BIT,
 		// todo, I should probably get around to integrating a memory allocator library such as Vulkan
 		// memory allocator (VMA) sooner than later. We don't want to have to update adding an allocator
 		// in a ton of locations.
@@ -145,11 +145,9 @@ void CatImgui::drawWindows()
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named
 	// window.
 	{
-		static float f = 0.0f;
-
 		char title[128];
-		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-			GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", GetEditorInstance()->getFrameTime() * 1000.0,
+			GetEditorInstance()->getFrameRate(), GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -196,10 +194,6 @@ void CatImgui::drawWindows()
 			GetEditorInstance()->m_jLevelLoad = tLoadLevel.get_future();
 
 			std::thread{ std::move( tLoadLevel ), name, false }.detach();
-
-
-			ImGui::End();
-			return;
 		}
 		ImGui::SameLine();
 		if ( ImGui::Button( "Save Level" ) )
@@ -211,6 +205,27 @@ void CatImgui::drawWindows()
 			}
 			GetEditorInstance()->saveLevel( name );
 		}
+
+		double dFrameRate = GetEditorInstance()->getFrameRate();
+		if ( !m_qFrameTimes.empty() && dFrameRate != m_qFrameTimes.front() )
+		{
+			m_qFrameTimes.push_front( dFrameRate );
+			if ( m_qFrameTimes.size() > m_nQueueSize )
+			{
+				m_qFrameTimes.pop_back();
+			}
+		}
+
+		auto func = [&]( void* data, int idx ) -> float
+		{
+			auto asd = m_qFrameTimes.begin();
+			std::advance( asd, idx );
+			return *asd;
+		};
+
+		float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
+
+		ImGui::PlotLines( "Frame Times", f, nullptr, m_qFrameTimes.size(), 0, NULL, 0.0f, 2000.0f, ImVec2( 0, 80 ) );
 
 		ImGui::End();
 	}

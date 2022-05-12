@@ -76,7 +76,8 @@ void CatPointLightRenderSystem::createPipeline( vk::RenderPass pRenderPass )
 
 void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUbo& ubo, const bool bIsRotating ) const
 {
-	const auto rotateLight = glm::rotate( glm::mat4( 1.f ), 0.5f * rFrameInfo.m_fFrameTime, { 0.f, -1.f, 0.f } );
+	const auto rotateLight =
+		glm::rotate( glm::mat4( 1.f ), 0.5f * static_cast< float >( rFrameInfo.m_dFrameTime ), { 0.f, -1.f, 0.f } );
 	int lightIndex = 0;
 	for ( auto& [key, obj] : rFrameInfo.m_mObjects )
 	{

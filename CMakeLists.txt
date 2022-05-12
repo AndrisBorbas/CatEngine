@@ -35,7 +35,7 @@ target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image loguru imgui I
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
 
 if(MSVC)
-  target_compile_options(${PROJECT_NAME} PUBLIC "/ZI")
+  #target_compile_options(${PROJECT_NAME} PUBLIC "/ZI")
   target_link_options(${PROJECT_NAME} PUBLIC "/INCREMENTAL")
 endif()
 

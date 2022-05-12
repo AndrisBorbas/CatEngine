@@ -21,6 +21,7 @@ void CatWindow::initWindow()
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 
+	// m_pWindow = glfwCreateWindow( m_iWidth, m_iHeight, m_sWindowName.c_str(), glfwGetPrimaryMonitor(), nullptr );
 	m_pWindow = glfwCreateWindow( m_iWidth, m_iHeight, m_sWindowName.c_str(), nullptr, nullptr );
 	glfwSetWindowUserPointer( m_pWindow, this );
 	// glfwSetCursorPosCallback( m_pWindow, mouseCallback );

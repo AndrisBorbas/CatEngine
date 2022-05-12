@@ -10,6 +10,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <queue>
 
 #include "ImGuizmo.h"
 
@@ -51,6 +52,10 @@ private:
 	CatApp& m_rApp;
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
+
+	std::list< double > m_qFrameTimes{ 0.0 };
+
+	const size_t m_nQueueSize = 100;
 };
 } // namespace cat
 

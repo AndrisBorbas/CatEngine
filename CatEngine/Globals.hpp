@@ -40,4 +40,28 @@ static constexpr vk::PresentModeKHR SELECTED_PRESENTMODE = vk::PresentModeKHR::e
 static constexpr char SELECTED_PRESENTMODE_TEXT[] = "Immediate";
 static constexpr float ID_MX[16] = { 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f };
 
+struct Lambda
+{
+	template < typename Tret, typename T >
+	static Tret lambda_ptr_exec( void* data, int i )
+	{
+		return (Tret)( *(T*)fn< T >() )( data, i );
+	}
+
+	template < typename Tret = void, typename Tfp = Tret ( * )( void* ), typename T >
+	static Tfp ptr( T& t )
+	{
+		fn< T >( &t );
+		return (Tfp)lambda_ptr_exec< Tret, T >;
+	}
+
+	template < typename T >
+	static void* fn( void* new_fn = nullptr )
+	{
+		static void* fn;
+		if ( new_fn != nullptr ) fn = new_fn;
+		return fn;
+	}
+};
+
 #endif // CATENGINE_GLOBALS_HPP

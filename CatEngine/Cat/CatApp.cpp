@@ -71,6 +71,12 @@ CatApp::CatApp()
 
 CatApp::~CatApp() = default;
 
+double clockToMilliseconds( clock_t ticks )
+{
+	// units/(units/time) => time (seconds) * 1000 = milliseconds
+	return ( ticks / static_cast< double >( CLOCKS_PER_SEC ) ) * 1000.0;
+}
+
 void CatApp::run()
 {
 	std::vector< std::unique_ptr< CatBuffer > > uboBuffers( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
@@ -113,14 +119,27 @@ void CatApp::run()
 	auto operation = ImGuizmo::UNIVERSAL;
 	auto mode = ImGuizmo::WORLD;
 
+	uint64_t nFrames = 0;
+
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while ( !m_window.shouldClose() )
 	{
 		glfwPollEvents();
 
 		auto newTime = std::chrono::high_resolution_clock::now();
-		float frameTime = std::chrono::duration< float, std::chrono::seconds::period >( newTime - currentTime ).count();
+		m_dFrameTime = std::chrono::duration< double, std::chrono::seconds::period >( newTime - currentTime ).count();
 		currentTime = newTime;
+		m_dDeltaTime += m_dFrameTime;
+		nFrames++;
+
+		if ( m_dDeltaTime >= 0.1 )
+		{
+			m_dFrameRate = ( static_cast< double >( nFrames ) * 0.5 / 0.1 + m_dFrameRate * 0.5 );
+			nFrames = 0;
+			m_dDeltaTime -= 0.1;
+			// m_dFrameRate = 1000.0 / ( m_dFrameRate == 0.0 ? 0.001 : m_dFrameRate );
+		}
+
 
 		if ( m_jLevelLoad.valid() )
 		{
@@ -161,7 +180,8 @@ void CatApp::run()
 		}
 
 
-		cameraController.moveInPlaneXZ( m_window.getGLFWwindow(), frameTime, getFrameInfo().m_rCameraObject );
+		cameraController.moveInPlaneXZ(
+			m_window.getGLFWwindow(), static_cast< float >( m_dFrameTime ), getFrameInfo().m_rCameraObject );
 		camera.setViewYXZ(
 			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
 
@@ -178,7 +198,7 @@ void CatApp::run()
 			short frameIndex = m_renderer.getFrameIndex();
 
 			m_pFrameInfo->update(
-				commandBuffer, globalDescriptorSets[frameIndex], frameTime, frameIndex, m_renderer.getFrameNumber() );
+				commandBuffer, globalDescriptorSets[frameIndex], m_dFrameTime, frameIndex, m_renderer.getFrameNumber() );
 
 			ubo.projection = camera.getProjection();
 			ubo.view = camera.getView();
@@ -329,7 +349,7 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 		else
 		{
 			std::packaged_task tLoadModel(
-				[]( nlohmann::basic_json<> object )
+				[]( json object )
 				{
 					LOG_F( INFO, "Frame: %llu, started model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
 						object["file"].get< std::string >().c_str() );
@@ -337,7 +357,7 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 						CatModel::createModelFromFile( GetEditorInstance()->m_device, object["file"] );
 					LOG_F( INFO, "Frame: %llu, finished model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
 						object["file"].get< std::string >().c_str() );
-					return std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > >{ object, model };
+					return std::pair< json, std::shared_ptr< CatModel > >{ object, model };
 				} );
 
 			m_aLoadingObjects.push_back( tLoadModel.get_future() );

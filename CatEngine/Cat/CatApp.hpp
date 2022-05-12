@@ -38,10 +38,12 @@ public:
 	void loadLevel( const std::string& sFileName, bool bClearPrevious = true );
 
 	std::future< void > m_jLevelLoad{};
-	std::vector< std::future< std::pair< nlohmann::basic_json<>, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
+	std::vector< std::future< std::pair< json, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
 	[[nodiscard]] auto getDevice() { return &m_device; }
 	[[nodiscard]] auto getRenderer() { return &m_renderer; }
+	[[nodiscard]] auto getFrameTime() const { return m_dFrameTime; }
+	[[nodiscard]] auto getFrameRate() const { return m_dFrameRate; }
 
 private:
 	void loadGameObjects();
@@ -55,6 +57,10 @@ private:
 	CatObject::Map m_mObjects;
 
 	std::unique_ptr< CatFrameInfo > m_pFrameInfo = nullptr;
+
+	double m_dFrameTime = 0.0;
+	double m_dDeltaTime = 0.0;
+	double m_dFrameRate = 0.0f;
 };
 
 [[nodiscard]] extern CatApp* GetEditorInstance();

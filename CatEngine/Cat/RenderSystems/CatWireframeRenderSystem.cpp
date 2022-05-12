@@ -68,7 +68,7 @@ void CatWireframeRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
+		m_rDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
 }
 
 void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
