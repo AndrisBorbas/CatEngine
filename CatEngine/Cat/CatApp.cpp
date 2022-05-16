@@ -71,12 +71,6 @@ CatApp::CatApp()
 
 CatApp::~CatApp() = default;
 
-double clockToMilliseconds( clock_t ticks )
-{
-	// units/(units/time) => time (seconds) * 1000 = milliseconds
-	return ( ticks / static_cast< double >( CLOCKS_PER_SEC ) ) * 1000.0;
-}
-
 void CatApp::run()
 {
 	std::vector< std::unique_ptr< CatBuffer > > uboBuffers( CatSwapChain::MAX_FRAMES_IN_FLIGHT );

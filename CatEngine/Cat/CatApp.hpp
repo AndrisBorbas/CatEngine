@@ -60,7 +60,7 @@ private:
 
 	double m_dFrameTime = 0.0;
 	double m_dDeltaTime = 0.0;
-	double m_dFrameRate = 0.0f;
+	double m_dFrameRate = 0.0;
 };
 
 [[nodiscard]] extern CatApp* GetEditorInstance();

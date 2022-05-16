@@ -40,7 +40,7 @@ if(MSVC)
 endif()
 
 
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
 
@@ -53,18 +53,18 @@ file(GLOB compute-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.comp)
 
 # Add them to the build.
 foreach (vertex-shader ${vertex-shaders})
-    get_filename_component(p ${vertex-shader} NAME)
-    add_shader(${PROJECT_NAME} ${p})
+    get_filename_component(shader ${vertex-shader} NAME)
+    add_shader(${PROJECT_NAME} ${shader})
 endforeach (vertex-shader)
 
 foreach (fragment-shader ${fragment-shaders})
-    get_filename_component(p ${fragment-shader} NAME)
-    add_shader(${PROJECT_NAME} ${p})
+    get_filename_component(shader ${fragment-shader} NAME)
+    add_shader(${PROJECT_NAME} ${shader})
 endforeach (fragment-shader)
 
 foreach (compute-shader ${compute-shaders})
-    get_filename_component(p ${compute-shader} NAME)
-    add_shader(${PROJECT_NAME} ${p})
+    get_filename_component(shader ${compute-shader} NAME)
+    add_shader(${PROJECT_NAME} ${shader})
 endforeach (compute-shader)
 
 set(output-assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/${TARGET}/assets)

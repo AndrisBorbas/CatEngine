@@ -206,6 +206,8 @@ void CatImgui::drawWindows()
 			GetEditorInstance()->saveLevel( name );
 		}
 
+
+		/*
 		double dFrameRate = GetEditorInstance()->getFrameRate();
 		if ( !m_qFrameTimes.empty() && dFrameRate != m_qFrameTimes.front() )
 		{
@@ -222,10 +224,11 @@ void CatImgui::drawWindows()
 			std::advance( asd, idx );
 			return *asd;
 		};
+		*/
 
-		float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
+		// float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
 
-		ImGui::PlotLines( "Frame Times", f, nullptr, m_qFrameTimes.size(), 0, NULL, 0.0f, 2000.0f, ImVec2( 0, 80 ) );
+		// ImGui::PlotLines( "Frame Times", f, nullptr, m_qFrameTimes.size(), 0, NULL, 0.0f, 2000.0f, ImVec2( 0, 80 ) );
 
 		ImGui::End();
 	}

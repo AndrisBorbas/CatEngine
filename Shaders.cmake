@@ -1,20 +1,12 @@
 function(add_shader TARGET SHADER)
-
     # Find glslc shader compiler.
-    # On Android, the NDK includes the binary, so no external dependency.
-
-
     find_program(GLSLC glslc)
-
 
     # All shaders for a sample are found here.
     set(current-shader-path ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/${SHADER})
 
-    # For Android, write SPIR-V files to app/assets which is then packaged into the APK.
-    # Otherwise, output in the binary directory.
-
+	# Output path is inside the assets folder.
     set(current-output-path ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/assets/shaders/${SHADER}.spv)
-
 
     # Add a custom command to compile GLSL to SPIR-V.
     get_filename_component(current-output-dir ${current-output-path} DIRECTORY)
