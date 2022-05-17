@@ -9,7 +9,8 @@ namespace cat
 class CatVolume : public CatObject
 {
 public:
-	[[nodiscard]] static std::unique_ptr< CatVolume > create( const std::string& sName, const std::string& sFile )
+	[[nodiscard]] static std::unique_ptr< CatVolume > create( const std::string& sName,
+		const std::string& sFile = "assets/models/cube.obj" )
 	{
 		auto volume = std::make_unique< CatVolume >( sName, sFile );
 		volume->m_vColor = { 1.0f, 0.0f, 0.0f };

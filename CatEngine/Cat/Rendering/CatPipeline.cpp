@@ -222,8 +222,8 @@ void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 	configInfo.m_pRasterizationInfo.rasterizerDiscardEnable = false;
 	configInfo.m_pRasterizationInfo.polygonMode = vk::PolygonMode::eFill;
 	configInfo.m_pRasterizationInfo.lineWidth = 1.0f;
-	configInfo.m_pRasterizationInfo.cullMode = vk::CullModeFlagBits::eNone;
-	configInfo.m_pRasterizationInfo.frontFace = vk::FrontFace::eClockwise;
+	configInfo.m_pRasterizationInfo.cullMode = vk::CullModeFlagBits::eBack;
+	configInfo.m_pRasterizationInfo.frontFace = vk::FrontFace::eCounterClockwise;
 	configInfo.m_pRasterizationInfo.depthBiasEnable = false;
 	configInfo.m_pRasterizationInfo.depthBiasConstantFactor = 0.0f; // Optional
 	configInfo.m_pRasterizationInfo.depthBiasClamp = 0.0f;			// Optional
@@ -291,6 +291,11 @@ void CatPipeline::enableWireframe( PipelineConfigInfo& configInfo )
 {
 	configInfo.m_pRasterizationInfo.polygonMode = vk::PolygonMode::eLine;
 	configInfo.m_pRasterizationInfo.lineWidth = 2.0f;
+	disableBackFaceCulling( configInfo );
 }
 
+void CatPipeline::disableBackFaceCulling( PipelineConfigInfo& configInfo )
+{
+	configInfo.m_pRasterizationInfo.cullMode = vk::CullModeFlagBits::eNone;
+}
 } // namespace cat

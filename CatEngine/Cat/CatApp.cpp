@@ -206,6 +206,8 @@ void CatApp::run()
 			// start new frame
 			m_renderer.beginSwapChainRenderPass( commandBuffer );
 
+			pointLightRenderSystem.update( getFrameInfo(), ubo, true );
+
 			ImGuizmo::DrawGrid(
 				glm::value_ptr( imguizmoCamera.getView() ), glm::value_ptr( imguizmoCamera.getProjection() ), ID_MX, 16.f );
 
@@ -215,7 +217,6 @@ void CatApp::run()
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
 			simpleRenderSystem.renderObjects( getFrameInfo() );
-			pointLightRenderSystem.update( getFrameInfo(), ubo, true );
 			pointLightRenderSystem.render( getFrameInfo() );
 			wireframeRenderSystem.renderObjects( getFrameInfo() );
 
@@ -265,12 +266,12 @@ void CatApp::run()
 			// as last step in render pass, record the imgui draw commands
 			imgui.render( commandBuffer );
 
+			// Update and Render additional Platform Windows
+			CatImgui::renderPlatformWindows();
+
 			m_renderer.endSwapChainRenderPass( commandBuffer );
 			m_renderer.endFrame();
 		}
-
-		// Update and Render additional Platform Windows
-		CatImgui::renderPlatformWindows();
 	}
 
 	m_device.getDevice().waitIdle();

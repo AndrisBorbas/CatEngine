@@ -6,12 +6,6 @@ namespace cat
 {
 void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject )
 {
-	//	glm::vec3 rotate{ 0 };
-	//	if ( glfwGetKey( window, m_eKeys.lookRight ) == GLFW_PRESS ) rotate.z += 1.f;
-	//	if ( glfwGetKey( window, m_eKeys.lookLeft ) == GLFW_PRESS ) rotate.z -= 1.f;
-	//	if ( glfwGetKey( window, m_eKeys.lookUp ) == GLFW_PRESS ) rotate.x += 1.f;
-	//	if ( glfwGetKey( window, m_eKeys.lookDown ) == GLFW_PRESS ) rotate.x -= 1.f;
-
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_RELEASE )
 	{
 		m_bFirstMouse = true;

@@ -13,32 +13,10 @@
 
 namespace cat
 {
-// ok this just initializes imgui using the provided integration files. So in our case we need to
-// initialize the vulkan and glfw imgui implementations, since that's what our engine is built
-// using.
 CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount )
 	: m_rDevice{ device }, m_rWindow{ window }, m_rApp{ app }
 {
-	// set up a descriptor pool stored on this instance, see header for more comments on this.
-	//	vk::DescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-	//		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 }, { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-	//		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 }, { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-	//		{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 }, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-	//		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 }, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-	//		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 }, { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
-	//	vk::DescriptorPoolCreateInfo pool_info = {};
-	//	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	//	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	//	pool_info.maxSets = 1000 * IM_ARRAYSIZE( pool_sizes );
-	//	pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE( pool_sizes );
-	//	pool_info.pPoolSizes = pool_sizes;
-	//	if ( vkCreateDescriptorPool( device.device(), &pool_info, nullptr, &descriptorPool ) != VK_SUCCESS )
-	//	{
-	//		throw std::runtime_error( "failed to set up descriptor pool for imgui" );
-	//	}
-
 	m_pDescriptorPool = CatDescriptorPool::Builder( m_rDevice )
-							.setMaxSets( 1000 )
 							.addPoolSize( vk::DescriptorType::eSampler, 1000 )
 							.addPoolSize( vk::DescriptorType::eCombinedImageSampler, 1000 )
 							.addPoolSize( vk::DescriptorType::eSampledImage, 1000 )
@@ -50,6 +28,8 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 							.addPoolSize( vk::DescriptorType::eUniformBufferDynamic, 1000 )
 							.addPoolSize( vk::DescriptorType::eStorageBufferDynamic, 1000 )
 							.addPoolSize( vk::DescriptorType::eInputAttachment, 1000 )
+							.setMaxSets( 1000 * 11 )
+							.setPoolFlags( vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet )
 							.build();
 
 	// Setup Dear ImGui context
@@ -58,7 +38,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
@@ -88,12 +68,8 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 		.Allocator = nullptr,
 		.CheckVkResultFn = check_vk_result,
 	};
-
-
 	ImGui_ImplVulkan_Init( &init_info, renderPass );
 
-	// upload fonts, this is done by recording and submitting a one time use command buffer
-	// which can be done easily bye using some existing helper functions on the lve device object
 	const auto commandBuffer = device.beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 	device.endSingleTimeCommands( commandBuffer );
@@ -102,7 +78,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 
 CatImgui::~CatImgui()
 {
-	//	vkDestroyDescriptorPool( lveDevice.device(), descriptorPool, nullptr );
+	m_rDevice.getDevice().destroyDescriptorPool( m_pDescriptorPool->getDescriptorPool() );
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

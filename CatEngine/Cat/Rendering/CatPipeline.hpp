@@ -53,6 +53,7 @@ public:
 	static void defaultPipelineConfigInfo( PipelineConfigInfo& configInfo );
 	static void enableAlphaBlending( PipelineConfigInfo& configInfo );
 	static void enableWireframe( PipelineConfigInfo& configInfo );
+	static void disableBackFaceCulling( PipelineConfigInfo& configInfo );
 
 private:
 	static std::vector< char > readFile( const std::string& filepath );

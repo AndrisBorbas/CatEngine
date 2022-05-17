@@ -66,6 +66,7 @@ void CatPointLightRenderSystem::createPipeline( vk::RenderPass pRenderPass )
 	PipelineConfigInfo pipelineConfig{};
 	CatPipeline::defaultPipelineConfigInfo( pipelineConfig );
 	CatPipeline::enableAlphaBlending( pipelineConfig );
+	CatPipeline::disableBackFaceCulling( pipelineConfig );
 	pipelineConfig.m_aAttributeDescriptions.clear();
 	pipelineConfig.m_aBindingDescriptions.clear();
 	pipelineConfig.m_pRenderPass = pRenderPass;
