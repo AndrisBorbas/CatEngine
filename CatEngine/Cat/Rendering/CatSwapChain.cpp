@@ -53,6 +53,14 @@ CatSwapChain::~CatSwapChain()
 		vkFreeMemory( m_rDevice.getDevice(), m_aDepthImageMemorys[i], nullptr );
 	}
 
+	for ( int i = 0; i < m_aColorImages.size(); i++ )
+	{
+		m_rDevice.getDevice().destroyImageView( m_aColorImageViews[i] );
+		m_rDevice.getDevice().destroyImage( m_aColorImages[i] );
+		m_rDevice.getDevice().freeMemory( m_aColorImageMemorys[i] );
+	}
+
+
 	for ( auto framebuffer : m_aSwapChainFramebuffers )
 	{
 		vkDestroyFramebuffer( m_rDevice.getDevice(), framebuffer, nullptr );
@@ -189,35 +197,95 @@ void CatSwapChain::createSwapChain()
 
 void CatSwapChain::createImageViews()
 {
+	vk::Extent2D swapChainExtent = getSwapChainExtent();
+
 	m_aSwapChainImageViews.resize( m_aSwapChainImages.size() );
+
+	m_aColorImages.resize( m_aSwapChainImages.size() );
+	m_aColorImageViews.resize( m_aSwapChainImages.size() );
+	m_aColorImageMemorys.resize( m_aSwapChainImages.size() );
+
 	for ( size_t i = 0; i < m_aSwapChainImages.size(); i++ )
 	{
 		vk::ImageViewCreateInfo viewInfo{
 			.image = m_aSwapChainImages[i],
 			.viewType = vk::ImageViewType::e2D,
 			.format = m_pSwapChainImageFormat,
-			.subresourceRange =
-				{
-					.aspectMask = vk::ImageAspectFlagBits::eColor,
-					.baseMipLevel = 0,
-					.levelCount = 1,
-					.baseArrayLayer = 0,
-					.layerCount = 1,
-				},
+			.subresourceRange{
+				.aspectMask = vk::ImageAspectFlagBits::eColor,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
 		};
 
 		if ( m_rDevice.getDevice().createImageView( &viewInfo, nullptr, &m_aSwapChainImageViews[i] ) != vk::Result::eSuccess )
 		{
 			throw std::runtime_error( "failed to create texture image view!" );
 		}
+
+		vk::ImageCreateInfo imageInfo{
+			.imageType = vk::ImageType::e2D,
+			.format = m_pSwapChainImageFormat,
+			.extent =
+				{
+					swapChainExtent.width,
+					swapChainExtent.height,
+					1,
+				},
+			.mipLevels = 1,
+			.arrayLayers = 1,
+			.samples = m_rDevice.getMSAA(),
+			.tiling = vk::ImageTiling::eOptimal,
+			.usage = vk::ImageUsageFlagBits::eTransientAttachment | vk::ImageUsageFlagBits::eColorAttachment,
+			.sharingMode = vk::SharingMode::eExclusive,
+			.initialLayout = vk::ImageLayout::eUndefined,
+		};
+
+		m_rDevice.createImageWithInfo(
+			imageInfo, vk::MemoryPropertyFlagBits::eDeviceLocal, m_aColorImages[i], m_aColorImageMemorys[i] );
+
+		vk::ImageViewCreateInfo colorViewInfo{
+			.image = m_aColorImages[i],
+			.viewType = vk::ImageViewType::e2D,
+			.format = m_pSwapChainImageFormat,
+			.subresourceRange{
+				.aspectMask = vk::ImageAspectFlagBits::eColor,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+
+		if ( m_rDevice.getDevice().createImageView( &colorViewInfo, nullptr, &m_aColorImageViews[i] ) != vk::Result::eSuccess )
+		{
+			throw std::runtime_error( "failed to create color image view!" );
+		}
 	}
 }
 
 void CatSwapChain::createRenderPass()
 {
+	vk::AttachmentDescription colorAttachment = {
+		.format = getSwapChainImageFormat(),
+		.samples = m_rDevice.getMSAA(),
+		.loadOp = vk::AttachmentLoadOp::eClear,
+		.storeOp = vk::AttachmentStoreOp::eStore,
+		.stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+		.stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+		.initialLayout = vk::ImageLayout::eUndefined,
+		.finalLayout = vk::ImageLayout::eColorAttachmentOptimal,
+	};
+	vk::AttachmentReference colorAttachmentRef = {
+		.attachment = 0,
+		.layout = vk::ImageLayout::eColorAttachmentOptimal,
+	};
+
 	vk::AttachmentDescription depthAttachment{
 		.format = findDepthFormat(),
-		.samples = vk::SampleCountFlagBits::e1,
+		.samples = m_rDevice.getMSAA(),
 		.loadOp = vk::AttachmentLoadOp::eClear,
 		.storeOp = vk::AttachmentStoreOp::eDontCare,
 		.stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
@@ -225,13 +293,12 @@ void CatSwapChain::createRenderPass()
 		.initialLayout = vk::ImageLayout::eUndefined,
 		.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
 	};
-
 	vk::AttachmentReference depthAttachmentRef{
 		.attachment = 1,
 		.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
 	};
 
-	vk::AttachmentDescription colorAttachment = {
+	vk::AttachmentDescription colorAttachmentResolve = {
 		.format = getSwapChainImageFormat(),
 		.samples = vk::SampleCountFlagBits::e1,
 		.loadOp = vk::AttachmentLoadOp::eClear,
@@ -241,9 +308,8 @@ void CatSwapChain::createRenderPass()
 		.initialLayout = vk::ImageLayout::eUndefined,
 		.finalLayout = vk::ImageLayout::ePresentSrcKHR,
 	};
-
-	vk::AttachmentReference colorAttachmentRef = {
-		.attachment = 0,
+	vk::AttachmentReference colorAttachmentResolveRef = {
+		.attachment = 2,
 		.layout = vk::ImageLayout::eColorAttachmentOptimal,
 	};
 
@@ -251,6 +317,7 @@ void CatSwapChain::createRenderPass()
 		.pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
 		.colorAttachmentCount = 1,
 		.pColorAttachments = &colorAttachmentRef,
+		.pResolveAttachments = &colorAttachmentResolveRef,
 		.pDepthStencilAttachment = &depthAttachmentRef,
 	};
 
@@ -259,10 +326,11 @@ void CatSwapChain::createRenderPass()
 		.dstSubpass = 0,
 		.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
 		.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-		.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eColorAttachmentWrite,
+		.srcAccessMask = {},
+		.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
 	};
 
-	std::array< vk::AttachmentDescription, 2 > attachments = { colorAttachment, depthAttachment };
+	std::array< vk::AttachmentDescription, 3 > attachments = { colorAttachment, depthAttachment, colorAttachmentResolve };
 	vk::RenderPassCreateInfo renderPassInfo = {
 		.attachmentCount = static_cast< uint32_t >( attachments.size() ),
 		.pAttachments = attachments.data(),
@@ -283,7 +351,8 @@ void CatSwapChain::createFramebuffers()
 	m_aSwapChainFramebuffers.resize( getImageCount() );
 	for ( size_t i = 0; i < getImageCount(); i++ )
 	{
-		std::array< vk::ImageView, 2 > attachments = { m_aSwapChainImageViews[i], m_aDepthImageViews[i] };
+		std::array< vk::ImageView, 3 > attachments = {
+			m_aColorImageViews[i], m_aDepthImageViews[i], m_aSwapChainImageViews[i] };
 
 		vk::Extent2D swapChainExtent = getSwapChainExtent();
 		vk::FramebufferCreateInfo framebufferInfo = {
@@ -326,7 +395,7 @@ void CatSwapChain::createDepthResources()
 				},
 			.mipLevels = 1,
 			.arrayLayers = 1,
-			.samples = vk::SampleCountFlagBits::e1,
+			.samples = m_rDevice.getMSAA(),
 			.tiling = vk::ImageTiling::eOptimal,
 			.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
 			.sharingMode = vk::SharingMode::eExclusive,
@@ -340,19 +409,18 @@ void CatSwapChain::createDepthResources()
 			.image = m_aDepthImages[i],
 			.viewType = vk::ImageViewType::e2D,
 			.format = depthFormat,
-			.subresourceRange =
-				{
-					vk::ImageAspectFlagBits::eDepth,
-					0,
-					1,
-					0,
-					1,
-				},
+			.subresourceRange{
+				.aspectMask = vk::ImageAspectFlagBits::eDepth,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
 		};
 
 		if ( m_rDevice.getDevice().createImageView( &viewInfo, nullptr, &m_aDepthImageViews[i] ) != vk::Result::eSuccess )
 		{
-			throw std::runtime_error( "failed to create texture image view!" );
+			throw std::runtime_error( "failed to create depth image view!" );
 		}
 	}
 }

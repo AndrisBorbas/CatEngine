@@ -61,7 +61,8 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 		.Subpass = 0,
 		.MinImageCount = 2,
 		.ImageCount = static_cast< uint32_t >( imageCount ),
-		.MSAASamples = VK_SAMPLE_COUNT_1_BIT,
+		.MSAASamples = static_cast< VkSampleCountFlagBits >( device.getMSAA() ),
+		// .MSAASamples = VK_SAMPLE_COUNT_8_BIT,
 		// todo, I should probably get around to integrating a memory allocator library such as Vulkan
 		// memory allocator (VMA) sooner than later. We don't want to have to update adding an allocator
 		// in a ton of locations.

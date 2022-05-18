@@ -66,6 +66,9 @@ private:
 	std::vector< vk::Image > m_aDepthImages;
 	std::vector< vk::DeviceMemory > m_aDepthImageMemorys;
 	std::vector< vk::ImageView > m_aDepthImageViews;
+	std::vector< vk::Image > m_aColorImages;
+	std::vector< vk::DeviceMemory > m_aColorImageMemorys;
+	std::vector< vk::ImageView > m_aColorImageViews;
 	std::vector< vk::Image > m_aSwapChainImages;
 	std::vector< vk::ImageView > m_aSwapChainImageViews;
 

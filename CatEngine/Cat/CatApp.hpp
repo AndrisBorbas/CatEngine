@@ -48,11 +48,11 @@ public:
 private:
 	void loadGameObjects();
 
+	// note: order of declarations matters
 	CatWindow m_window{ WIDTH, HEIGHT, "Cat Engine" };
 	CatDevice m_device{ m_window };
 	CatRenderer m_renderer{ m_window, m_device };
 
-	// note: order of declarations matters
 	std::unique_ptr< CatDescriptorPool > m_pGlobalPool{};
 	CatObject::Map m_mObjects;
 

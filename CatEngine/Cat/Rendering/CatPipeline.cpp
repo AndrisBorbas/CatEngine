@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "Cat/CatApp.hpp"
+
 namespace cat
 {
 CatPipeline::CatPipeline( CatDevice& device,
@@ -230,7 +232,7 @@ void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 	configInfo.m_pRasterizationInfo.depthBiasSlopeFactor = 0.0f;	// Optional
 
 	configInfo.m_pMultisampleInfo.sampleShadingEnable = false;
-	configInfo.m_pMultisampleInfo.rasterizationSamples = vk::SampleCountFlagBits::e1;
+	configInfo.m_pMultisampleInfo.rasterizationSamples = GetEditorInstance()->getDevice()->getMSAA();
 	configInfo.m_pMultisampleInfo.minSampleShading = 1.0f;		 // Optional
 	configInfo.m_pMultisampleInfo.pSampleMask = nullptr;		 // Optional
 	configInfo.m_pMultisampleInfo.alphaToCoverageEnable = false; // Optional

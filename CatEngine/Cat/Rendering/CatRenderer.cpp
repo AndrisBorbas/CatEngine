@@ -122,9 +122,10 @@ void CatRenderer::beginSwapChainRenderPass( vk::CommandBuffer commandBuffer )
 	CHECK_F( m_bIsFrameStarted, "Can't call beginSwapChainRenderPass if frame is not in progress" );
 	CHECK_F( commandBuffer == getCurrentCommandBuffer(), "Can't begin render pass on command buffer from a different frame" );
 
-	std::array< vk::ClearValue, 2 > clearValues{};
+	std::array< vk::ClearValue, 3 > clearValues{};
 	clearValues[0].setColor( std::array< float, 4 >{ 0.01f, 0.01f, 0.0125f, 1.0f } );
 	clearValues[1].setDepthStencil( { 1.0f, 0 } );
+	clearValues[2].setColor( std::array< float, 4 >{ 0.01f, 0.01f, 0.0125f, 1.0f } );
 
 	vk::RenderPassBeginInfo renderPassInfo{
 		.renderPass = m_pSwapChain->getRenderPass(),

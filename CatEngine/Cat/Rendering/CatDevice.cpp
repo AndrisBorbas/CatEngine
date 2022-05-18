@@ -17,8 +17,24 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeveri
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData )
 {
-	// std::cerr << "-- validation layer error: " << pCallbackData->pMessage << std::endl;
-	LOG_F( WARNING, "-- validation layer error: %s\n", pCallbackData->pMessage );
+	auto verbosity = loguru::Verbosity_FATAL;
+	switch ( messageSeverity )
+	{
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+			verbosity = loguru::Verbosity_ERROR;
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+			verbosity = loguru::Verbosity_WARNING;
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+			verbosity = loguru::Verbosity_INFO;
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+			verbosity = loguru::Verbosity_MAX;
+			break;
+	}
+
+	VLOG_F( verbosity, "-- validation layer error: %s\n", pCallbackData->pMessage );
 
 	return VK_FALSE;
 }
@@ -76,9 +92,9 @@ void CatDevice::createInstance()
 
 	const vk::ApplicationInfo appInfo = {
 		.pApplicationName = "CatEditor",
-		.applicationVersion = VK_MAKE_VERSION( 0, 2, 0 ),
+		.applicationVersion = VK_MAKE_VERSION( 0, 3, 0 ),
 		.pEngineName = "CatEngine",
-		.engineVersion = VK_MAKE_VERSION( 0, 2, 0 ),
+		.engineVersion = VK_MAKE_VERSION( 0, 3, 0 ),
 		.apiVersion = VK_API_VERSION_1_2,
 	};
 
@@ -116,6 +132,9 @@ void CatDevice::createInstance()
 
 vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDevice rPhysicalDevice )
 {
+	// Limit MSAA to 1 because otherwise undocked imgui crashes
+	return vk::SampleCountFlagBits::e1;
+
 	vk::PhysicalDeviceProperties physicalDeviceProperties;
 	rPhysicalDevice.getProperties( &physicalDeviceProperties );
 
@@ -253,6 +272,7 @@ void CatDevice::createLogicalDevice()
 	}
 
 	vk::PhysicalDeviceFeatures deviceFeatures = {
+		.sampleRateShading = true,
 		.fillModeNonSolid = true,
 		.wideLines = true,
 		.samplerAnisotropy = true,

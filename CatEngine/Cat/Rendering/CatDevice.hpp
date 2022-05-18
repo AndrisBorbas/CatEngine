@@ -59,6 +59,7 @@ public:
 	[[nodiscard]] vk::Format findSupportedFormat( const std::vector< vk::Format >& candidates,
 		vk::ImageTiling tiling,
 		vk::FormatFeatureFlags features );
+	[[nodiscard]] auto getMSAA() { return m_msaaSamples; }
 
 	// Buffer Helper Functions
 	void createBuffer( vk::DeviceSize size,
