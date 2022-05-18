@@ -12,8 +12,6 @@
 #include <imgui_impl_vulkan.h>
 #include <queue>
 
-#include "ImGuizmo.h"
-
 #include <glm/vec3.hpp>
 
 #include <stdexcept>

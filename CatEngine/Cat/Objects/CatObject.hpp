@@ -28,29 +28,30 @@ class CatObject
 public:
 	using id_t = uint32_t;
 	using Map = std::unordered_map< id_t, std::unique_ptr< CatObject > >;
+	using Type = const std::string;
 
-	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale );
-	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation );
-	void updateTransform( const glm::vec3& vTranslation );
 
 	[[nodiscard]] static std::unique_ptr< CatObject > create( const std::string& sName, const std::string& sFile )
 	{
-		return std::make_unique< CatObject >( sName, sFile );
+		return std::unique_ptr< CatObject >( new CatObject( sName, sFile ) );
 	}
 
-	[[nodiscard]] CatObject( std::string sName, std::string sFile )
-		: m_id( currentId++ ), m_sName( std::move( sName ) ), m_sFile( std::move( sFile ) )
-	{
-	}
 
 	CatObject( const CatObject& ) = delete;
 	CatObject& operator=( const CatObject& ) = delete;
 	CatObject( CatObject&& ) = default;
 	CatObject& operator=( CatObject&& ) = default;
 
+	virtual json save();
+
+	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale );
+	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation );
+	void updateTransform( const glm::vec3& vTranslation );
+
 	[[nodiscard]] id_t getId() const { return m_id; }
-	[[nodiscard]] std::string getName() const { return m_sName; }
-	[[nodiscard]] std::string getFileName() const { return m_sFile; }
+	[[nodiscard]] auto& getName() const { return m_sName; }
+	[[nodiscard]] auto& getFileName() const { return m_sFile; }
+	[[nodiscard]] virtual Type& getType() const { return m_sType; }
 
 	glm::vec3 m_vColor{};
 	TransformComponent m_transform{};
@@ -60,12 +61,18 @@ public:
 	virtual ~CatObject() = default;
 
 protected:
+	[[nodiscard]] CatObject( std::string sName, std::string sFile, const Type& sType = "BaseGameObject" )
+		: m_id( m_idCurrent++ ), m_sName( std::move( sName ) ), m_sFile( std::move( sFile ) ), m_sType( sType )
+	{
+	}
+
 	const id_t m_id;
 	std::string m_sName;
 	std::string m_sFile;
+	Type m_sType;
 
 private:
-	static id_t currentId;
+	static id_t m_idCurrent;
 };
 
 } // namespace cat

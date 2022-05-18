@@ -32,6 +32,8 @@
 
 #include <json.hpp>
 
+#include "Cat/CatUtils.hpp"
+
 // for convenience
 using json = nlohmann::json;
 

@@ -15,19 +15,19 @@ public:
 		const float fIntensity = 10.f,
 		const float fRadius = .1f )
 	{
-		auto light = CatLight::_create( sName, sFile );
+		auto light = std::unique_ptr< CatLight >( new CatLight( sName, sFile ) );
 		light->m_vColor = vColor;
 		light->m_transform.scale.x = fIntensity;
 		light->m_transform.scale.y = fRadius;
 		return light;
 	}
 
-	[[nodiscard]] CatLight( const std::string& sName, const std::string& sFile ) : CatObject( sName, sFile ) {}
+	virtual ~CatLight() override = default;
 
 protected:
-	[[nodiscard]] static std::unique_ptr< CatLight > _create( const std::string& sName, const std::string& sFile = "Light" )
+	[[nodiscard]] CatLight( const std::string& sName, const std::string& sFile, const CatObject::Type& sType = "Light" )
+		: CatObject( sName, sFile, sType )
 	{
-		return std::make_unique< CatLight >( sName, sFile );
 	}
 };
 

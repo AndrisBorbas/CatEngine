@@ -1,0 +1,1 @@
+#define CAT_PROPERTY(_member, _getter, _setter, _paramName, _propertyName) [[nodiscard]] virtual const decltype( _member )& _getter() const { return _member; } virtual void _setter( const decltype( _member )& _paramName ) { _member = _paramName; } __declspec( property( get = _getter, put = _setter ) ) decltype( _member ) _propertyName;

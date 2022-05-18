@@ -24,6 +24,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "ImGuizmo.h"
 #include "loguru.hpp"
 #include "Objects/CatLight.hpp"
 #include "Objects/CatVolume.hpp"
@@ -66,6 +67,9 @@ CatApp::CatApp()
 	cube->m_pModel = model;
 	cube->m_transform.translation = { 1.5f, .5f, 0.f };
 	cube->m_transform.scale = { 1.0f, 1.0f, 1.0f };
+
+	cube->m_SLoadLevel = "asd.json";
+
 	m_mObjects.emplace( cube->getId(), std::move( cube ) );
 }
 
@@ -153,11 +157,12 @@ void CatApp::run()
 			{
 				auto [object, model] = jModel.get();
 				std::unique_ptr< CatObject > obj;
-				if ( object["name"].contains( "Volume" ) )
+				if ( object["type"].get< std::string >() == "TriggerVolume" )
 				{
 					obj = CatVolume::create( object["name"], object["file"] );
+					obj->m_pModel = model;
 				}
-				else
+				else // type == "BaseGameObject"
 				{
 					obj = CatObject::create( object["name"], object["file"] );
 					obj->m_pModel = model;
@@ -173,6 +178,29 @@ void CatApp::run()
 			}
 		}
 
+		if ( viewerObject )
+		{
+			for ( auto& [key, obj] : m_mObjects )
+			{
+				if ( const auto volume = dynamic_cast< CatVolume* >( &( *obj ) ) )
+				{
+					if ( volume->isInside( *viewerObject ) )
+					{
+						// LOG_F( INFO, "POG" );
+						if ( !volume->m_SLoadLevel.empty() && !volume->m_BIsLoaded )
+						{
+							volume->m_BIsLoaded = true;
+							loadLevel( volume->m_SLoadLevel, false );
+						}
+						if ( !volume->m_SSaveLevel.empty() && !volume->m_BIsSaved )
+						{
+							volume->m_BIsSaved = true;
+							saveLevel( volume->m_SSaveLevel );
+						}
+					}
+				}
+			}
+		}
 
 		cameraController.moveInPlaneXZ(
 			m_window.getGLFWwindow(), static_cast< float >( m_dFrameTime ), getFrameInfo().m_rCameraObject );
@@ -279,25 +307,13 @@ void CatApp::run()
 
 void CatApp::saveLevel( const std::string& sFileName ) const
 {
+	const auto sPath = "assets/levels/" + sFileName;
 	json file;
 	json objects;
 	int i = 0;
 	for ( auto& [key, obj] : getFrameInfo().m_mObjects )
 	{
-		auto curr = std::to_string( obj->getId() ) /* + " : " + obj->getName() */;
-
-		objects[i]["name"] = obj->getName();
-		objects[i]["file"] = obj->getFileName();
-
-		objects[i]["transform"]["t"] = obj->m_transform.translation;
-		objects[i]["transform"]["r"] = obj->m_transform.rotation;
-		objects[i]["transform"]["s"] = obj->m_transform.scale;
-
-		objects[i]["color"] = obj->m_vColor;
-		/*if ( const auto light = dynamic_cast< CatLight* >( &obj ) )
-		{
-			objects[i]["lightIntensity"] = light->m_transform.scale.x;
-		}*/
+		objects[i] = obj->save();
 
 		++i;
 	}
@@ -305,14 +321,18 @@ void CatApp::saveLevel( const std::string& sFileName ) const
 
 	// LOG_F( INFO, file.dump( 2 ).c_str() );
 
-	std::ofstream ofs( sFileName );
+	std::ofstream ofs( sPath );
 	ofs << std::setw( 2 ) << file << std::endl;
 	ofs.close();
+
+	DLOG_F( INFO, "Level saved: %s", sPath.c_str() );
 }
 
 void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious /* = true */ )
 {
 	LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+
+	const auto sPath = "assets/levels/" + sFileName;
 
 	if ( bClearPrevious )
 	{
@@ -320,7 +340,7 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 	}
 
 	json file;
-	std::ifstream ifs( sFileName );
+	std::ifstream ifs( sPath );
 	ifs >> file;
 	ifs.close();
 
@@ -328,11 +348,11 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 	objects = file["objects"];
 	for ( auto& object : objects )
 	{
-		if ( object["file"] == "Camera" )
+		if ( object["type"] == "Camera" )
 		{
 			continue;
 		}
-		else if ( object["file"].get< std::string >().starts_with( "Light" ) )
+		else if ( object["type"].get< std::string >() == "Light" )
 		{
 			auto pointLight = CatLight::create( object["name"] );
 			pointLight->m_transform.translation = glm::make_vec3( &object["transform"]["t"].get< std::vector< float > >()[0] );

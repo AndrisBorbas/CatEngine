@@ -11,6 +11,8 @@
 #include <future>
 #include <functional>
 
+#include "ImGuizmo.h"
+
 namespace cat
 {
 CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount )
@@ -79,7 +81,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 
 CatImgui::~CatImgui()
 {
-	m_rDevice.getDevice().destroyDescriptorPool( m_pDescriptorPool->getDescriptorPool() );
+	// m_rDevice.getDevice().destroyDescriptorPool( m_pDescriptorPool->getDescriptorPool() );
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

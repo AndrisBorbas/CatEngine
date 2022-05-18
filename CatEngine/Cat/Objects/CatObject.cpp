@@ -2,11 +2,15 @@
 
 #include "Cat/CatApp.hpp"
 #include "Cat/CatApp.hpp"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include "glm/gtc/matrix_inverse.hpp"
 
 namespace cat
 {
-CatObject::id_t CatObject::currentId = 1;
+CatObject::id_t CatObject::m_idCurrent = 1;
 
 glm::mat4 TransformComponent::mat4() const
 {
@@ -52,6 +56,22 @@ glm::mat3 TransformComponent::normalMatrix() const
 			invScale.z * ( c1 * c2 ),
 		},
 	};
+}
+
+json CatObject::save()
+{
+	json object;
+	object["name"] = getName();
+	object["file"] = getFileName();
+	object["type"] = getType();
+
+	object["transform"]["t"] = m_transform.translation;
+	object["transform"]["r"] = m_transform.rotation;
+	object["transform"]["s"] = m_transform.scale;
+
+	object["color"] = m_vColor;
+
+	return object;
 }
 
 void CatObject::updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale )
