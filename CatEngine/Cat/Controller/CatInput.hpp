@@ -2,7 +2,7 @@
 #define CATENGINE_CATINPUT_HPP
 
 #include "Cat/CatWindow.hpp"
-#include "CatObject.hpp"
+#include "Cat/Objects/CatObject.hpp"
 
 namespace cat
 {
@@ -27,11 +27,13 @@ public:
 
 	void moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject );
 
+	static void registerInputHandlers();
+
 private:
 	KeyMappings m_eKeys{};
 	float m_fMovementSpeed = 3.f;
 	float m_fMouseSensitivity = 0.0045f;
-	glm::vec2 m_vMouseLastPos = { 0.f, 0.f };
+	glm::dvec2 m_vMouseLastPos = { 0.0, 0.0 };
 	bool m_bFirstMouse = true;
 	float m_fYaw = -1.5f;
 	float m_fPitch = -.35f;

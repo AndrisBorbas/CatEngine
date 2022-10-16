@@ -1,7 +1,5 @@
-#ifndef CATENGINE_CATWIREFRAMERENDERSYSTEM_HPP
-#define CATENGINE_CATWIREFRAMERENDERSYSTEM_HPP
-
-#pragma once
+#ifndef CATENGINE_CATGRIDRENDERSYSTEM_HPP
+#define CATENGINE_CATGRIDRENDERSYSTEM_HPP
 
 #include "Cat/Rendering/CatDevice.hpp"
 #include "Cat/Controller/CatCamera.hpp"
@@ -14,14 +12,14 @@
 
 namespace cat
 {
-class CatWireframeRenderSystem
+class CatGridRenderSystem
 {
 public:
-	CatWireframeRenderSystem( CatDevice& device, vk::RenderPass renderPass, vk::DescriptorSetLayout globalSetLayout );
-	~CatWireframeRenderSystem();
+	CatGridRenderSystem( CatDevice& device, vk::RenderPass renderPass, vk::DescriptorSetLayout globalSetLayout );
+	~CatGridRenderSystem();
 
-	CatWireframeRenderSystem( const CatWireframeRenderSystem& ) = delete;
-	CatWireframeRenderSystem& operator=( const CatWireframeRenderSystem& ) = delete;
+	CatGridRenderSystem( const CatGridRenderSystem& ) = delete;
+	CatGridRenderSystem& operator=( const CatGridRenderSystem& ) = delete;
 
 	void renderObjects( const CatFrameInfo& frameInfo );
 
@@ -36,4 +34,4 @@ private:
 };
 } // namespace cat
 
-#endif // CATENGINE_CATWIREFRAMERENDERSYSTEM_HPP
+#endif // CATENGINE_CATGRIDRENDERSYSTEM_HPP

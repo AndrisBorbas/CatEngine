@@ -1,0 +1,6 @@
+---
+Language: Cpp
+BasedOnStyle: InheritParentConfig
+AllowShortFunctionsOnASingleLine: All
+BraceWrapping:
+  AfterFunction: false

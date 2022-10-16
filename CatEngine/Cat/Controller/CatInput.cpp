@@ -1,4 +1,5 @@
 #include "CatInput.hpp"
+#include "Cat/CatApp.hpp"
 
 #include <limits>
 
@@ -15,27 +16,26 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_PRESS )
 	{
 		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
-		double* pXPos = new double;
-		double* pYPos = new double;
+		auto* pXPos = new double;
+		auto* pYPos = new double;
 		glfwGetCursorPos( window, pXPos, pYPos );
-		if ( pXPos && pYPos )
+
+		if ( m_bFirstMouse )
 		{
-			if ( m_bFirstMouse )
-			{
-				m_vMouseLastPos.x = *pXPos;
-				m_vMouseLastPos.y = *pYPos;
-				m_bFirstMouse = false;
-			}
-
-			float fXOffset = *pXPos - m_vMouseLastPos.x;
-			float fYOffset = m_vMouseLastPos.y - *pYPos; // reversed since y-coordinates go from bottom to top
-
 			m_vMouseLastPos.x = *pXPos;
 			m_vMouseLastPos.y = *pYPos;
-
-			m_fYaw += fXOffset * m_fMouseSensitivity;
-			m_fPitch += fYOffset * m_fMouseSensitivity;
+			m_bFirstMouse = false;
 		}
+
+		float fXOffset = *pXPos - m_vMouseLastPos.x;
+		float fYOffset = m_vMouseLastPos.y - *pYPos; // reversed since y-coordinates go from bottom to top
+
+		m_vMouseLastPos.x = *pXPos;
+		m_vMouseLastPos.y = *pYPos;
+
+		m_fYaw += fXOffset * m_fMouseSensitivity;
+		m_fPitch += fYOffset * m_fMouseSensitivity;
+
 		delete pXPos;
 		delete pYPos;
 	}
@@ -70,4 +70,17 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 		gameObject.m_transform.translation += m_fMovementSpeed * dt * glm::normalize( moveDir );
 	}
 }
+
+void CatInput::registerInputHandlers()
+{
+	glfwSetKeyCallback( cat::GetEditorInstance()->m_Window.getGLFWwindow(),
+		[]( GLFWwindow* window, int key, int scancode, int action, int mods )
+		{
+			if ( key == GLFW_KEY_ENTER && action == GLFW_PRESS && mods == GLFW_MOD_ALT )
+			{
+				cat::GetEditorInstance()->m_Window.toggleFullscreen();
+			}
+		} );
+}
+
 } // namespace cat

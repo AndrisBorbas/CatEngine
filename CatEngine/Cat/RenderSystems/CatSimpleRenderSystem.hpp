@@ -2,7 +2,7 @@
 #define CATENGINE_CATSIMPLERENDERSYSTEM_HPP
 
 #include "Cat/Rendering/CatDevice.hpp"
-#include "Cat/Objects/CatCamera.hpp"
+#include "Cat/Controller/CatCamera.hpp"
 #include "Cat/CatFrameInfo.hpp"
 #include "Cat/Objects/CatObject.hpp"
 #include "Cat/Rendering/CatPipeline.hpp"

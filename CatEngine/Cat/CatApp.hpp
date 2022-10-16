@@ -42,14 +42,12 @@ public:
 
 	[[nodiscard]] auto getDevice() { return &m_device; }
 	[[nodiscard]] auto getRenderer() { return &m_renderer; }
-	[[nodiscard]] auto getFrameTime() const { return m_dFrameTime; }
-	[[nodiscard]] auto getFrameRate() const { return m_dFrameRate; }
 
 private:
-	void loadGameObjects();
+	void loadDefaultExampleMap();
 
 	// note: order of declarations matters
-	CatWindow m_window{ WIDTH, HEIGHT, "Cat Engine" };
+	CatWindow m_window{ WIDTH, HEIGHT, "Cat Engine", false };
 	CatDevice m_device{ m_window };
 	CatRenderer m_renderer{ m_window, m_device };
 
@@ -61,6 +59,12 @@ private:
 	double m_dFrameTime = 0.0;
 	double m_dDeltaTime = 0.0;
 	double m_dFrameRate = 0.0;
+
+public:
+	CAT_READONLY_PROPERTY( m_dFrameRate, getFrameRate, dFrameRate, m_DFrameRate );
+	CAT_READONLY_PROPERTY( m_dFrameTime, getFrameTime, dFrameTime, m_DFrameTime );
+	CAT_READONLY_PROPERTY( m_dDeltaTime, getDeltaTime, dDeltaTime, m_DDeltaTime );
+	CAT_READONLY_PROPERTY( m_window, getWindow, window, m_Window );
 };
 
 [[nodiscard]] extern CatApp* GetEditorInstance();

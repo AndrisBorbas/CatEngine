@@ -32,7 +32,7 @@
 
 #include <json.hpp>
 
-#include "Cat/CatUtils.hpp"
+#include "Cat/Utils/CatUtils.hpp"
 
 // for convenience
 using json = nlohmann::json;

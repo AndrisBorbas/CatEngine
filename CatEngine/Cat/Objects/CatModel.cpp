@@ -1,6 +1,6 @@
 #include "CatModel.hpp"
 
-#include "Cat/CatUtils.hpp"
+#include "Cat/Utils/CatUtils.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -19,7 +19,7 @@ struct hash< cat::CatModel::Vertex >
 	size_t operator()( cat::CatModel::Vertex const& vertex ) const
 	{
 		size_t seed = 0;
-		cat::hashCombine( seed, vertex.m_vPosition, vertex.m_vColor, vertex.m_vNormal, vertex.m_vUV );
+		cat::HashCombine( seed, vertex.m_vPosition, vertex.m_vColor, vertex.m_vNormal, vertex.m_vUV );
 		return seed;
 	}
 };

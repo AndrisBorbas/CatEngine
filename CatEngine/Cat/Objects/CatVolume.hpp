@@ -21,21 +21,7 @@ public:
 
 	virtual bool isInside( const CatObject& other );
 	json save() override;
-
-
-	[[nodiscard]] virtual const std::string& getLoadLevel() const { return m_sLoadLevel; }
-	virtual void setLoadLevel( const std::string& sLoadLevel ) { m_sLoadLevel = sLoadLevel; }
-	__declspec( property( get = getLoadLevel, put = setLoadLevel ) ) std::string m_SLoadLevel;
-
-	[[nodiscard]] virtual bool isIsLoaded() const { return m_bIsLoaded; }
-	virtual void setIsLoaded( const bool isLoaded ) { m_bIsLoaded = isLoaded; }
-	__declspec( property( get = isIsLoaded, put = setIsLoaded ) ) bool m_BIsLoaded;
-
-	[[nodiscard]] virtual bool isIsSaved() const { return m_bIsSaved; }
-	virtual void setIsSaved( const bool isSaved ) { m_bIsSaved = isSaved; }
-	__declspec( property( get = isIsSaved, put = setIsSaved ) ) bool m_BIsSaved;
-
-
+	
 	virtual ~CatVolume() override = default;
 
 protected:
@@ -53,7 +39,10 @@ protected:
 	bool m_bIsSaved = false;
 
 public:
-	CAT_PROPERTY( m_sSaveLevel, getSaveLevel, setSaveLevel, sSaveLevel, m_SSaveLevel )
+	CAT_PROPERTY( m_sSaveLevel, getSaveLevel, setSaveLevel, sSaveLevel, m_SSaveLevel );
+	CAT_PROPERTY( m_sLoadLevel, getLoadLevel, setLoadLevel, sLoadLevel, m_SLoadLevel );
+	CAT_PROPERTY( m_bIsLoaded, isLoaded, setIsLoaded, bIsLoaded, m_BIsLoaded );
+	CAT_PROPERTY( m_bIsSaved, isSaved, setIsSaved, bIsSaved, m_BIsSaved );
 };
 
 } // namespace cat

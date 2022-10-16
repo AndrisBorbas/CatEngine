@@ -33,16 +33,17 @@ public:
 
 	static void newFrame();
 
-	void render( vk::CommandBuffer commandBuffer );
+	static void render( vk::CommandBuffer commandBuffer );
 	static void renderPlatformWindows();
 
 	// Example state
 	bool m_bShowDemoWindow = false;
 	bool m_bShowDebugWindow = false;
 	ImVec4 m_vClearColor = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
+	static void createDockSpace();
 	void drawWindows();
 
-	void drawDebug( const glm::mat4 mView, const glm::mat4 mProj );
+	void drawDebug( glm::mat4 mx1, glm::mat4 mx2 );
 
 private:
 	CatDevice& m_rDevice;

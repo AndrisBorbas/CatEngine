@@ -51,7 +51,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 	// Setup Platform/Renderer backends
 	// Initialize imgui for vulkan
 	ImGui_ImplGlfw_InitForVulkan( window.getGLFWwindow(), true );
-	ImGui_ImplVulkan_InitInfo init_info = {
+	ImGui_ImplVulkan_InitInfo initInfo = {
 		.Instance = device.getInstance(),
 		.PhysicalDevice = device.getPhysicalDevice(),
 		.Device = device.getDevice(),
@@ -71,7 +71,7 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 		.Allocator = nullptr,
 		.CheckVkResultFn = check_vk_result,
 	};
-	ImGui_ImplVulkan_Init( &init_info, renderPass );
+	ImGui_ImplVulkan_Init( &initInfo, renderPass );
 
 	const auto commandBuffer = device.beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
@@ -114,9 +114,22 @@ void CatImgui::renderPlatformWindows()
 	}
 }
 
+void CatImgui::createDockSpace()
+{
+	static ImGuiDockNodeFlags dockspaceFlags =
+		ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode;
+	ImGui::DockSpaceOverViewport( ImGui::GetMainViewport(), dockspaceFlags );
+}
+
 
 void CatImgui::drawWindows()
 {
+	{
+		// const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		//			window_flags |= ImGuiWindowFlags_NoBackground;
+		// ImGui::DockSpaceOverViewport( ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode );
+	}
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
 	if ( m_bShowDemoWindow ) ImGui::ShowDemoWindow( &m_bShowDemoWindow );
@@ -126,7 +139,7 @@ void CatImgui::drawWindows()
 	{
 		char title[128];
 		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", GetEditorInstance()->getFrameTime() * 1000.0,
-			GetEditorInstance()->getFrameRate(), GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+			GetEditorInstance()->m_DFrameRate, GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -150,8 +163,8 @@ void CatImgui::drawWindows()
 			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
-		static char buf[32] = "asd";
-		ImGui::InputTextWithHint( "##Lavel Name", "Filename", buf, 32, ImGuiInputTextFlags_CharsNoBlank );
+		static char buf[128] = "asd";
+		ImGui::InputTextWithHint( "##Lavel Name", "Filename", buf, 128, ImGuiInputTextFlags_CharsNoBlank );
 		if ( ImGui::Button( "Load Level" ) )
 		{
 			std::string name( buf );
@@ -185,9 +198,9 @@ void CatImgui::drawWindows()
 			GetEditorInstance()->saveLevel( name );
 		}
 
+		// TODO: https://github.com/epezent/implot
 
-		/*
-		double dFrameRate = GetEditorInstance()->getFrameRate();
+		auto dFrameRate = GetEditorInstance()->m_DFrameRate;
 		if ( !m_qFrameTimes.empty() && dFrameRate != m_qFrameTimes.front() )
 		{
 			m_qFrameTimes.push_front( dFrameRate );
@@ -203,9 +216,9 @@ void CatImgui::drawWindows()
 			std::advance( asd, idx );
 			return *asd;
 		};
-		*/
 
-		// float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
+
+		//		 float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
 
 		// ImGui::PlotLines( "Frame Times", f, nullptr, m_qFrameTimes.size(), 0, NULL, 0.0f, 2000.0f, ImVec2( 0, 80 ) );
 
@@ -267,22 +280,22 @@ void CatImgui::drawWindows()
 	}
 }
 
-void CatImgui::drawDebug( const glm::mat4 mView, const glm::mat4 mProj )
+void CatImgui::drawDebug( const glm::mat4 mx1, const glm::mat4 mx2 )
 {
 	if ( m_bShowDebugWindow )
 	{
-		ImGui::Begin( "View Matrix", &m_bShowDebugWindow );
-		ImGui::DragFloat3( "A", (float*)&mView[0] );
-		ImGui::DragFloat3( "B", (float*)&mView[1] );
-		ImGui::DragFloat3( "C", (float*)&mView[2] );
-		ImGui::DragFloat3( "D", (float*)&mView[3] );
+		ImGui::Begin( "MX1", &m_bShowDebugWindow );
+		ImGui::DragFloat3( "", (float*)&mx1[0] );
+		ImGui::DragFloat3( "", (float*)&mx1[1] );
+		ImGui::DragFloat3( "", (float*)&mx1[2] );
+		ImGui::DragFloat3( "", (float*)&mx1[3] );
 		ImGui::End();
 
-		ImGui::Begin( "Proj Matrix", &m_bShowDebugWindow );
-		ImGui::DragFloat3( "A", (float*)&mProj[0] );
-		ImGui::DragFloat3( "B", (float*)&mProj[1] );
-		ImGui::DragFloat3( "C", (float*)&mProj[2] );
-		ImGui::DragFloat3( "D", (float*)&mProj[3] );
+		ImGui::Begin( "MX2", &m_bShowDebugWindow );
+		ImGui::DragFloat3( "", (float*)&mx2[0] );
+		ImGui::DragFloat3( "", (float*)&mx2[1] );
+		ImGui::DragFloat3( "", (float*)&mx2[2] );
+		ImGui::DragFloat3( "", (float*)&mx2[3] );
 		ImGui::End();
 	}
 }

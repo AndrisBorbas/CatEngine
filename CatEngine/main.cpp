@@ -25,12 +25,11 @@ int main( int argc, char** argv )
 		// Main Loop
 		cat::GetEditorInstance()->run();
 
-
 		cat::DestroyGameInstance();
 
 	} catch ( const std::exception& e )
 	{
-		ABORT_F( e.what() );
+		ABORT_F( "%s", e.what() );
 		std::cerr << e.what() << '\n';
 		return EXIT_FAILURE;
 	}

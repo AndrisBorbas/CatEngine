@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Cat/Objects/CatCamera.hpp"
+#include "Cat/Controller/CatCamera.hpp"
 #include "Cat/Rendering/CatDevice.hpp"
 #include "Cat/CatFrameInfo.hpp"
 #include "Cat/Objects/CatObject.hpp"

@@ -1,4 +1,4 @@
-#include "CatSimpleRenderSystem.hpp"
+#include "CatGridRenderSystem.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -19,7 +19,7 @@ struct CatPushConstantData
 	glm::mat4 m_mxNormal{ 1.f };
 };
 
-CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
+CatGridRenderSystem::CatGridRenderSystem( CatDevice& device,
 	vk::RenderPass renderPass,
 	vk::DescriptorSetLayout globalSetLayout )
 	: m_rDevice{ device }
@@ -28,12 +28,12 @@ CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
 	createPipeline( renderPass );
 }
 
-CatSimpleRenderSystem::~CatSimpleRenderSystem()
+CatGridRenderSystem::~CatGridRenderSystem()
 {
 	vkDestroyPipelineLayout( m_rDevice.getDevice(), m_pPipelineLayout, nullptr );
 }
 
-void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
+void CatGridRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
 {
 	vk::PushConstantRange pushConstantRange{
 		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
@@ -57,7 +57,7 @@ void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout global
 	}
 }
 
-void CatSimpleRenderSystem::createPipeline( vk::RenderPass renderPass )
+void CatGridRenderSystem::createPipeline( vk::RenderPass renderPass )
 {
 	assert( !!m_pPipelineLayout && "Cannot create pipeline before pipeline layout" );
 
@@ -67,10 +67,10 @@ void CatSimpleRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
+		m_rDevice, "assets/shaders/grid.vert.spv", "assets/shaders/grid.frag.spv", pipelineConfig );
 }
 
-void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
+void CatGridRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 {
 	m_pPipeline->bind( frameInfo.m_pCommandBuffer );
 
@@ -80,16 +80,22 @@ void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
 		if ( obj->m_pModel == nullptr ) continue;
-		if ( obj->getName() == "BaseGrid" ) continue;
-		if ( dynamic_cast< CatVolume* >( obj.get() ) != nullptr ) continue;
-		CatPushConstantData push{};
-		push.m_mxModel = obj->m_transform.mat4();
-		push.m_mxNormal = obj->m_transform.normalMatrix();
+		if ( obj->getName() == "BaseGrid" )
+		{
+			CatPushConstantData push{};
+			push.m_mxModel = obj->m_transform.mat4();
+			push.m_mxNormal = obj->m_transform.normalMatrix();
 
-		frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
-			vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ), &push );
-		obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
-		obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
+			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
+				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
+				&push );
+			/*
+			obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
+			obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
+			*/
+
+			frameInfo.m_pCommandBuffer.draw( 6, 1, 0, 0 );
+		}
 	}
 }
 } // namespace cat
