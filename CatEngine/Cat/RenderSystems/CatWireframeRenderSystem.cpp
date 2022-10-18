@@ -81,17 +81,17 @@ void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
 		if ( obj->m_pModel == nullptr ) continue;
-		if ( auto volume = dynamic_cast< CatVolume* >( obj.get() ) )
+		if ( obj->getType() >= ObjectType::eVolume )
 		{
 			CatPushConstantData push{};
-			push.m_mxModel = volume->m_transform.mat4();
-			push.m_mxNormal = volume->m_transform.normalMatrix();
+			push.m_mxModel = obj->m_transform.mat4();
+			push.m_mxNormal = obj->m_transform.normalMatrix();
 
 			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
 				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
 				&push );
-			volume->m_pModel->bind( frameInfo.m_pCommandBuffer );
-			volume->m_pModel->draw( frameInfo.m_pCommandBuffer );
+			obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
+			obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
 		}
 	}
 }

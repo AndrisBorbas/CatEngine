@@ -284,8 +284,8 @@ void CatPipeline::enableAlphaBlending( PipelineConfigInfo& configInfo )
 	configInfo.m_pColorBlendAttachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
 	configInfo.m_pColorBlendAttachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
 	configInfo.m_pColorBlendAttachment.colorBlendOp = vk::BlendOp::eAdd;
-	configInfo.m_pColorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
-	configInfo.m_pColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+	configInfo.m_pColorBlendAttachment.srcAlphaBlendFactor = vk::BlendFactor::eSrcAlpha;
+	configInfo.m_pColorBlendAttachment.dstAlphaBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
 	configInfo.m_pColorBlendAttachment.alphaBlendOp = vk::BlendOp::eAdd;
 }
 
@@ -300,4 +300,16 @@ void CatPipeline::disableBackFaceCulling( PipelineConfigInfo& configInfo )
 {
 	configInfo.m_pRasterizationInfo.cullMode = vk::CullModeFlagBits::eNone;
 }
+
+void CatPipeline::disableDepthWrite( PipelineConfigInfo& configInfo )
+{
+	configInfo.m_pDepthStencilInfo.depthWriteEnable = false;
+}
+
+void CatPipeline::disableDepthTest( PipelineConfigInfo& configInfo )
+{
+	configInfo.m_pDepthStencilInfo.depthTestEnable = false;
+	configInfo.m_pDepthStencilInfo.depthWriteEnable = false;
+}
+
 } // namespace cat

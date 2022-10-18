@@ -38,7 +38,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 	vk::DescriptorSet m_pGlobalDescriptorSet;
 	GlobalUbo& m_rUBO;
 	CatObject::Map& m_mObjects;
-	CatObject::id_t m_selectedItemId;
+	id_t m_selectedItemId;
 
 	CatFrameInfo_t( vk::CommandBuffer commandBuffer,
 		CatCamera& rCamera,
@@ -49,7 +49,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		const double fFrameTime = 0.0,
 		const short nFrameIndex = 0,
 		const uint64_t nFrameNumber = 0,
-		const CatObject::id_t& selectedItemId = 0 )
+		const id_t& selectedItemId = 0 )
 		: m_nFrameIndex( nFrameIndex ),
 		  m_nFrameNumber( nFrameNumber ),
 		  m_dFrameTime( fFrameTime ),
@@ -76,7 +76,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		m_nFrameNumber = nFrameNumber;
 	}
 
-	void updateSelectedItemId( const CatObject::id_t& selectedItemId ) { m_selectedItemId = selectedItemId; }
+	void updateSelectedItemId( const id_t& selectedItemId ) { m_selectedItemId = selectedItemId; }
 };
 } // namespace cat
 

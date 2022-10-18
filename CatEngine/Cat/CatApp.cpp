@@ -62,10 +62,7 @@ CatApp::CatApp()
 						.build();
 	// loadDefaultExampleMap();
 
-	std::shared_ptr< CatModel > planeModel = CatModel::createModelFromFile( m_device, "assets/models/quad.obj" );
-	auto grid = CatObject::create( "BaseGrid", "assets/models/quad.obj" );
-	grid->m_pModel = planeModel;
-
+	auto grid = CatObject::create( "BaseGrid", "", ObjectType::eGrid );
 	m_mObjects.emplace( grid->getId(), std::move( grid ) );
 
 	std::shared_ptr< CatModel > cubeModel = CatModel::createModelFromFile( m_device, "assets/models/cube.obj" );
@@ -102,6 +99,9 @@ void CatApp::run()
 		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
 	}
 
+	// GLFW input handlers are overwritten and ImGui calls previously set input handlers
+	CatInput::registerInputHandlers();
+
 	CatImgui imgui{ *this, m_window, m_device, m_renderer.getSwapChainRenderPass(), m_renderer.getImageCount() };
 
 	CatSimpleRenderSystem simpleRenderSystem{
@@ -114,13 +114,12 @@ void CatApp::run()
 		m_device, m_renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
 	CatCamera camera{};
-	auto viewerObject = CatObject::create( "Camera", "Camera" );
+	auto viewerObject = CatObject::create( "Camera", "", ObjectType::eCamera );
 	viewerObject->m_transform.translation = { 0.f, 1.5f, 2.5f };
 	CatInput cameraController{};
 
 	GlobalUbo ubo{};
 
-	CatInput::registerInputHandlers();
 
 	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, *viewerObject, globalDescriptorSets[0], ubo, m_mObjects );
 
@@ -135,10 +134,6 @@ void CatApp::run()
 	while ( !m_window.shouldClose() )
 	{
 		glfwPollEvents();
-
-		if ( glfwGetKey( m_window.getGLFWwindow(), GLFW_KEY_ENTER ) == GLFW_PRESS )
-		{
-		}
 
 		auto newTime = std::chrono::high_resolution_clock::now();
 		m_dFrameTime = std::chrono::duration< double, std::chrono::seconds::period >( newTime - currentTime ).count();
@@ -265,9 +260,9 @@ void CatApp::run()
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
 			simpleRenderSystem.renderObjects( getFrameInfo() );
-			pointLightRenderSystem.render( getFrameInfo() );
 			wireframeRenderSystem.renderObjects( getFrameInfo() );
 			gridRenderSystem.renderObjects( getFrameInfo() );
+			pointLightRenderSystem.render( getFrameInfo() );
 
 			ImGuizmo::Enable( true );
 			ImGuizmo::SetDrawlist( ImGui::GetBackgroundDrawList() );
@@ -444,7 +439,7 @@ void CatApp::loadDefaultExampleMap()
 
 	for ( int i = 0; i < lightColors.size(); i++ )
 	{
-		auto pointLight = CatLight::create( "Light", "Light", lightColors[i], 0.2f );
+		auto pointLight = CatLight::create( "Light", lightColors[i], 0.2f );
 		auto rotateLight =
 			glm::rotate( glm::mat4( 1.f ), ( i * glm::two_pi< float >() ) / lightColors.size(), { 0.f, -1.f, 0.f } );
 		pointLight->m_transform.translation = glm::vec3( rotateLight * glm::vec4( -1.f, 1.f, -1.f, 1.f ) );

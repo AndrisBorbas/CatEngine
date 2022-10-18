@@ -23,17 +23,46 @@ struct TransformComponent
 	[[nodiscard]] glm::mat3 normalMatrix() const;
 };
 
+enum class ObjectType
+{
+	eNotSaved = ( 1u << 0 ),
+	eDynamic = ( 1u << 1 ),
+	eEditorObject = ( 1u << 2 ) | eNotSaved,
+	eGameObject = ( 1u << 3 ),
+	eCamera = ( 1u << 4 ) | eEditorObject,
+	eLight = ( 1u << 5 ),
+	eVolume = ( 1u << 6 ),
+	eGrid = ( 1u << 7 ) | eEditorObject,
+};
+
+inline ObjectType operator|( ObjectType& lhs, ObjectType& rhs )
+{
+	return static_cast< ObjectType >( static_cast< uint32_t >( lhs ) | static_cast< uint32_t >( rhs ) );
+}
+
+inline ObjectType operator&( ObjectType& lhs, ObjectType& rhs )
+{
+	return static_cast< ObjectType >( static_cast< uint32_t >( lhs ) & static_cast< uint32_t >( rhs ) );
+}
+
+// Contains operator
+// Does lhs contain rhs
+static bool operator>=( ObjectType lhs, ObjectType rhs )
+{
+	return ( lhs & rhs ) == rhs;
+}
+
 class CatObject
 {
 public:
-	using id_t = uint32_t;
 	using Map = std::unordered_map< id_t, std::unique_ptr< CatObject > >;
-	using Type = const std::string;
 
 
-	[[nodiscard]] static std::unique_ptr< CatObject > create( const std::string& sName, const std::string& sFile )
+	[[nodiscard]] static std::unique_ptr< CatObject > create( const std::string& sName,
+		const std::string& sFile = "",
+		const ObjectType& eType = ObjectType::eGameObject )
 	{
-		return std::unique_ptr< CatObject >( new CatObject( sName, sFile ) );
+		return std::unique_ptr< CatObject >( new CatObject( sName, sFile, eType ) );
 	}
 
 
@@ -41,6 +70,8 @@ public:
 	CatObject& operator=( const CatObject& ) = delete;
 	CatObject( CatObject&& ) = default;
 	CatObject& operator=( CatObject&& ) = default;
+
+	// TODO: Add load() which loads from json and creates correct object automatically.
 
 	virtual json save();
 
@@ -51,7 +82,7 @@ public:
 	[[nodiscard]] id_t getId() const { return m_id; }
 	[[nodiscard]] auto& getName() const { return m_sName; }
 	[[nodiscard]] auto& getFileName() const { return m_sFile; }
-	[[nodiscard]] virtual Type& getType() const { return m_sType; }
+	[[nodiscard]] virtual const ObjectType& getType() const { return m_eType; }
 
 	glm::vec3 m_vColor{};
 	TransformComponent m_transform{};
@@ -61,18 +92,20 @@ public:
 	virtual ~CatObject() = default;
 
 protected:
-	[[nodiscard]] CatObject( std::string sName, std::string sFile, const Type& sType = "BaseGameObject" )
-		: m_id( m_idCurrent++ ), m_sName( std::move( sName ) ), m_sFile( std::move( sFile ) ), m_sType( sType )
+	[[nodiscard]] explicit CatObject( std::string sName,
+		std::string sFile = "",
+		const ObjectType& eType = ObjectType::eGameObject )
+		: m_id( M_ID_CURRENT++ ), m_sName( std::move( sName ) ), m_sFile( std::move( sFile ) ), m_eType( eType )
 	{
 	}
 
 	const id_t m_id;
 	std::string m_sName;
 	std::string m_sFile;
-	Type m_sType;
+	ObjectType m_eType;
 
 private:
-	static id_t m_idCurrent;
+	static id_t M_ID_CURRENT;
 };
 
 } // namespace cat

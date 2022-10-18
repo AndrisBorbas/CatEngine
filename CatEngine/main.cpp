@@ -17,7 +17,6 @@ int main( int argc, char** argv )
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = 1;
 
-
 	try
 	{
 		cat::CreateEditorInstance();

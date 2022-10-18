@@ -37,6 +37,7 @@
 // for convenience
 using json = nlohmann::json;
 
+using id_t = unsigned long long;
 
 static constexpr vk::PresentModeKHR SELECTED_PRESENTMODE = vk::PresentModeKHR::eImmediate;
 static constexpr char SELECTED_PRESENTMODE_TEXT[] = "Immediate";

@@ -67,6 +67,7 @@ void CatPointLightRenderSystem::createPipeline( vk::RenderPass pRenderPass )
 	CatPipeline::defaultPipelineConfigInfo( pipelineConfig );
 	CatPipeline::enableAlphaBlending( pipelineConfig );
 	CatPipeline::disableBackFaceCulling( pipelineConfig );
+	CatPipeline::disableDepthWrite( pipelineConfig );
 	pipelineConfig.m_aAttributeDescriptions.clear();
 	pipelineConfig.m_aBindingDescriptions.clear();
 	pipelineConfig.m_pRenderPass = pRenderPass;
@@ -82,8 +83,10 @@ void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUb
 	int lightIndex = 0;
 	for ( auto& [key, obj] : rFrameInfo.m_mObjects )
 	{
-		if ( const auto light = dynamic_cast< CatLight* >( obj.get() ) )
+		if ( obj->getType() >= ObjectType::eLight )
 		{
+			const auto light = static_cast< CatLight* >( obj.get() );
+
 			CHECK_F( lightIndex < MAX_LIGHTS, "Point lights exceed maximum specified" );
 
 			// update light position
@@ -104,11 +107,13 @@ void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUb
 
 void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 {
-	std::map< float, CatObject::id_t > sorted;
+	std::map< float, id_t > sorted;
 	for ( auto& [key, obj] : rFrameInfo.m_mObjects )
 	{
-		if ( const auto light = dynamic_cast< CatLight* >( obj.get() ) )
+		if ( obj->getType() >= ObjectType::eLight )
 		{
+			const auto light = static_cast< CatLight* >( obj.get() );
+
 			// calculate distance
 			auto offset = rFrameInfo.m_rCamera.getPosition() - light->m_transform.translation;
 			float disSquared = glm::dot( offset, offset );
@@ -124,8 +129,11 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	// iterate through sorted lights in reverse order
 	for ( auto it = sorted.rbegin(); it != sorted.rend(); ++it )
 	{
-		if ( const auto light = dynamic_cast< CatLight* >( rFrameInfo.m_mObjects.at( it->second ).get() ) )
+		const auto object = rFrameInfo.m_mObjects.at( it->second ).get();
+		if ( object->getType() >= ObjectType::eLight )
 		{
+			const auto light = static_cast< CatLight* >( object );
+
 			PointLightPushConstants push{};
 			push.position = glm::vec4( light->m_transform.translation, 1.f );
 			push.color = glm::vec4( light->m_vColor, light->m_transform.scale.x );

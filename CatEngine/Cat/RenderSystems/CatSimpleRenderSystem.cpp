@@ -80,16 +80,18 @@ void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
 		if ( obj->m_pModel == nullptr ) continue;
-		if ( obj->getName() == "BaseGrid" ) continue;
-		if ( dynamic_cast< CatVolume* >( obj.get() ) != nullptr ) continue;
-		CatPushConstantData push{};
-		push.m_mxModel = obj->m_transform.mat4();
-		push.m_mxNormal = obj->m_transform.normalMatrix();
+		if ( obj->getType() >= ObjectType::eGameObject )
+		{
+			CatPushConstantData push{};
+			push.m_mxModel = obj->m_transform.mat4();
+			push.m_mxNormal = obj->m_transform.normalMatrix();
 
-		frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
-			vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ), &push );
-		obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
-		obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
+			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
+				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
+				&push );
+			obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
+			obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
+		}
 	}
 }
 } // namespace cat

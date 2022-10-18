@@ -12,29 +12,29 @@ class CatVolume : public CatObject
 {
 public:
 	[[nodiscard]] static std::unique_ptr< CatVolume > create( const std::string& sName,
-		const std::string& sFile = "assets/models/cube.obj" )
+		const std::string& sFile = "assets/models/cube.obj",
+		const ObjectType& eType = ObjectType::eVolume )
 	{
-		auto volume = std::unique_ptr< CatVolume >( new CatVolume( sName, sFile ) );
+		auto volume = std::unique_ptr< CatVolume >( new CatVolume( sName, sFile, eType ) );
 		volume->m_vColor = { 1.0f, 0.0f, 0.0f };
 		return volume;
 	}
 
 	virtual bool isInside( const CatObject& other );
 	json save() override;
-	
+
 	virtual ~CatVolume() override = default;
 
 protected:
 	[[nodiscard]] CatVolume( const std::string& sName,
-		const std::string& sFile,
-		const CatObject::Type& sType = "TriggerVolume" )
-		: CatObject( sName, sFile, sType )
+		const std::string& sFile = "assets/models/cube.obj",
+		const ObjectType& eType = ObjectType::eVolume )
+		: CatObject( sName, sFile, eType )
 	{
 	}
 
 	std::string m_sSaveLevel;
 	std::string m_sLoadLevel;
-
 	bool m_bIsLoaded = false;
 	bool m_bIsSaved = false;
 

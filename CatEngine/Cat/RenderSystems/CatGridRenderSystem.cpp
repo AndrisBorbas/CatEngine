@@ -64,6 +64,10 @@ void CatGridRenderSystem::createPipeline( vk::RenderPass renderPass )
 	PipelineConfigInfo pipelineConfig{};
 	CatPipeline::defaultPipelineConfigInfo( pipelineConfig );
 	CatPipeline::enableAlphaBlending( pipelineConfig );
+	CatPipeline::disableBackFaceCulling( pipelineConfig );
+	CatPipeline::disableDepthWrite( pipelineConfig );
+	pipelineConfig.m_aAttributeDescriptions.clear();
+	pipelineConfig.m_aBindingDescriptions.clear();
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
@@ -79,8 +83,7 @@ void CatGridRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 
 	for ( auto& [key, obj] : frameInfo.m_mObjects )
 	{
-		if ( obj->m_pModel == nullptr ) continue;
-		if ( obj->getName() == "BaseGrid" )
+		if ( obj->getType() >= ObjectType::eGrid )
 		{
 			CatPushConstantData push{};
 			push.m_mxModel = obj->m_transform.mat4();
@@ -89,10 +92,6 @@ void CatGridRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
 				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
 				&push );
-			/*
-			obj->m_pModel->bind( frameInfo.m_pCommandBuffer );
-			obj->m_pModel->draw( frameInfo.m_pCommandBuffer );
-			*/
 
 			frameInfo.m_pCommandBuffer.draw( 6, 1, 0, 0 );
 		}

@@ -19,7 +19,7 @@ struct hash< cat::CatModel::Vertex >
 	size_t operator()( cat::CatModel::Vertex const& vertex ) const
 	{
 		size_t seed = 0;
-		cat::HashCombine( seed, vertex.m_vPosition, vertex.m_vColor, vertex.m_vNormal, vertex.m_vUV );
+		cat::HashCombine( seed, vertex.vPosition, vertex.vColor, vertex.vNormal, vertex.vUV );
 		return seed;
 	}
 };
@@ -30,8 +30,8 @@ namespace cat
 {
 CatModel::CatModel( CatDevice& device, const CatModel::Builder& builder ) : m_rDevice{ device }
 {
-	createVertexBuffers( builder.m_aVertices );
-	createIndexBuffers( builder.m_aIndices );
+	createVertexBuffers( builder.aVertices );
+	createIndexBuffers( builder.aIndices );
 }
 
 CatModel::~CatModel()
@@ -139,13 +139,12 @@ std::vector< vk::VertexInputAttributeDescription > CatModel::Vertex::getAttribut
 	std::vector< vk::VertexInputAttributeDescription > attributeDescriptions{};
 
 	attributeDescriptions.push_back(
-		{ 0, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vPosition ) ) } );
+		{ 0, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, vPosition ) ) } );
 	attributeDescriptions.push_back(
-		{ 1, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vColor ) ) } );
+		{ 1, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, vColor ) ) } );
 	attributeDescriptions.push_back(
-		{ 2, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vNormal ) ) } );
-	attributeDescriptions.push_back(
-		{ 3, 0, vk::Format::eR32G32Sfloat, static_cast< uint32_t >( offsetof( Vertex, m_vUV ) ) } );
+		{ 2, 0, vk::Format::eR32G32B32Sfloat, static_cast< uint32_t >( offsetof( Vertex, vNormal ) ) } );
+	attributeDescriptions.push_back( { 3, 0, vk::Format::eR32G32Sfloat, static_cast< uint32_t >( offsetof( Vertex, vUV ) ) } );
 
 	return attributeDescriptions;
 }
@@ -162,8 +161,8 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 		throw std::runtime_error( warn + err );
 	}
 
-	m_aVertices.clear();
-	m_aIndices.clear();
+	aVertices.clear();
+	aIndices.clear();
 
 	std::unordered_map< Vertex, uint32_t > uniqueVertices{};
 	for ( const auto& shape : shapes )
@@ -174,13 +173,13 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 
 			if ( index.vertex_index >= 0 )
 			{
-				vertex.m_vPosition = {
+				vertex.vPosition = {
 					attrib.vertices[3 * index.vertex_index + 0],
 					attrib.vertices[3 * index.vertex_index + 1],
 					attrib.vertices[3 * index.vertex_index + 2],
 				};
 
-				vertex.m_vColor = {
+				vertex.vColor = {
 					attrib.colors[3 * index.vertex_index + 0],
 					attrib.colors[3 * index.vertex_index + 1],
 					attrib.colors[3 * index.vertex_index + 2],
@@ -189,7 +188,7 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 
 			if ( index.normal_index >= 0 )
 			{
-				vertex.m_vNormal = {
+				vertex.vNormal = {
 					attrib.normals[3 * index.normal_index + 0],
 					attrib.normals[3 * index.normal_index + 1],
 					attrib.normals[3 * index.normal_index + 2],
@@ -198,7 +197,7 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 
 			if ( index.texcoord_index >= 0 )
 			{
-				vertex.m_vUV = {
+				vertex.vUV = {
 					attrib.texcoords[2 * index.texcoord_index + 0],
 					attrib.texcoords[2 * index.texcoord_index + 1],
 				};
@@ -206,10 +205,10 @@ void CatModel::Builder::loadModel( const std::string& filepath )
 
 			if ( !uniqueVertices.contains( vertex ) )
 			{
-				uniqueVertices[vertex] = static_cast< uint32_t >( m_aVertices.size() );
-				m_aVertices.push_back( vertex );
+				uniqueVertices[vertex] = static_cast< uint32_t >( aVertices.size() );
+				aVertices.push_back( vertex );
 			}
-			m_aIndices.push_back( uniqueVertices[vertex] );
+			aIndices.push_back( uniqueVertices[vertex] );
 		}
 	}
 }

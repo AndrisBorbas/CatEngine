@@ -10,12 +10,12 @@ class CatLight : public CatObject
 {
 public:
 	[[nodiscard]] static std::unique_ptr< CatLight > create( const std::string& sName,
-		const std::string& sFile = "Light",
 		const glm::vec3 vColor = glm::vec3( 1.f ),
 		const float fIntensity = 10.f,
-		const float fRadius = .1f )
+		const float fRadius = .1f,
+		const ObjectType& eType = ObjectType::eLight )
 	{
-		auto light = std::unique_ptr< CatLight >( new CatLight( sName, sFile ) );
+		auto light = std::unique_ptr< CatLight >( new CatLight( sName, eType ) );
 		light->m_vColor = vColor;
 		light->m_transform.scale.x = fIntensity;
 		light->m_transform.scale.y = fRadius;
@@ -25,8 +25,8 @@ public:
 	virtual ~CatLight() override = default;
 
 protected:
-	[[nodiscard]] CatLight( const std::string& sName, const std::string& sFile, const CatObject::Type& sType = "Light" )
-		: CatObject( sName, sFile, sType )
+	[[nodiscard]] explicit CatLight( const std::string& sName, const ObjectType& eType = ObjectType::eLight )
+		: CatObject( sName, std::string(), eType )
 	{
 	}
 };

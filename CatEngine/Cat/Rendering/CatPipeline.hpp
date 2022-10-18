@@ -54,6 +54,8 @@ public:
 	static void enableAlphaBlending( PipelineConfigInfo& configInfo );
 	static void enableWireframe( PipelineConfigInfo& configInfo );
 	static void disableBackFaceCulling( PipelineConfigInfo& configInfo );
+	static void disableDepthWrite( PipelineConfigInfo& configInfo );
+	static void disableDepthTest( PipelineConfigInfo& configInfo );
 
 private:
 	static std::vector< char > readFile( const std::string& filepath );

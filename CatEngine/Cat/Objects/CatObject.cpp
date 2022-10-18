@@ -10,7 +10,7 @@
 
 namespace cat
 {
-CatObject::id_t CatObject::m_idCurrent = 1;
+id_t CatObject::M_ID_CURRENT = 1;
 
 glm::mat4 TransformComponent::mat4() const
 {
@@ -31,6 +31,7 @@ glm::mat3 TransformComponent::normalMatrix() const
 {
 	return glm::inverseTranspose( glm::mat3( this->mat4() ) );
 
+	// Old manual inverse transpose code
 	const float c3 = glm::cos( rotation.z );
 	const float s3 = glm::sin( rotation.z );
 	const float c2 = glm::cos( rotation.x );

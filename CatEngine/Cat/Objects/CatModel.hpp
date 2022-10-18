@@ -18,25 +18,24 @@ class CatModel
 public:
 	struct Vertex
 	{
-		glm::vec3 m_vPosition{};
-		glm::vec3 m_vColor{};
-		glm::vec3 m_vNormal{};
-		glm::vec2 m_vUV{};
+		glm::vec3 vPosition{};
+		glm::vec3 vColor{};
+		glm::vec3 vNormal{};
+		glm::vec2 vUV{};
 
 		static std::vector< vk::VertexInputBindingDescription > getBindingDescriptions();
 		static std::vector< vk::VertexInputAttributeDescription > getAttributeDescriptions();
 
 		bool operator==( const Vertex& other ) const
 		{
-			return m_vPosition == other.m_vPosition && m_vColor == other.m_vColor && m_vNormal == other.m_vNormal
-				   && m_vUV == other.m_vUV;
+			return vPosition == other.vPosition && vColor == other.vColor && vNormal == other.vNormal && vUV == other.vUV;
 		}
 	};
 
 	struct Builder
 	{
-		std::vector< Vertex > m_aVertices{};
-		std::vector< uint32_t > m_aIndices{};
+		std::vector< Vertex > aVertices{};
+		std::vector< uint32_t > aIndices{};
 
 		void loadModel( const std::string& filepath );
 	};
@@ -47,6 +46,7 @@ public:
 	CatModel( const CatModel& ) = delete;
 	CatModel& operator=( const CatModel& ) = delete;
 
+	// TODO: Don't load a model twice
 	static std::unique_ptr< CatModel > createModelFromFile( CatDevice& device, const std::string& filepath );
 
 	void bind( vk::CommandBuffer commandBuffer );
