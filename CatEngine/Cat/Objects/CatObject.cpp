@@ -61,6 +61,12 @@ glm::mat3 TransformComponent::normalMatrix() const
 
 json CatObject::save()
 {
+	if ( getType() >= ObjectType::eNotSaved )
+	{
+		return nullptr;
+		return {};
+	}
+
 	json object;
 	object["name"] = getName();
 	object["file"] = getFileName();
@@ -73,6 +79,19 @@ json CatObject::save()
 	object["color"] = m_vColor;
 
 	return object;
+}
+
+void CatObject::load( const json& object )
+{
+	// m_pModel = model;
+
+	m_transform.translation = glm::make_vec3( object["transform"]["t"].get< std::vector< float > >().data() );
+	m_transform.rotation = glm::make_vec3( object["transform"]["r"].get< std::vector< float > >().data() );
+	m_transform.scale = glm::make_vec3( object["transform"]["s"].get< std::vector< float > >().data() );
+	m_vColor = glm::make_vec3( object["color"].get< std::vector< float > >().data() );
+
+	LOG_F( INFO, "Frame: %llu, obj loaded: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
+		object["name"].get< std::string >().c_str() );
 }
 
 void CatObject::updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale )

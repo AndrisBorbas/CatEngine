@@ -38,11 +38,11 @@ CatModel::~CatModel()
 {
 }
 
-std::unique_ptr< CatModel > CatModel::createModelFromFile( CatDevice& device, const std::string& filepath )
+std::shared_ptr< CatModel > CatModel::createModelFromFile( CatDevice& device, const std::string& filepath )
 {
 	Builder builder{};
 	builder.loadModel( filepath );
-	return std::make_unique< CatModel >( device, builder );
+	return std::make_shared< CatModel >( device, builder );
 }
 
 void CatModel::createVertexBuffers( const std::vector< Vertex >& vertices )

@@ -47,7 +47,7 @@ public:
 	CatModel& operator=( const CatModel& ) = delete;
 
 	// TODO: Don't load a model twice
-	static std::unique_ptr< CatModel > createModelFromFile( CatDevice& device, const std::string& filepath );
+	static std::shared_ptr< CatModel > createModelFromFile( CatDevice& device, const std::string& filepath );
 
 	void bind( vk::CommandBuffer commandBuffer );
 	void draw( vk::CommandBuffer commandBuffer );

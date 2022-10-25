@@ -25,7 +25,7 @@ void HashCombine( std::size_t& seed, const T& v, const Rest&... rest ) {
 	[[nodiscard]] virtual decltype( _member )& _getter() { return _member; }             \
 	__declspec( property( get = _getter ) ) decltype( _member ) _propertyName;
 
-// Define a non const read-only property.
+// Define a const-only read-only property.
 #define CAT_CONST_READONLY_PROPERTY( _member, _getter, _paramName, _propertyName )       \
 	[[nodiscard]] virtual const decltype( _member )& _getter() const { return _member; } \
 	__declspec( property( get = _getter ) ) decltype( _member ) _propertyName;

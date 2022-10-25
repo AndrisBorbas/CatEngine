@@ -78,9 +78,9 @@ void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	frameInfo.m_pCommandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, m_pPipelineLayout, 0, 1, &frameInfo.m_pGlobalDescriptorSet, 0, nullptr );
 
-	for ( auto& [key, obj] : frameInfo.m_mObjects )
+	for ( auto& [key, obj] : frameInfo.m_rLevel->getAllObjects() )
 	{
-		if ( obj->m_pModel == nullptr ) continue;
+		if ( !obj->m_pModel ) continue;
 		if ( obj->getType() >= ObjectType::eVolume )
 		{
 			CatPushConstantData push{};

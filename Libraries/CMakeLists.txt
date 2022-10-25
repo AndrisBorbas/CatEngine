@@ -13,48 +13,52 @@ target_link_libraries(glfw INTERFACE GLFW3)
 
 add_library(loguru STATIC)
 target_sources(loguru PRIVATE
-	"loguru-2.1.0/loguru.hpp"
-	"loguru-2.1.0/loguru.cpp"
-)
+		"loguru-2.1.0/loguru.hpp"
+		"loguru-2.1.0/loguru.cpp"
+		)
 target_include_directories(loguru PUBLIC loguru-2.1.0)
 
 add_library(tinyobjloader STATIC)
 target_sources(tinyobjloader PRIVATE
-	"tinyobjloader-master/tiny_obj_loader.h"
-	"tinyobjloader-master/tiny_obj_loader.cc"
-)
+		"tinyobjloader-master/tiny_obj_loader.h"
+		"tinyobjloader-master/tiny_obj_loader.cc"
+		)
 target_include_directories(tinyobjloader PUBLIC tinyobjloader-master)
 
 add_library(imgui STATIC)
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
 
-file(GLOB sources imgui/*.cpp)
-
-message("${sources}")
-
 target_sources(imgui PRIVATE
-	"${sources}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_internal.h"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imconfig.h"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.h"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp"
 
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_vulkan.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_glfw.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_tables.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp"
 
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_internal.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_vulkan.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_impl_glfw.cpp"
 
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_draw.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_widgets.cpp"
-)
+		"${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui_demo.cpp"
+		)
+
 target_link_libraries(imgui PUBLIC "glfw;Vulkan::Vulkan")
 
 add_library(ImGuizmo STATIC)
 target_sources(ImGuizmo PRIVATE
-	"ImGuizmo-1.83/ImGuizmo.h"
-	"ImGuizmo-1.83/ImGuizmo.cpp"
-)
+		"ImGuizmo-1.83/ImGuizmo.h"
+		"ImGuizmo-1.83/ImGuizmo.cpp"
+		)
 target_include_directories(ImGuizmo PUBLIC "ImGuizmo-1.83")
 target_link_libraries(ImGuizmo imgui)
 
 add_library(json INTERFACE)
 target_include_directories(json INTERFACE json)
+
+add_library(concurrentqueue INTERFACE)
+target_include_directories(concurrentqueue INTERFACE concurrentqueue-1.0.3)
+
+add_library(threadpool INTERFACE)
+target_include_directories(threadpool INTERFACE thread-pool-3.3.0)

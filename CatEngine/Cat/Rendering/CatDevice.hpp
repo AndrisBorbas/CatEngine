@@ -14,17 +14,18 @@ namespace cat
 {
 struct QueueFamilyIndices
 {
-	std::optional< uint32_t > m_nGraphicsFamily;
-	std::optional< uint32_t > m_nPresentFamily;
+	std::optional< uint32_t > nGraphicsFamily;
+	std::optional< uint32_t > nPresentFamily;
+	std::optional< uint32_t > nTransferFamily;
 
-	bool isComplete() { return m_nGraphicsFamily.has_value() && m_nPresentFamily.has_value(); }
+	bool isComplete() const { return nGraphicsFamily.has_value() && nPresentFamily.has_value() && nTransferFamily.has_value(); }
 };
 
 struct SwapChainSupportDetails
 {
-	vk::SurfaceCapabilitiesKHR m_capabilities;
-	std::vector< vk::SurfaceFormatKHR > m_aFormats;
-	std::vector< vk::PresentModeKHR > m_aPresentModes;
+	vk::SurfaceCapabilitiesKHR capabilities;
+	std::vector< vk::SurfaceFormatKHR > aFormats;
+	std::vector< vk::PresentModeKHR > aPresentModes;
 };
 
 class CatDevice
@@ -45,14 +46,15 @@ public:
 	CatDevice( CatDevice&& ) = delete;
 	CatDevice& operator=( CatDevice&& ) = delete;
 
-	[[nodiscard]] vk::CommandPool getCommandPool() const { return m_pCommandPool; }
+	[[nodiscard]] vk::CommandPool getCommandPool() const { return m_pDrawCommandPool; }
 	[[nodiscard]] vk::Device getDevice() const { return m_device; }
 	[[nodiscard]] vk::SurfaceKHR getSurface() const { return m_surface; }
 	[[nodiscard]] vk::Queue getGraphicsQueue() const { return m_graphicsQueue; }
 	[[nodiscard]] vk::Queue getPresentQueue() const { return m_presentQueue; }
+	[[nodiscard]] vk::Queue getTransferQueue() const { return m_transferQueue; }
 	[[nodiscard]] vk::Instance getInstance() const { return m_instance; }
 	[[nodiscard]] vk::PhysicalDevice getPhysicalDevice() const { return m_physicalDevice; }
-	[[nodiscard]] uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().m_nGraphicsFamily.value(); }
+	[[nodiscard]] uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().nGraphicsFamily.value(); }
 	[[nodiscard]] SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport( m_physicalDevice ); }
 	[[nodiscard]] uint32_t findMemoryType( uint32_t typeFilter, vk::MemoryPropertyFlags rProperties );
 	[[nodiscard]] QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies( m_physicalDevice ); }
@@ -105,16 +107,29 @@ private:
 	vk::DebugUtilsMessengerEXT m_debugMessenger;
 	vk::PhysicalDevice m_physicalDevice = nullptr;
 	CatWindow& m_rWindow;
-	vk::CommandPool m_pCommandPool;
+	vk::CommandPool m_pDrawCommandPool;
+	vk::CommandPool m_pTransferCommandPool;
 
 	vk::Device m_device;
 	vk::SurfaceKHR m_surface;
+
+	// TODO: add transfer queue
 	vk::Queue m_graphicsQueue;
 	vk::Queue m_presentQueue;
+	vk::Queue m_transferQueue;
 	vk::SampleCountFlagBits m_msaaSamples;
 
+	std::vector< const char* > m_aDeviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		// Only works if vulkan configurator is running
+		// #ifndef NDEBUG
+		//		// TODO:
+		//		// https://www.saschawillems.de/blog/2016/05/28/tutorial-on-using-vulkans-vk_ext_debug_marker-with-renderdoc/
+		//		VK_EXT_DEBUG_MARKER_EXTENSION_NAME,
+		// #endif
+	};
+
 	const std::vector< const char* > m_aValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector< const char* > m_aDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 };
 } // namespace cat
 

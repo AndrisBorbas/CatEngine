@@ -6,6 +6,7 @@
 
 #include <string>
 #include <utility>
+#include <future>
 
 namespace cat
 {
@@ -36,16 +37,32 @@ private:
 	id_t m_idCurrentChunk = 0;
 	std::unordered_map< id_t, std::unique_ptr< CatChunk > > m_mChunks;
 	std::vector< id_t > m_aLoadedChunkIds;
+	CatObject::Map m_mObjects;
+	std::future< void > m_fLoaded;
+
 
 public:
-	CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )
+	virtual ~CatLevel() = default;
+
+	[[nodiscard]] static std::unique_ptr< CatLevel > create( const std::string& sName,
+		glm::ivec2 vSize = glm::ivec2( 9, 9 ),
+		glm::ivec2 vChunkSize = glm::ivec2( 32, 32 ) );
+	void save();
+	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& sName );
+
+	bool isFullyLoaded()
+	{
+		using namespace std::chrono_literals;
+		return m_fLoaded.valid() && m_fLoaded.wait_for( 0ns ) == std::future_status::ready;
+	}
+
+	auto& getAllObjects() { return m_mObjects; }
+
+protected:
+	[[nodiscard]] explicit CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )
 		: m_sName( std::move( sName ) ), m_vSize( vSize ), m_vChunkSize( vChunkSize )
 	{
 	}
-	~CatLevel() = default;
-
-	void save();
-	static std::unique_ptr< CatLevel > load( const std::string& sName );
 
 public:
 	CAT_PROPERTY( m_sName, getName, setName, sName, m_SName );

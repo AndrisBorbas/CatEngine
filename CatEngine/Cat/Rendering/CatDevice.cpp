@@ -71,7 +71,7 @@ CatDevice::CatDevice( CatWindow& rWindow ) : m_rWindow{ rWindow }
 
 CatDevice::~CatDevice()
 {
-	m_device.destroyCommandPool( m_pCommandPool, nullptr );
+	m_device.destroyCommandPool( m_pDrawCommandPool, nullptr );
 	m_device.destroy( nullptr );
 
 	if ( m_bEnableValidationLayers )
@@ -133,7 +133,7 @@ void CatDevice::createInstance()
 vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDevice rPhysicalDevice )
 {
 	// Limit MSAA to 1 because otherwise undocked imgui crashes
-	return vk::SampleCountFlagBits::e1;
+	// return vk::SampleCountFlagBits::e1;
 
 	vk::PhysicalDeviceProperties physicalDeviceProperties;
 	rPhysicalDevice.getProperties( &physicalDeviceProperties );
@@ -162,7 +162,7 @@ bool CatDevice::isDeviceSuitable( const vk::PhysicalDevice rPhysicalDevice )
 	}
 
 	SwapChainSupportDetails swapChainSupport = querySwapChainSupport( rPhysicalDevice );
-	if ( swapChainSupport.m_aFormats.empty() || swapChainSupport.m_aPresentModes.empty() )
+	if ( swapChainSupport.aFormats.empty() || swapChainSupport.aPresentModes.empty() )
 	{
 		return false;
 	}
@@ -241,7 +241,7 @@ void CatDevice::pickPhysicalDevice()
 	if ( candidates.rbegin()->first > 0 )
 	{
 		m_physicalDevice = candidates.rbegin()->second;
-		LOG_F( INFO, m_physicalDevice.getProperties().deviceName );
+		LOG_F( INFO, "%s", m_physicalDevice.getProperties().deviceName );
 	}
 	else
 	{
@@ -257,7 +257,11 @@ void CatDevice::createLogicalDevice()
 	QueueFamilyIndices indices = findQueueFamilies( m_physicalDevice );
 
 	std::vector< vk::DeviceQueueCreateInfo > queueCreateInfos;
-	std::set< uint32_t > uniqueQueueFamilies = { indices.m_nGraphicsFamily.value(), indices.m_nPresentFamily.value() };
+	std::set< uint32_t > uniqueQueueFamilies = {
+		indices.nGraphicsFamily.value(),
+		indices.nPresentFamily.value(),
+		indices.nTransferFamily.value(),
+	};
 
 	float queuePriority = 1.0f;
 	for ( uint32_t queueFamily : uniqueQueueFamilies )
@@ -272,10 +276,12 @@ void CatDevice::createLogicalDevice()
 	}
 
 	vk::PhysicalDeviceFeatures deviceFeatures = {
+		.tessellationShader = true,
 		.sampleRateShading = true,
 		.fillModeNonSolid = true,
 		.wideLines = true,
 		.samplerAnisotropy = true,
+		.variableMultisampleRate = true,
 	};
 
 	vk::DeviceCreateInfo createInfo = {
@@ -304,29 +310,41 @@ void CatDevice::createLogicalDevice()
 		throw std::runtime_error( "failed to create logical device!" );
 	}
 
-	m_device.getQueue( indices.m_nGraphicsFamily.value(), 0, &m_graphicsQueue );
-	m_device.getQueue( indices.m_nPresentFamily.value(), 0, &m_presentQueue );
+	m_device.getQueue( indices.nGraphicsFamily.value(), 0, &m_graphicsQueue );
+	m_device.getQueue( indices.nPresentFamily.value(), 0, &m_presentQueue );
+	m_device.getQueue( indices.nTransferFamily.value(), 0, &m_transferQueue );
 }
 
 void CatDevice::createCommandPool()
 {
 	QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
-	vk::CommandPoolCreateInfo poolInfo = {
+	vk::CommandPoolCreateInfo drawPoolInfo = {
 		.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-		.queueFamilyIndex = queueFamilyIndices.m_nGraphicsFamily.value(),
+		.queueFamilyIndex = queueFamilyIndices.nGraphicsFamily.value(),
 	};
 
 
-	if ( m_device.createCommandPool( &poolInfo, nullptr, &m_pCommandPool ) != vk::Result::eSuccess )
+	if ( m_device.createCommandPool( &drawPoolInfo, nullptr, &m_pDrawCommandPool ) != vk::Result::eSuccess )
 	{
-		throw std::runtime_error( "failed to create command pool!" );
+		throw std::runtime_error( "failed to create draw command pool!" );
+	}
+
+	vk::CommandPoolCreateInfo transferPoolInfo = {
+		.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer ,
+		.queueFamilyIndex = queueFamilyIndices.nTransferFamily.value(),
+	};
+
+
+	if ( m_device.createCommandPool( &transferPoolInfo, nullptr, &m_pTransferCommandPool ) != vk::Result::eSuccess )
+	{
+		throw std::runtime_error( "failed to create transfer command pool!" );
 	}
 }
 
 void CatDevice::createSurface()
 {
-	VkSurfaceKHR tempSurface = VkSurfaceKHR( m_surface );
+	auto tempSurface = VkSurfaceKHR( m_surface );
 	m_rWindow.createWindowSurface( m_instance, &tempSurface );
 	m_surface = tempSurface;
 }
@@ -441,11 +459,17 @@ bool CatDevice::checkDeviceExtensionSupport( const vk::PhysicalDevice rPhysicalD
 	std::vector< vk::ExtensionProperties > availableExtensions( extensionCount );
 	rPhysicalDevice.enumerateDeviceExtensionProperties( nullptr, &extensionCount, availableExtensions.data() );
 
+
 	std::set< std::string > requiredExtensions( m_aDeviceExtensions.begin(), m_aDeviceExtensions.end() );
+
 
 	for ( const auto& extension : availableExtensions )
 	{
 		requiredExtensions.erase( extension.extensionName );
+		if ( requiredExtensions.empty() )
+		{
+			break;
+		}
 	}
 
 	return requiredExtensions.empty();
@@ -466,13 +490,17 @@ QueueFamilyIndices CatDevice::findQueueFamilies( const vk::PhysicalDevice rPhysi
 	{
 		if ( queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics )
 		{
-			indices.m_nGraphicsFamily = i;
+			indices.nGraphicsFamily = i;
 		}
 		vk::Bool32 presentSupport = false;
 		rPhysicalDevice.getSurfaceSupportKHR( i, m_surface, &presentSupport );
 		if ( queueFamily.queueCount > 0 && presentSupport )
 		{
-			indices.m_nPresentFamily = i;
+			indices.nPresentFamily = i;
+		}
+		if ( queueFamilyCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eTransfer )
+		{
+			indices.nTransferFamily = i;
 		}
 		if ( indices.isComplete() )
 		{
@@ -488,15 +516,15 @@ QueueFamilyIndices CatDevice::findQueueFamilies( const vk::PhysicalDevice rPhysi
 SwapChainSupportDetails CatDevice::querySwapChainSupport( const vk::PhysicalDevice rPhysicalDevice )
 {
 	SwapChainSupportDetails details;
-	rPhysicalDevice.getSurfaceCapabilitiesKHR( m_surface, &details.m_capabilities );
+	rPhysicalDevice.getSurfaceCapabilitiesKHR( m_surface, &details.capabilities );
 
 	uint32_t formatCount;
 	rPhysicalDevice.getSurfaceFormatsKHR( m_surface, &formatCount, nullptr );
 
 	if ( formatCount != 0 )
 	{
-		details.m_aFormats.resize( formatCount );
-		rPhysicalDevice.getSurfaceFormatsKHR( m_surface, &formatCount, details.m_aFormats.data() );
+		details.aFormats.resize( formatCount );
+		rPhysicalDevice.getSurfaceFormatsKHR( m_surface, &formatCount, details.aFormats.data() );
 	}
 
 	uint32_t presentModeCount;
@@ -504,8 +532,8 @@ SwapChainSupportDetails CatDevice::querySwapChainSupport( const vk::PhysicalDevi
 
 	if ( presentModeCount != 0 )
 	{
-		details.m_aPresentModes.resize( presentModeCount );
-		rPhysicalDevice.getSurfacePresentModesKHR( m_surface, &presentModeCount, details.m_aPresentModes.data() );
+		details.aPresentModes.resize( presentModeCount );
+		rPhysicalDevice.getSurfacePresentModesKHR( m_surface, &presentModeCount, details.aPresentModes.data() );
 	}
 	return details;
 }
@@ -583,7 +611,7 @@ void CatDevice::createBuffer( vk::DeviceSize size,
 vk::CommandBuffer CatDevice::beginSingleTimeCommands()
 {
 	vk::CommandBufferAllocateInfo allocInfo{
-		.commandPool = m_pCommandPool,
+		.commandPool = m_pTransferCommandPool,
 		.level = vk::CommandBufferLevel::ePrimary,
 		.commandBufferCount = 1,
 	};
@@ -608,10 +636,10 @@ void CatDevice::endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const
 	};
 
 	const std::lock_guard lock( m_mutex );
-	m_graphicsQueue.submit( 1, &submitInfo, VK_NULL_HANDLE );
-	m_graphicsQueue.waitIdle();
+	m_transferQueue.submit( 1, &submitInfo, VK_NULL_HANDLE );
+	m_transferQueue.waitIdle();
 
-	m_device.freeCommandBuffers( m_pCommandPool, 1, &commandBuffer );
+	m_device.freeCommandBuffers( m_pTransferCommandPool, 1, &commandBuffer );
 }
 
 void CatDevice::copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size )

@@ -56,14 +56,15 @@ void DestroyGameInstance()
 
 CatApp::CatApp()
 {
-	m_pGlobalPool = CatDescriptorPool::Builder( m_device )
-						.setMaxSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT )
-						.addPoolSize( vk::DescriptorType::eUniformBuffer, CatSwapChain::MAX_FRAMES_IN_FLIGHT )
-						.build();
+	m_pGlobalDescriptorPool = CatDescriptorPool::Builder( m_device )
+								  .setMaxSets( CatSwapChain::MAX_FRAMES_IN_FLIGHT )
+								  .addPoolSize( vk::DescriptorType::eUniformBuffer, CatSwapChain::MAX_FRAMES_IN_FLIGHT )
+								  .build();
 	// loadDefaultExampleMap();
 
-	auto grid = CatObject::create( "BaseGrid", "", ObjectType::eGrid );
-	m_mObjects.emplace( grid->getId(), std::move( grid ) );
+	// m_tLevelLoader= std::thread
+
+	m_pCurrentLevel = CatLevel::create( "Base" );
 
 	std::shared_ptr< CatModel > cubeModel = CatModel::createModelFromFile( m_device, "assets/models/cube.obj" );
 	auto cube = CatVolume::create( "Volume", "assets/models/cube.obj" );
@@ -96,7 +97,9 @@ void CatApp::run()
 	for ( size_t i = 0; i < globalDescriptorSets.size(); i++ )
 	{
 		auto bufferInfo = uboBuffers[i]->descriptorInfo();
-		CatDescriptorWriter( *globalSetLayout, *m_pGlobalPool ).writeBuffer( 0, &bufferInfo ).build( globalDescriptorSets[i] );
+		CatDescriptorWriter( *globalSetLayout, *m_pGlobalDescriptorPool )
+			.writeBuffer( 0, &bufferInfo )
+			.build( globalDescriptorSets[i] );
 	}
 
 	// GLFW input handlers are overwritten and ImGui calls previously set input handlers
@@ -121,7 +124,8 @@ void CatApp::run()
 	GlobalUbo ubo{};
 
 
-	m_pFrameInfo = std::make_unique< CatFrameInfo >( nullptr, camera, *viewerObject, globalDescriptorSets[0], ubo, m_mObjects );
+	m_pFrameInfo =
+		std::make_unique< CatFrameInfo >( nullptr, camera, *viewerObject, globalDescriptorSets[0], ubo, m_pCurrentLevel );
 
 	auto operation = ImGuizmo::UNIVERSAL;
 	auto mode = ImGuizmo::WORLD;
@@ -141,6 +145,7 @@ void CatApp::run()
 		m_dDeltaTime += m_dFrameTime;
 		nFrames++;
 
+		// Update delta time every frame
 		if ( m_dDeltaTime >= 0.1 )
 		{
 			m_dFrameRate = ( static_cast< double >( nFrames ) * 0.5 / 0.1 + m_dFrameRate * 0.5 );
@@ -150,6 +155,7 @@ void CatApp::run()
 		}
 
 
+		/*
 		if ( m_jLevelLoad.valid() )
 		{
 			using namespace std::chrono_literals;
@@ -188,7 +194,10 @@ void CatApp::run()
 				jModel = {};
 			}
 		}
+		*/
 
+		// Check if camera is in a volume
+		/*
 		if ( viewerObject )
 		{
 			for ( auto& obj : m_mObjects | std::views::values )
@@ -211,6 +220,12 @@ void CatApp::run()
 					}
 				}
 			}
+		}
+		 */
+
+		if ( m_pCurrentLevel->isFullyLoaded() )
+		{
+			// Level fully loaded
 		}
 
 		cameraController.moveInPlaneXZ(
@@ -323,78 +338,14 @@ void CatApp::run()
 
 void CatApp::saveLevel( const std::string& sFileName ) const
 {
-	const auto sPath = "assets/levels/" + sFileName;
-	json file;
-	json objects;
-	int i = 0;
-	for ( const auto& obj : getFrameInfo().m_mObjects | std::views::values )
-	{
-		objects[i] = obj->save();
+	m_pCurrentLevel->save();
 
-		++i;
-	}
-	file["objects"] = objects;
-
-	// LOG_F( INFO, file.dump( 2 ).c_str() );
-
-	std::ofstream ofs( sPath );
-	ofs << std::setw( 2 ) << file << std::endl;
-	ofs.close();
-
-	DLOG_F( INFO, "Level saved: %s", sPath.c_str() );
+	DLOG_F( INFO, "Level saved: %s", ( LEVELS_BASE_PATH + sFileName ).c_str() );
 }
 
 void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious /* = true */ )
 {
-	LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
-
-	const auto sPath = "assets/levels/" + sFileName;
-
-	if ( bClearPrevious )
-	{
-		m_mObjects.clear();
-	}
-
-	json file;
-	std::ifstream ifs( sPath );
-	ifs >> file;
-	ifs.close();
-
-	for ( auto& object : file["objects"] )
-	{
-		if ( object["type"] == "Camera" )
-		{
-			continue;
-		}
-		else if ( object["type"].get< std::string >() == "Light" )
-		{
-			auto pointLight = CatLight::create( object["name"] );
-			pointLight->m_transform.translation =
-				glm::make_vec3( object["transform"]["t"].get< std::vector< float > >().data() );
-			pointLight->m_transform.rotation = glm::make_vec3( object["transform"]["r"].get< std::vector< float > >().data() );
-			pointLight->m_transform.scale = glm::make_vec3( object["transform"]["s"].get< std::vector< float > >().data() );
-			pointLight->m_vColor = glm::make_vec3( object["color"].get< std::vector< float > >().data() );
-			m_mObjects.emplace( pointLight->getId(), std::move( pointLight ) );
-		}
-		else
-		{
-			std::packaged_task tLoadModel(
-				[]( json object )
-				{
-					LOG_F( INFO, "Frame: %llu, started model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
-						object["file"].get< std::string >().c_str() );
-					std::shared_ptr< CatModel > model =
-						CatModel::createModelFromFile( GetEditorInstance()->m_device, object["file"] );
-					LOG_F( INFO, "Frame: %llu, finished model loading: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
-						object["file"].get< std::string >().c_str() );
-					return std::pair< json, std::shared_ptr< CatModel > >{ object, model };
-				} );
-
-			m_aLoadingObjects.push_back( tLoadModel.get_future() );
-
-			std::thread{ std::move( tLoadModel ), object }.detach();
-		}
-	}
+	m_pCurrentLevel = CatLevel::load( sFileName );
 }
 
 void CatApp::loadDefaultExampleMap()

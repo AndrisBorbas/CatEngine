@@ -2,6 +2,7 @@
 #define CATENGINE_CATOBJECT_HPP
 
 #include "CatModel.hpp"
+#include "CatObjectType.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -22,35 +23,6 @@ struct TransformComponent
 
 	[[nodiscard]] glm::mat3 normalMatrix() const;
 };
-
-enum class ObjectType
-{
-	eNotSaved = ( 1u << 0 ),
-	eDynamic = ( 1u << 1 ),
-	eEditorObject = ( 1u << 2 ) | eNotSaved,
-	eGameObject = ( 1u << 3 ),
-	eCamera = ( 1u << 4 ) | eEditorObject,
-	eLight = ( 1u << 5 ),
-	eVolume = ( 1u << 6 ),
-	eGrid = ( 1u << 7 ) | eEditorObject,
-};
-
-inline ObjectType operator|( ObjectType& lhs, ObjectType& rhs )
-{
-	return static_cast< ObjectType >( static_cast< uint32_t >( lhs ) | static_cast< uint32_t >( rhs ) );
-}
-
-inline ObjectType operator&( ObjectType& lhs, ObjectType& rhs )
-{
-	return static_cast< ObjectType >( static_cast< uint32_t >( lhs ) & static_cast< uint32_t >( rhs ) );
-}
-
-// Contains operator
-// Does lhs contain rhs
-static bool operator>=( ObjectType lhs, ObjectType rhs )
-{
-	return ( lhs & rhs ) == rhs;
-}
 
 class CatObject
 {
@@ -74,6 +46,7 @@ public:
 	// TODO: Add load() which loads from json and creates correct object automatically.
 
 	virtual json save();
+	virtual void load( const json& object );
 
 	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation, const glm::vec3& vScale );
 	void updateTransform( const glm::vec3& vTranslation, const glm::vec3& vRotation );

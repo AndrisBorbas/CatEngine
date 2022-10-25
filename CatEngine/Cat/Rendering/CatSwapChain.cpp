@@ -136,14 +136,14 @@ void CatSwapChain::createSwapChain()
 {
 	SwapChainSupportDetails swapChainSupport = m_rDevice.getSwapChainSupport();
 
-	vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat( swapChainSupport.m_aFormats );
-	vk::PresentModeKHR presentMode = chooseSwapPresentMode( swapChainSupport.m_aPresentModes );
-	vk::Extent2D extent = chooseSwapExtent( swapChainSupport.m_capabilities );
+	vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat( swapChainSupport.aFormats );
+	vk::PresentModeKHR presentMode = chooseSwapPresentMode( swapChainSupport.aPresentModes );
+	vk::Extent2D extent = chooseSwapExtent( swapChainSupport.capabilities );
 
-	uint32_t imageCount = swapChainSupport.m_capabilities.minImageCount + 1;
-	if ( swapChainSupport.m_capabilities.maxImageCount > 0 && imageCount > swapChainSupport.m_capabilities.maxImageCount )
+	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+	if ( swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount )
 	{
-		imageCount = swapChainSupport.m_capabilities.maxImageCount;
+		imageCount = swapChainSupport.capabilities.maxImageCount;
 	}
 
 	vk::SwapchainCreateInfoKHR createInfo = {
@@ -154,16 +154,16 @@ void CatSwapChain::createSwapChain()
 		.imageExtent = extent,
 		.imageArrayLayers = 1,
 		.imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-		.preTransform = swapChainSupport.m_capabilities.currentTransform,
+		.preTransform = swapChainSupport.capabilities.currentTransform,
 		.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
 		.presentMode = presentMode,
 		.clipped = true,
 	};
 
 	QueueFamilyIndices indices = m_rDevice.findPhysicalQueueFamilies();
-	uint32_t queueFamilyIndices[] = { indices.m_nGraphicsFamily.value(), indices.m_nPresentFamily.value() };
+	uint32_t queueFamilyIndices[] = { indices.nGraphicsFamily.value(), indices.nPresentFamily.value() };
 
-	if ( indices.m_nGraphicsFamily != indices.m_nPresentFamily )
+	if ( indices.nGraphicsFamily != indices.nPresentFamily )
 	{
 		createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
 		createInfo.queueFamilyIndexCount = 2;

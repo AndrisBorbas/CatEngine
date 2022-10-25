@@ -3,6 +3,7 @@
 
 #include "Cat/Controller/CatCamera.hpp"
 #include "Cat/Objects/CatObject.hpp"
+#include "Cat/Level/CatLevel.hpp"
 
 #include "vulkan/vulkan.hpp"
 
@@ -37,7 +38,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 	CatObject& m_rCameraObject;
 	vk::DescriptorSet m_pGlobalDescriptorSet;
 	GlobalUbo& m_rUBO;
-	CatObject::Map& m_mObjects;
+	std::unique_ptr< CatLevel >& m_rLevel;
 	id_t m_selectedItemId;
 
 	CatFrameInfo_t( vk::CommandBuffer commandBuffer,
@@ -45,7 +46,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		CatObject& rCameraObject,
 		vk::DescriptorSet globalDescriptorSet,
 		GlobalUbo& rUBO,
-		CatObject::Map& mObjects,
+		std::unique_ptr< CatLevel >& rLevel,
 		const double fFrameTime = 0.0,
 		const short nFrameIndex = 0,
 		const uint64_t nFrameNumber = 0,
@@ -58,7 +59,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		  m_rCameraObject( rCameraObject ),
 		  m_pGlobalDescriptorSet( globalDescriptorSet ),
 		  m_rUBO( rUBO ),
-		  m_mObjects( mObjects ),
+		  m_rLevel( rLevel ),
 		  m_selectedItemId( selectedItemId )
 	{
 	}

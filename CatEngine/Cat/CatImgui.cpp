@@ -138,7 +138,7 @@ void CatImgui::drawWindows()
 	// window.
 	{
 		char title[128];
-		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", GetEditorInstance()->getFrameTime() * 1000.0,
+		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", GetEditorInstance()->m_DFrameTime * 1000.0,
 			GetEditorInstance()->m_DFrameRate, GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
@@ -163,7 +163,7 @@ void CatImgui::drawWindows()
 			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
-		static char buf[128] = "asd";
+		static char buf[128] = "wasd";
 		ImGui::InputTextWithHint( "##Lavel Name", "Filename", buf, 128, ImGuiInputTextFlags_CharsNoBlank );
 		if ( ImGui::Button( "Load Level" ) )
 		{
@@ -174,18 +174,7 @@ void CatImgui::drawWindows()
 			}
 			LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 
-			std::packaged_task tLoadLevel(
-				[=]( const std::string& name, bool bClearExisting )
-				{
-					LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
-					GetEditorInstance()->loadLevel( name, bClearExisting );
-					GetEditorInstance()->getFrameInfo().updateSelectedItemId(
-						GetEditorInstance()->getFrameInfo().m_mObjects.begin()->first );
-				} );
-
-			GetEditorInstance()->m_jLevelLoad = tLoadLevel.get_future();
-
-			std::thread{ std::move( tLoadLevel ), name, false }.detach();
+			GetEditorInstance()->loadLevel( name );
 		}
 		ImGui::SameLine();
 		if ( ImGui::Button( "Save Level" ) )
@@ -231,7 +220,7 @@ void CatImgui::drawWindows()
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
-			for ( auto& [key, object] : GetEditorInstance()->getFrameInfo().m_mObjects )
+			for ( auto& [key, object] : GetEditorInstance()->getFrameInfo().m_rLevel->getAllObjects() )
 			{
 				++i;
 				ImGui::PushID( i );
@@ -259,19 +248,22 @@ void CatImgui::drawWindows()
 			ImGui::DragFloat3( "Position",
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
-												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
 												 ->m_transform.translation ),
 				0.1f );
 			ImGui::DragFloat3( "Rotation",
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
-												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
 												 ->m_transform.rotation ),
 				0.1f );
 			ImGui::DragFloat3( "Scale",
 				reinterpret_cast< float* >( &GetEditorInstance()
 												 ->getFrameInfo()
-												 .m_mObjects.at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 .m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
 												 ->m_transform.scale ),
 				0.1f );
 
