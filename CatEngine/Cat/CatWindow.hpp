@@ -27,6 +27,8 @@ public:
 	void resetWindowResizedFlag() { m_bFramebufferResized = false; }
 	[[nodiscard]] GLFWwindow* getGLFWwindow() const { return m_pWindow; }
 
+	[[nodiscard]] GLFWwindow* operator*() const { return m_pWindow; }
+
 	void toggleFullscreen();
 	void createWindowSurface( vk::Instance instance, VkSurfaceKHR* pSurface );
 

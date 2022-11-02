@@ -19,10 +19,10 @@ struct CatPushConstantData
 	glm::mat4 m_mxNormal{ 1.f };
 };
 
-CatWireframeRenderSystem::CatWireframeRenderSystem( CatDevice& device,
+CatWireframeRenderSystem::CatWireframeRenderSystem( CatDevice* pDevice,
 	vk::RenderPass renderPass,
 	vk::DescriptorSetLayout globalSetLayout )
-	: m_rDevice{ device }
+	: m_pDevice{ pDevice }
 {
 	createPipelineLayout( globalSetLayout );
 	createPipeline( renderPass );
@@ -30,7 +30,7 @@ CatWireframeRenderSystem::CatWireframeRenderSystem( CatDevice& device,
 
 CatWireframeRenderSystem::~CatWireframeRenderSystem()
 {
-	vkDestroyPipelineLayout( m_rDevice.getDevice(), m_pPipelineLayout, nullptr );
+	( **m_pDevice ).destroy( m_pPipelineLayout );
 }
 
 void CatWireframeRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
@@ -50,8 +50,7 @@ void CatWireframeRenderSystem::createPipelineLayout( vk::DescriptorSetLayout glo
 		.pPushConstantRanges = &pushConstantRange,
 	};
 
-	if ( m_rDevice.getDevice().createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout )
-		 != vk::Result::eSuccess )
+	if ( ( **m_pDevice ).createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create pipeline layout!" );
 	}
@@ -68,7 +67,7 @@ void CatWireframeRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
+		m_pDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
 }
 
 void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
@@ -80,7 +79,11 @@ void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 
 	for ( auto& [key, obj] : frameInfo.m_rLevel->getAllObjects() )
 	{
+		if ( !obj ) continue;
+		if ( !obj->m_BVisible ) continue;
+
 		if ( !obj->m_pModel ) continue;
+
 		if ( obj->getType() >= ObjectType::eVolume )
 		{
 			CatPushConstantData push{};

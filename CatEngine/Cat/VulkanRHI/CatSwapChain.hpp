@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATSWAPCHAIN_HPP
 #define CATENGINE_CATSWAPCHAIN_HPP
 
-#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
 
 namespace cat
 {
@@ -10,8 +10,8 @@ class CatSwapChain
 public:
 	static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-	CatSwapChain( CatDevice& rDevice, vk::Extent2D windowExtent );
-	CatSwapChain( CatDevice& rDevice, vk::Extent2D windowExtent, std::shared_ptr< CatSwapChain > previous );
+	CatSwapChain( CatDevice* pDevice, vk::Extent2D windowExtent );
+	CatSwapChain( CatDevice* pDevice, vk::Extent2D windowExtent, std::shared_ptr< CatSwapChain > previous );
 
 	~CatSwapChain();
 
@@ -34,7 +34,7 @@ public:
 	vk::Format findDepthFormat();
 
 	vk::Result acquireNextImage( uint32_t* imageIndex );
-	vk::Result submitCommandBuffers( const vk::CommandBuffer* buffers, uint32_t* imageIndex );
+	vk::Result submitCommandBuffers( const vk::CommandBuffer* buffers, const uint32_t* imageIndex );
 
 	bool compareSwapFormats( const CatSwapChain& swapChain ) const
 	{
@@ -72,7 +72,7 @@ private:
 	std::vector< vk::Image > m_aSwapChainImages;
 	std::vector< vk::ImageView > m_aSwapChainImageViews;
 
-	CatDevice& m_rDevice;
+	CatDevice* m_pDevice;
 	vk::Extent2D windowExtent;
 
 	vk::SwapchainKHR swapChain;

@@ -27,11 +27,11 @@ struct TransformComponent
 class CatObject
 {
 public:
-	using Map = std::unordered_map< id_t, std::unique_ptr< CatObject > >;
+	using Map = std::unordered_map< id_t, std::shared_ptr< CatObject > >;
 
 
 	[[nodiscard]] static std::unique_ptr< CatObject > create( const std::string& sName,
-		const std::string& sFile = "",
+		const std::string& sFile,
 		const ObjectType& eType = ObjectType::eGameObject )
 	{
 		return std::unique_ptr< CatObject >( new CatObject( sName, sFile, eType ) );
@@ -65,9 +65,7 @@ public:
 	virtual ~CatObject() = default;
 
 protected:
-	[[nodiscard]] explicit CatObject( std::string sName,
-		std::string sFile = "",
-		const ObjectType& eType = ObjectType::eGameObject )
+	[[nodiscard]] explicit CatObject( std::string sName, std::string sFile, const ObjectType& eType = ObjectType::eGameObject )
 		: m_id( M_ID_CURRENT++ ), m_sName( std::move( sName ) ), m_sFile( std::move( sFile ) ), m_eType( eType )
 	{
 	}
@@ -76,9 +74,13 @@ protected:
 	std::string m_sName;
 	std::string m_sFile;
 	ObjectType m_eType;
+	bool m_bVisible;
 
 private:
 	static id_t M_ID_CURRENT;
+
+public:
+	CAT_PROPERTY( m_bVisible, getVisible, setVisible, m_BVisible );
 };
 
 } // namespace cat

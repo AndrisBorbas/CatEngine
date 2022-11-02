@@ -15,12 +15,18 @@ class CatChunk
 {
 private:
 	const id_t m_id;
-	const glm::ivec2 m_vPosition;
+	glm::ivec2 m_vPosition;
 	CatObject::Map m_mObjects;
+	std::vector< id_t > m_aObjectIds;
 
 public:
 	CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize ) : m_id( id ), m_vPosition( vPosition ) {}
 	~CatChunk() = default;
+
+	CAT_READONLY_PROPERTY( m_id, getId, m_ID );
+	CAT_PROPERTY( m_vPosition, getPosition, setPosition, m_VPosition );
+	CAT_READONLY_PROPERTY( m_mObjects, getObjects, m_MObjects );
+	CAT_READONLY_PROPERTY( m_aObjectIds, getObjectIds, m_AObjectIds );
 };
 
 // TODO: Levels are rectangular, and chunks have ascending ids, so you can easily calculate the neighbouring chunk ids on the x
@@ -47,16 +53,12 @@ public:
 	[[nodiscard]] static std::unique_ptr< CatLevel > create( const std::string& sName,
 		glm::ivec2 vSize = glm::ivec2( 9, 9 ),
 		glm::ivec2 vChunkSize = glm::ivec2( 32, 32 ) );
-	void save();
+	void save( const std::string& sFileName = "" );
 	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& sName );
 
-	bool isFullyLoaded()
-	{
-		using namespace std::chrono_literals;
-		return m_fLoaded.valid() && m_fLoaded.wait_for( 0ns ) == std::future_status::ready;
-	}
+	bool isFullyLoaded();
 
-	auto& getAllObjects() { return m_mObjects; }
+	CatObject::Map getAllObjects();
 
 protected:
 	[[nodiscard]] explicit CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )
@@ -65,7 +67,8 @@ protected:
 	}
 
 public:
-	CAT_PROPERTY( m_sName, getName, setName, sName, m_SName );
+	CAT_PROPERTY( m_sName, getName, setName, m_SName );
+	CAT_READONLY_PROPERTY( m_idCurrentChunk, getCurrentChunkId, m_IDCurrentChunk );
 };
 
 } // namespace cat

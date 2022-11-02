@@ -31,13 +31,13 @@ vk::DeviceSize CatBuffer::getAlignment( vk::DeviceSize instanceSize, vk::DeviceS
 	return instanceSize;
 }
 
-CatBuffer::CatBuffer( CatDevice& device,
+CatBuffer::CatBuffer( CatDevice* pDevice,
 	vk::DeviceSize instanceSize,
 	uint32_t instanceCount,
 	vk::BufferUsageFlags usageFlags,
 	vk::MemoryPropertyFlags memoryPropertyFlags,
 	vk::DeviceSize minOffsetAlignment )
-	: m_rDevice{ device },
+	: m_pDevice{ pDevice },
 	  m_pInstanceSize{ instanceSize },
 	  m_nInstanceCount{ instanceCount },
 	  m_pUsageFlags{ usageFlags },
@@ -45,14 +45,14 @@ CatBuffer::CatBuffer( CatDevice& device,
 {
 	m_pAlignmentSize = getAlignment( instanceSize, minOffsetAlignment );
 	m_pBufferSize = m_pAlignmentSize * instanceCount;
-	device.createBuffer( m_pBufferSize, usageFlags, memoryPropertyFlags, m_pBuffer, m_pMemory );
+	pDevice->createBuffer( m_pBufferSize, usageFlags, memoryPropertyFlags, m_pBuffer, m_pMemory );
 }
 
 CatBuffer::~CatBuffer()
 {
 	unmap();
-	vkDestroyBuffer( m_rDevice.getDevice(), m_pBuffer, nullptr );
-	vkFreeMemory( m_rDevice.getDevice(), m_pMemory, nullptr );
+	( **m_pDevice ).destroy( m_pBuffer );
+	( **m_pDevice ).free( m_pMemory );
 }
 
 /**
@@ -67,7 +67,7 @@ CatBuffer::~CatBuffer()
 vk::Result CatBuffer::map( vk::DeviceSize size, vk::DeviceSize offset )
 {
 	assert( m_pBuffer && m_pMemory && "Called map on buffer before create" );
-	return m_rDevice.getDevice().mapMemory( m_pMemory, offset, size, {}, &m_pMapped );
+	return ( **m_pDevice ).mapMemory( m_pMemory, offset, size, {}, &m_pMapped );
 }
 
 /**
@@ -79,7 +79,7 @@ void CatBuffer::unmap()
 {
 	if ( m_pMapped )
 	{
-		m_rDevice.getDevice().unmapMemory( m_pMemory );
+		( **m_pDevice ).unmapMemory( m_pMemory );
 		m_pMapped = nullptr;
 	}
 }
@@ -127,7 +127,7 @@ vk::Result CatBuffer::flush( vk::DeviceSize size, vk::DeviceSize offset )
 		.offset = offset,
 		.size = size,
 	};
-	return m_rDevice.getDevice().flushMappedMemoryRanges( 1, &mappedRange );
+	return ( **m_pDevice ).flushMappedMemoryRanges( 1, &mappedRange );
 }
 
 /**
@@ -148,7 +148,7 @@ vk::Result CatBuffer::invalidate( vk::DeviceSize size, vk::DeviceSize offset )
 		.offset = offset,
 		.size = size,
 	};
-	return m_rDevice.getDevice().invalidateMappedMemoryRanges( 1, &mappedRange );
+	return ( **m_pDevice ).invalidateMappedMemoryRanges( 1, &mappedRange );
 }
 
 /**

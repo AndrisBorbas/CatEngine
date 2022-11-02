@@ -15,10 +15,10 @@
 
 namespace cat
 {
-CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount )
-	: m_rDevice{ device }, m_rWindow{ window }, m_rApp{ app }
+CatImgui::CatImgui( CatWindow* pWindow, CatDevice* pDevice, vk::RenderPass renderPass, size_t imageCount )
+	: m_pWindow{ pWindow }, m_pDevice{ pDevice }
 {
-	m_pDescriptorPool = CatDescriptorPool::Builder( m_rDevice )
+	m_pDescriptorPool = CatDescriptorPool::Builder( *m_pDevice )
 							.addPoolSize( vk::DescriptorType::eSampler, 1000 )
 							.addPoolSize( vk::DescriptorType::eCombinedImageSampler, 1000 )
 							.addPoolSize( vk::DescriptorType::eSampledImage, 1000 )
@@ -50,20 +50,20 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 
 	// Setup Platform/Renderer backends
 	// Initialize imgui for vulkan
-	ImGui_ImplGlfw_InitForVulkan( window.getGLFWwindow(), true );
+	ImGui_ImplGlfw_InitForVulkan( **m_pWindow, true );
 	ImGui_ImplVulkan_InitInfo initInfo = {
-		.Instance = device.getInstance(),
-		.PhysicalDevice = device.getPhysicalDevice(),
-		.Device = device.getDevice(),
-		.QueueFamily = device.getGraphicsQueueFamily(),
-		.Queue = device.getGraphicsQueue(),
+		.Instance = m_pDevice->getInstance(),
+		.PhysicalDevice = m_pDevice->getPhysicalDevice(),
+		.Device = m_pDevice->getDevice(),
+		.QueueFamily = m_pDevice->getGraphicsQueueFamily(),
+		.Queue = m_pDevice->getGraphicsQueue(),
 		// pipeline cache is a potential future optimization, ignoring for now
 		.PipelineCache = nullptr,
 		.DescriptorPool = m_pDescriptorPool->getDescriptorPool(),
 		.Subpass = 0,
 		.MinImageCount = 2,
 		.ImageCount = static_cast< uint32_t >( imageCount ),
-		.MSAASamples = static_cast< VkSampleCountFlagBits >( device.getMSAA() ),
+		.MSAASamples = static_cast< VkSampleCountFlagBits >( m_pDevice->getMSAA() ),
 		// .MSAASamples = VK_SAMPLE_COUNT_8_BIT,
 		// todo, I should probably get around to integrating a memory allocator library such as Vulkan
 		// memory allocator (VMA) sooner than later. We don't want to have to update adding an allocator
@@ -73,9 +73,9 @@ CatImgui::CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::Rende
 	};
 	ImGui_ImplVulkan_Init( &initInfo, renderPass );
 
-	const auto commandBuffer = device.beginSingleTimeCommands();
+	const auto commandBuffer = m_pDevice->beginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
-	device.endSingleTimeCommands( commandBuffer );
+	m_pDevice->endSingleTimeCommands( commandBuffer );
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
@@ -139,7 +139,7 @@ void CatImgui::drawWindows()
 	{
 		char title[128];
 		sprintf( title, "%.4f ms / %.1f FPS | %llu# ###Main", GetEditorInstance()->m_DFrameTime * 1000.0,
-			GetEditorInstance()->m_DFrameRate, GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+			GetEditorInstance()->m_DFrameRate, GetEditorInstance()->m_RFrameInfo.m_nFrameNumber );
 		ImGui::Begin( title ); // Create a window and append into it.
 
 		// ImGui::Text( "This is some useful text." ); // Display some text (you can use a format strings too)
@@ -157,13 +157,14 @@ void CatImgui::drawWindows()
 		// ImGui::SameLine();
 		// ImGui::Text( "counter = %d", counter );
 
-		ImGui::DragFloat3( "camera position",
-			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.translation ), 0.1f );
-		ImGui::DragFloat3( "camera rotation",
-			reinterpret_cast< float* >( &GetEditorInstance()->getFrameInfo().m_rCameraObject.m_transform.rotation ), 0.1f );
+		ImGui::DragFloat3( "cam pos",
+			reinterpret_cast< float* >( &GetEditorInstance()->m_RFrameInfo.m_rCameraObject.m_transform.translation ), 0.1f );
+		ImGui::DragFloat3( "cam rot",
+			reinterpret_cast< float* >( &GetEditorInstance()->m_RFrameInfo.m_rCameraObject.m_transform.rotation ), 0.1f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
 		static char buf[128] = "wasd";
+		ImGui::DragFloat( "cam spd mult", &GetEditorInstance()->m_FCameraSpeed, 0.1f );
 		ImGui::InputTextWithHint( "##Lavel Name", "Filename", buf, 128, ImGuiInputTextFlags_CharsNoBlank );
 		if ( ImGui::Button( "Load Level" ) )
 		{
@@ -172,7 +173,7 @@ void CatImgui::drawWindows()
 			{
 				name += ".json";
 			}
-			LOG_F( INFO, "Frame: %llu", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
+			LOG_F( INFO, "Frame: %llu", GetEditorInstance()->m_RFrameInfo.m_nFrameNumber );
 
 			GetEditorInstance()->loadLevel( name );
 		}
@@ -180,10 +181,6 @@ void CatImgui::drawWindows()
 		if ( ImGui::Button( "Save Level" ) )
 		{
 			std::string name( buf );
-			if ( !name.ends_with( ".json" ) )
-			{
-				name += ".json";
-			}
 			GetEditorInstance()->saveLevel( name );
 		}
 
@@ -220,15 +217,15 @@ void CatImgui::drawWindows()
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
-			for ( auto& [key, object] : GetEditorInstance()->getFrameInfo().m_rLevel->getAllObjects() )
+			for ( auto& [key, object] : GetEditorInstance()->m_RFrameInfo.m_rLevel->getAllObjects() )
 			{
 				++i;
 				ImGui::PushID( i );
-				const bool isSelected = ( GetEditorInstance()->getFrameInfo().m_selectedItemId == key );
+				const bool isSelected = ( GetEditorInstance()->m_RFrameInfo.m_selectedItemId == key );
 				if ( ImGui::Selectable( ( object->getName() ).c_str(), isSelected ) )
 				{
 					// currentItemIdx = key;
-					GetEditorInstance()->getFrameInfo().updateSelectedItemId( key );
+					GetEditorInstance()->m_RFrameInfo.updateSelectedItemId( key );
 				}
 				ImGui::PopID();
 
@@ -241,29 +238,26 @@ void CatImgui::drawWindows()
 		ImGui::End();
 	}
 	{
-		if ( GetEditorInstance()->getFrameInfo().m_selectedItemId != 0 )
+		if ( GetEditorInstance()->m_RFrameInfo.m_selectedItemId != 0 )
 		{
 			ImGui::Begin( "SelectedObject" );
 
 			ImGui::DragFloat3( "Position",
 				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->getFrameInfo()
-												 .m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 ->m_RFrameInfo.m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
 												 ->m_transform.translation ),
 				0.1f );
 			ImGui::DragFloat3( "Rotation",
 				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->getFrameInfo()
-												 .m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 ->m_RFrameInfo.m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
 												 ->m_transform.rotation ),
 				0.1f );
 			ImGui::DragFloat3( "Scale",
 				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->getFrameInfo()
-												 .m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->getFrameInfo().m_selectedItemId )
+												 ->m_RFrameInfo.m_rLevel->getAllObjects()
+												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
 												 ->m_transform.scale ),
 				0.1f );
 

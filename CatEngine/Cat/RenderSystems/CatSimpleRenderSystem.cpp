@@ -19,10 +19,10 @@ struct CatPushConstantData
 	glm::mat4 m_mxNormal{ 1.f };
 };
 
-CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
+CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice* pDevice,
 	vk::RenderPass renderPass,
 	vk::DescriptorSetLayout globalSetLayout )
-	: m_rDevice{ device }
+	: m_pDevice{ pDevice }
 {
 	createPipelineLayout( globalSetLayout );
 	createPipeline( renderPass );
@@ -30,7 +30,7 @@ CatSimpleRenderSystem::CatSimpleRenderSystem( CatDevice& device,
 
 CatSimpleRenderSystem::~CatSimpleRenderSystem()
 {
-	vkDestroyPipelineLayout( m_rDevice.getDevice(), m_pPipelineLayout, nullptr );
+	( **m_pDevice ).destroy( m_pPipelineLayout );
 }
 
 void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout globalSetLayout )
@@ -50,8 +50,7 @@ void CatSimpleRenderSystem::createPipelineLayout( vk::DescriptorSetLayout global
 		.pPushConstantRanges = &pushConstantRange,
 	};
 
-	if ( m_rDevice.getDevice().createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout )
-		 != vk::Result::eSuccess )
+	if ( ( **m_pDevice ).createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create pipeline layout!" );
 	}
@@ -67,7 +66,7 @@ void CatSimpleRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
+		m_pDevice, "assets/shaders/simple_shader_2.vert.spv", "assets/shaders/simple_shader_2.frag.spv", pipelineConfig );
 }
 
 void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
@@ -79,7 +78,11 @@ void CatSimpleRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 
 	for ( auto& [key, obj] : frameInfo.m_rLevel->getAllObjects() )
 	{
+		if ( !obj ) continue;
+		if ( !obj->m_BVisible ) continue;
+
 		if ( !obj->m_pModel ) continue;
+
 		if ( obj->getType() >= ObjectType::eGameObject )
 		{
 			CatPushConstantData push{};

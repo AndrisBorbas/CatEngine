@@ -2,7 +2,7 @@
 
 #version 450
 
-layout ( location = 0 ) in vec3 position;
+// layout ( location = 0 ) in vec3 position;
 
 layout ( location = 0 ) out float near; //0.01
 layout ( location = 1 ) out float far; //100

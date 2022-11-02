@@ -20,6 +20,7 @@ int main( int argc, char** argv )
 	try
 	{
 		cat::CreateEditorInstance();
+		cat::GetEditorInstance()->init();
 
 		// Main Loop
 		cat::GetEditorInstance()->run();

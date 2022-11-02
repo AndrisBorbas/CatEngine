@@ -59,7 +59,7 @@ void DestroyDebugUtilsMessengerEXT( const vk::Instance& rInstance,
 
 // class member functions
 
-CatDevice::CatDevice( CatWindow& rWindow ) : m_rWindow{ rWindow }
+CatDevice::CatDevice( CatWindow* pWindow ) : m_pWindow{ pWindow }
 {
 	createInstance();
 	setupDebugMessenger();
@@ -133,7 +133,7 @@ void CatDevice::createInstance()
 vk::SampleCountFlagBits CatDevice::getMaxUsableSampleCount( const vk::PhysicalDevice rPhysicalDevice )
 {
 	// Limit MSAA to 1 because otherwise undocked imgui crashes
-	// return vk::SampleCountFlagBits::e1;
+	return vk::SampleCountFlagBits::e1;
 
 	vk::PhysicalDeviceProperties physicalDeviceProperties;
 	rPhysicalDevice.getProperties( &physicalDeviceProperties );
@@ -345,7 +345,7 @@ void CatDevice::createCommandPool()
 void CatDevice::createSurface()
 {
 	auto tempSurface = VkSurfaceKHR( m_surface );
-	m_rWindow.createWindowSurface( m_instance, &tempSurface );
+	m_pWindow->createWindowSurface( m_instance, &tempSurface );
 	m_surface = tempSurface;
 }
 

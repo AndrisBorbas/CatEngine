@@ -13,21 +13,26 @@ void HashCombine( std::size_t& seed, const T& v, const Rest&... rest ) {
 };
 
 // Define a property
-#define CAT_PROPERTY( _member, _getter, _setter, _paramName, _propertyName )                \
+#define CAT_PROPERTY( _member, _getter, _setter, _propertyName )                            \
 	[[nodiscard]] virtual const decltype( _member )& _getter() const { return _member; }    \
 	[[nodiscard]] virtual decltype( _member )& _getter() { return _member; }                \
 	virtual void _setter( const decltype( _member )& _paramName ) { _member = _paramName; } \
 	__declspec( property( get = _getter, put = _setter ) ) decltype( _member ) _propertyName;
 
 // Define a read-only property.
-#define CAT_READONLY_PROPERTY( _member, _getter, _paramName, _propertyName )             \
+#define CAT_READONLY_PROPERTY( _member, _getter, _propertyName )                         \
 	[[nodiscard]] virtual const decltype( _member )& _getter() const { return _member; } \
 	[[nodiscard]] virtual decltype( _member )& _getter() { return _member; }             \
 	__declspec( property( get = _getter ) ) decltype( _member ) _propertyName;
 
 // Define a const-only read-only property.
-#define CAT_CONST_READONLY_PROPERTY( _member, _getter, _paramName, _propertyName )       \
+#define CAT_CONST_READONLY_PROPERTY( _member, _getter, _propertyName )                   \
 	[[nodiscard]] virtual const decltype( _member )& _getter() const { return _member; } \
+	__declspec( property( get = _getter ) ) decltype( _member ) _propertyName;
+
+// Define a read-only pointer reference property.
+#define CAT_READONLY_POINTER_REF_PROPERTY( _member, _getter, _propertyName )   \
+	[[nodiscard]] virtual decltype( *_member )& _getter() { return *_member; } \
 	__declspec( property( get = _getter ) ) decltype( _member ) _propertyName;
 
 } // namespace cat

@@ -1,7 +1,7 @@
 #ifndef CATENGINE_CATPIPELINE_HPP
 #define CATENGINE_CATPIPELINE_HPP
 
-#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
 
 #include <string>
 #include <vector>
@@ -34,11 +34,11 @@ struct PipelineConfigInfo
 class CatPipeline
 {
 public:
-	CatPipeline( CatDevice& device,
+	CatPipeline( CatDevice* pDevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo );
-	CatPipeline( CatDevice& device,
+	CatPipeline( CatDevice* pDevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const std::string& compFilepath,
@@ -71,7 +71,7 @@ private:
 
 	void createShaderModule( const std::vector< char >& code, vk::ShaderModule* shaderModule );
 
-	CatDevice& m_rDevice;
+	CatDevice* m_pDevice;
 	vk::Pipeline m_pGraphicsPipeline;
 	vk::ShaderModule m_pVertShaderModule;
 	vk::ShaderModule m_pFragShaderModule;

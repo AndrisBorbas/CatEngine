@@ -24,10 +24,10 @@ struct PointLightPushConstants
 	float radius;
 };
 
-CatPointLightRenderSystem::CatPointLightRenderSystem( CatDevice& rDevice,
+CatPointLightRenderSystem::CatPointLightRenderSystem( CatDevice* pDevice,
 	vk::RenderPass pRenderPass,
 	vk::DescriptorSetLayout pGlobalSetLayout )
-	: m_rDevice{ rDevice }
+	: m_pDevice{ pDevice }
 {
 	createPipelineLayout( pGlobalSetLayout );
 	createPipeline( pRenderPass );
@@ -35,7 +35,7 @@ CatPointLightRenderSystem::CatPointLightRenderSystem( CatDevice& rDevice,
 
 CatPointLightRenderSystem::~CatPointLightRenderSystem()
 {
-	m_rDevice.getDevice().destroyPipelineLayout( m_pPipelineLayout, nullptr );
+	( **m_pDevice ).destroy( m_pPipelineLayout );
 }
 
 void CatPointLightRenderSystem::createPipelineLayout( vk::DescriptorSetLayout pGlobalSetLayout )
@@ -52,8 +52,7 @@ void CatPointLightRenderSystem::createPipelineLayout( vk::DescriptorSetLayout pG
 	pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-	if ( m_rDevice.getDevice().createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout )
-		 != vk::Result::eSuccess )
+	if ( ( **m_pDevice ).createPipelineLayout( &pipelineLayoutInfo, nullptr, &m_pPipelineLayout ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create pipeline layout!" );
 	}
@@ -73,7 +72,7 @@ void CatPointLightRenderSystem::createPipeline( vk::RenderPass pRenderPass )
 	pipelineConfig.m_pRenderPass = pRenderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_rDevice, "assets/shaders/point_light.vert.spv", "assets/shaders/point_light.frag.spv", pipelineConfig );
+		m_pDevice, "assets/shaders/point_light.vert.spv", "assets/shaders/point_light.frag.spv", pipelineConfig );
 }
 
 void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUbo& ubo, const bool bIsRotating ) const
@@ -110,6 +109,7 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	std::map< float, id_t > sorted;
 	for ( auto& [key, obj] : rFrameInfo.m_rLevel->getAllObjects() )
 	{
+		if ( !obj ) continue;
 		if ( obj->getType() >= ObjectType::eLight )
 		{
 			const auto light = static_cast< CatLight* >( obj.get() );
@@ -129,7 +129,10 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	// iterate through sorted lights in reverse order
 	for ( auto it = sorted.rbegin(); it != sorted.rend(); ++it )
 	{
-		const auto object = rFrameInfo.m_rLevel->getAllObjects().at( it->second ).get();
+		const auto& object = rFrameInfo.m_rLevel->getAllObjects()[it->second].get();
+
+		if ( !object->m_BVisible ) continue;
+
 		if ( object->getType() >= ObjectType::eLight )
 		{
 			const auto light = static_cast< CatLight* >( object );

@@ -36,7 +36,7 @@ float computeDepth(vec3 pos ) {
 }
 float computeLinearDepth(vec3 pos ) {
 	vec4 clip_space_pos = fragProjection * fragView * vec4( pos.xyz, 1.0 );
-	float clip_space_depth = ( clip_space_pos.z / clip_space_pos.w ) * 2.0 - 1.0; // put back between -1 and 1
+	float clip_space_depth = computeDepth( pos ) * 2.0 - 1.0; // put back between -1 and 1
 	float linearDepth = ( 2.0 * near * far ) / ( far + near - clip_space_depth * ( far - near ) ); // get linear value between 0.01 and 100
 	return linearDepth / far; // normalize
 }

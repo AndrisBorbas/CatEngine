@@ -37,8 +37,10 @@ public:
 	const bool m_bEnableValidationLayers = true;
 #endif
 
-	CatDevice( CatWindow& rWindow );
+	CatDevice( CatWindow* pWindow );
 	~CatDevice();
+
+	[[nodiscard]] vk::Device operator*() const { return m_device; }
 
 	// Not copyable or movable
 	CatDevice( const CatDevice& ) = delete;
@@ -106,7 +108,7 @@ private:
 	vk::Instance m_instance;
 	vk::DebugUtilsMessengerEXT m_debugMessenger;
 	vk::PhysicalDevice m_physicalDevice = nullptr;
-	CatWindow& m_rWindow;
+	CatWindow* m_pWindow;
 	vk::CommandPool m_pDrawCommandPool;
 	vk::CommandPool m_pTransferCommandPool;
 

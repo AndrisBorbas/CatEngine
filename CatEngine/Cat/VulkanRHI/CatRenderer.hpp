@@ -16,7 +16,7 @@ namespace cat
 class CatRenderer
 {
 public:
-	CatRenderer( CatWindow& window, CatDevice& device );
+	CatRenderer( CatWindow* pWindow, CatDevice* pDevice );
 	~CatRenderer();
 
 	CatRenderer( const CatRenderer& ) = delete;
@@ -51,8 +51,8 @@ private:
 	void freeCommandBuffers();
 	void recreateSwapChain();
 
-	CatWindow& m_rWindow;
-	CatDevice& m_rDevice;
+	CatWindow* m_pWindow;
+	CatDevice* m_pDevice;
 	std::unique_ptr< CatSwapChain > m_pSwapChain;
 	std::vector< vk::CommandBuffer > m_pCommandBuffers;
 

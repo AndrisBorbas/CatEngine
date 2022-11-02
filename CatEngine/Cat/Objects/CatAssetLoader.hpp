@@ -23,7 +23,7 @@ public:
 
 	std::shared_future< std::shared_ptr< CatModel > > load( const json& object, CatObject::Map& mObjects );
 
-	CAT_READONLY_PROPERTY( m_mModelCache, getModelCache, mModelCache, m_MModelCache );
+	CAT_READONLY_PROPERTY( m_mModelCache, getModelCache, m_MModelCache );
 };
 
 } // namespace cat

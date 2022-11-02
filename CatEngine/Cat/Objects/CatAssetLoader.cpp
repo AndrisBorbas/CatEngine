@@ -28,9 +28,9 @@ std::shared_future< std::shared_ptr< CatModel > > CatAssetLoader::load( const js
 		{
 			auto task = [&object, &mObjects]()
 			{
-				auto model = CatModel::createModelFromFile( GetEditorInstance()->m_Device, object["file"] );
+				auto model = CatModel::createModelFromFile( GetEditorInstance()->m_PDevice, object["file"] );
 
-				auto obj = CatObject::create( object["name"] );
+				auto obj = CatObject::create( object["name"], object["file"] );
 
 				obj->load( object );
 				obj->m_pModel = model;
@@ -46,7 +46,7 @@ std::shared_future< std::shared_ptr< CatModel > > CatAssetLoader::load( const js
 		}
 		else
 		{
-			auto obj = CatObject::create( object["name"] );
+			auto obj = CatObject::create( object["name"], object["file"] );
 
 			obj->load( object );
 			obj->m_pModel = m_mModelCache[object["file"]].get();

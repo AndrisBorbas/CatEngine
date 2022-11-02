@@ -7,7 +7,7 @@
 
 namespace cat
 {
-CatRenderer::CatRenderer( CatWindow& window, CatDevice& device ) : m_rWindow{ window }, m_rDevice{ device }
+CatRenderer::CatRenderer( CatWindow* pWindow, CatDevice* pDevice ) : m_pWindow{ pWindow }, m_pDevice{ pDevice }
 {
 	recreateSwapChain();
 	createCommandBuffers();
@@ -20,22 +20,22 @@ CatRenderer::~CatRenderer()
 
 void CatRenderer::recreateSwapChain()
 {
-	auto extent = m_rWindow.getExtent();
+	auto extent = m_pWindow->getExtent();
 	while ( extent.width == 0 || extent.height == 0 )
 	{
-		extent = m_rWindow.getExtent();
+		extent = m_pWindow->getExtent();
 		glfwWaitEvents();
 	}
-	m_rDevice.getDevice().waitIdle();
+	m_pDevice->getDevice().waitIdle();
 
 	if ( m_pSwapChain == nullptr )
 	{
-		m_pSwapChain = std::make_unique< CatSwapChain >( m_rDevice, extent );
+		m_pSwapChain = std::make_unique< CatSwapChain >( m_pDevice, extent );
 	}
 	else
 	{
 		std::shared_ptr< CatSwapChain > oldSwapChain = std::move( m_pSwapChain );
-		m_pSwapChain = std::make_unique< CatSwapChain >( m_rDevice, extent, oldSwapChain );
+		m_pSwapChain = std::make_unique< CatSwapChain >( m_pDevice, extent, oldSwapChain );
 
 		if ( !oldSwapChain->compareSwapFormats( *m_pSwapChain.get() ) )
 		{
@@ -49,12 +49,12 @@ void CatRenderer::createCommandBuffers()
 	m_pCommandBuffers.resize( CatSwapChain::MAX_FRAMES_IN_FLIGHT );
 
 	vk::CommandBufferAllocateInfo allocInfo{
-		.commandPool = m_rDevice.getCommandPool(),
+		.commandPool = m_pDevice->getCommandPool(),
 		.level = vk::CommandBufferLevel::ePrimary,
 		.commandBufferCount = static_cast< uint32_t >( m_pCommandBuffers.size() ),
 	};
 
-	if ( m_rDevice.getDevice().allocateCommandBuffers( &allocInfo, m_pCommandBuffers.data() ) != vk::Result::eSuccess )
+	if ( m_pDevice->getDevice().allocateCommandBuffers( &allocInfo, m_pCommandBuffers.data() ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "Failed to allocate command buffers!" );
 	}
@@ -62,8 +62,8 @@ void CatRenderer::createCommandBuffers()
 
 void CatRenderer::freeCommandBuffers()
 {
-	m_rDevice.getDevice().free(
-		m_rDevice.getCommandPool(), static_cast< uint32_t >( m_pCommandBuffers.size() ), m_pCommandBuffers.data() );
+	m_pDevice->getDevice().free(
+		m_pDevice->getCommandPool(), static_cast< uint32_t >( m_pCommandBuffers.size() ), m_pCommandBuffers.data() );
 	m_pCommandBuffers.clear();
 }
 
@@ -102,9 +102,9 @@ void CatRenderer::endFrame()
 	commandBuffer.end();
 
 	auto result = m_pSwapChain->submitCommandBuffers( &commandBuffer, &m_nCurrentImageIndex );
-	if ( result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_rWindow.wasWindowResized() )
+	if ( result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_pWindow->wasWindowResized() )
 	{
-		m_rWindow.resetWindowResizedFlag();
+		m_pWindow->resetWindowResizedFlag();
 		recreateSwapChain();
 	}
 	else if ( result != vk::Result::eSuccess )

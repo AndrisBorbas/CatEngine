@@ -11,30 +11,30 @@
 
 namespace cat
 {
-CatPipeline::CatPipeline( CatDevice& device,
+CatPipeline::CatPipeline( CatDevice* pDevice,
 	const std::string& vertFilepath,
 	const std::string& fragFilepath,
 	const PipelineConfigInfo& configInfo )
-	: m_rDevice{ device }
+	: m_pDevice{ pDevice }
 {
 	createGraphicsPipeline( vertFilepath, fragFilepath, configInfo );
 }
 
-CatPipeline::CatPipeline( CatDevice& device,
+CatPipeline::CatPipeline( CatDevice* pDevice,
 	const std::string& vertFilepath,
 	const std::string& fragFilepath,
 	const std::string& compFilePath,
 	const PipelineConfigInfo& configInfo )
-	: m_rDevice{ device }
+	: m_pDevice{ pDevice }
 {
 	createGraphicsPipeline( vertFilepath, fragFilepath, compFilePath, configInfo );
 }
 
 CatPipeline::~CatPipeline()
 {
-	m_rDevice.getDevice().destroy( m_pVertShaderModule );
-	m_rDevice.getDevice().destroy( m_pFragShaderModule );
-	m_rDevice.getDevice().destroy( m_pGraphicsPipeline );
+	( **m_pDevice ).destroy( m_pVertShaderModule );
+	( **m_pDevice ).destroy( m_pFragShaderModule );
+	( **m_pDevice ).destroy( m_pGraphicsPipeline );
 }
 
 std::vector< char > CatPipeline::readFile( const std::string& filepath )
@@ -112,7 +112,7 @@ void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
 		.basePipelineIndex = -1,
 	};
 
-	if ( m_rDevice.getDevice().createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
+	if ( ( **m_pDevice ).createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
 		 != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create graphics pipeline" );
@@ -185,7 +185,7 @@ void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
 		.basePipelineIndex = -1,
 	};
 
-	if ( m_rDevice.getDevice().createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
+	if ( ( **m_pDevice ).createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
 		 != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create graphics pipeline" );
@@ -199,7 +199,7 @@ void CatPipeline::createShaderModule( const std::vector< char >& code, vk::Shade
 		.pCode = reinterpret_cast< const uint32_t* >( code.data() ),
 	};
 
-	if ( m_rDevice.getDevice().createShaderModule( &createInfo, nullptr, shaderModule ) != vk::Result::eSuccess )
+	if ( ( **m_pDevice ).createShaderModule( &createInfo, nullptr, shaderModule ) != vk::Result::eSuccess )
 	{
 		throw std::runtime_error( "failed to create shader module" );
 	}
@@ -232,7 +232,7 @@ void CatPipeline::defaultPipelineConfigInfo( PipelineConfigInfo& configInfo )
 	configInfo.m_pRasterizationInfo.depthBiasSlopeFactor = 0.0f;	// Optional
 
 	configInfo.m_pMultisampleInfo.sampleShadingEnable = false;
-	configInfo.m_pMultisampleInfo.rasterizationSamples = GetEditorInstance()->m_Device.getMSAA();
+	configInfo.m_pMultisampleInfo.rasterizationSamples = GetEditorInstance()->m_PDevice->getMSAA();
 	configInfo.m_pMultisampleInfo.minSampleShading = 1.0f;		 // Optional
 	configInfo.m_pMultisampleInfo.pSampleMask = nullptr;		 // Optional
 	configInfo.m_pMultisampleInfo.alphaToCoverageEnable = false; // Optional

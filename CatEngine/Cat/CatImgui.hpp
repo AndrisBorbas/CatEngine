@@ -1,10 +1,9 @@
 #ifndef CATENGINE_CATIMGUI_HPP
 #define CATENGINE_CATIMGUI_HPP
 
-#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
 #include "Cat/CatWindow.hpp"
-#include "Cat/Rendering/CatDescriptors.hpp"
-#include "Cat/CatApp.hpp"
+#include "Cat/VulkanRHI/CatDescriptors.hpp"
 #include "CatFrameInfo.hpp"
 
 #include <imgui.h>
@@ -28,7 +27,7 @@ static void check_vk_result( VkResult err )
 class CatImgui
 {
 public:
-	CatImgui( CatApp& app, CatWindow& window, CatDevice& device, vk::RenderPass renderPass, size_t imageCount );
+	CatImgui( CatWindow* pWindow, CatDevice* pDevice, vk::RenderPass renderPass, size_t imageCount );
 	~CatImgui();
 
 	static void newFrame();
@@ -46,9 +45,8 @@ public:
 	void drawDebug( glm::mat4 mx1, glm::mat4 mx2 );
 
 private:
-	CatDevice& m_rDevice;
-	CatWindow& m_rWindow;
-	CatApp& m_rApp;
+	CatWindow* m_pWindow;
+	CatDevice* m_pDevice;
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 

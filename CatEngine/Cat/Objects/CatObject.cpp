@@ -29,7 +29,7 @@ glm::mat4 TransformComponent::mat4() const
 
 glm::mat3 TransformComponent::normalMatrix() const
 {
-	return glm::inverseTranspose( glm::mat3( this->mat4() ) );
+	return glm::mat3( glm::inverseTranspose( this->mat4() ) );
 
 	// Old manual inverse transpose code
 	const float c3 = glm::cos( rotation.z );
@@ -63,13 +63,15 @@ json CatObject::save()
 {
 	if ( getType() >= ObjectType::eNotSaved )
 	{
-		return nullptr;
 		return {};
 	}
 
 	json object;
 	object["name"] = getName();
-	object["file"] = getFileName();
+	if ( const auto& sFile = getFileName(); !sFile.empty() )
+	{
+		object["file"] = sFile;
+	}
 	object["type"] = getType();
 
 	object["transform"]["t"] = m_transform.translation;
@@ -90,7 +92,7 @@ void CatObject::load( const json& object )
 	m_transform.scale = glm::make_vec3( object["transform"]["s"].get< std::vector< float > >().data() );
 	m_vColor = glm::make_vec3( object["color"].get< std::vector< float > >().data() );
 
-	LOG_F( INFO, "Frame: %llu, obj loaded: %s", GetEditorInstance()->getFrameInfo().m_nFrameNumber,
+	LOG_F( INFO, "Frame: %llu, obj loaded: %s", GetEditorInstance()->m_RFrameInfo.m_nFrameNumber,
 		object["name"].get< std::string >().c_str() );
 }
 

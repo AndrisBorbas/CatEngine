@@ -30,7 +30,7 @@ add_subdirectory(Libraries)
 
 include_directories(CatEngine)
 
-add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngine/Cat/CatWindow.cpp CatEngine/Cat/Controller/CatCamera.cpp CatEngine/Cat/Controller/CatCamera.hpp CatEngine/Cat/Controller/CatInput.cpp CatEngine/Cat/Controller/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/Rendering/CatDevice.cpp CatEngine/Cat/Rendering/CatDevice.hpp CatEngine/Cat/Utils/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/Rendering/CatBuffer.cpp CatEngine/Cat/Rendering/CatBuffer.hpp CatEngine/Cat/Rendering/CatDescriptors.cpp CatEngine/Cat/Rendering/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/Rendering/CatPipeline.cpp CatEngine/Cat/Rendering/CatPipeline.hpp CatEngine/Cat/Rendering/CatRenderer.cpp CatEngine/Cat/Rendering/CatRenderer.hpp CatEngine/Cat/Rendering/CatSwapChain.cpp CatEngine/Cat/Rendering/CatSwapChain.hpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.cpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImGui.cpp CatEngine/Cat/CatImGui.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.hpp CatEngine/Cat/Objects/CatVolume.cpp CatEngine/Cat/Objects/CatVolume.hpp CatEngine/Cat/Objects/CatLight.cpp CatEngine/Cat/Objects/CatLight.hpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.cpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.hpp CatEngine/Cat/Level/CatLevel.cpp CatEngine/Cat/Level/CatLevel.hpp CatEngine/Cat/Objects/CatObjectType.hpp CatEngine/Cat/Objects/CatAssetLoader.cpp CatEngine/Cat/Objects/CatAssetLoader.hpp)
+add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngine/Cat/CatWindow.cpp CatEngine/Cat/Controller/CatCamera.cpp CatEngine/Cat/Controller/CatCamera.hpp CatEngine/Cat/Controller/CatInput.cpp CatEngine/Cat/Controller/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/VulkanRHI/CatDevice.cpp CatEngine/Cat/VulkanRHI/CatDevice.hpp CatEngine/Cat/Utils/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/VulkanRHI/CatBuffer.cpp CatEngine/Cat/VulkanRHI/CatBuffer.hpp CatEngine/Cat/VulkanRHI/CatDescriptors.cpp CatEngine/Cat/VulkanRHI/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/VulkanRHI/CatPipeline.cpp CatEngine/Cat/VulkanRHI/CatPipeline.hpp CatEngine/Cat/VulkanRHI/CatRenderer.cpp CatEngine/Cat/VulkanRHI/CatRenderer.hpp CatEngine/Cat/VulkanRHI/CatSwapChain.cpp CatEngine/Cat/VulkanRHI/CatSwapChain.hpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.cpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImgui.cpp CatEngine/Cat/CatImgui.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.hpp CatEngine/Cat/Objects/CatVolume.cpp CatEngine/Cat/Objects/CatVolume.hpp CatEngine/Cat/Objects/CatLight.cpp CatEngine/Cat/Objects/CatLight.hpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.cpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.hpp CatEngine/Cat/Level/CatLevel.cpp CatEngine/Cat/Level/CatLevel.hpp CatEngine/Cat/Objects/CatObjectType.hpp CatEngine/Cat/Objects/CatAssetLoader.cpp CatEngine/Cat/Objects/CatAssetLoader.hpp)
 
 # ###Vulkan
 find_package(Vulkan REQUIRED)
@@ -66,20 +66,12 @@ foreach (compute-shader ${compute-shaders})
 	add_shader(${PROJECT_NAME} ${shader})
 endforeach (compute-shader)
 
-set(output-assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/${TARGET}/assets)
-
-add_custom_target(shader-target ALL)
 message("Shaders: ${shaders}")
-add_dependencies(shader-target ${shaders})
-add_dependencies(${PROJECT_NAME} shader-target)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
 
-add_custom_command(TARGET shader-target POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
 
 if (CMAKE_CONFIGURATION_TYPES)
 	string(TOLOWER "${CMAKE_CONFIGURATION_TYPES}" CMAKE_CONFIGURATION_TYPES_LOWER)

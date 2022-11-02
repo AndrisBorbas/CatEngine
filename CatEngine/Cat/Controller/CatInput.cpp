@@ -62,7 +62,7 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 	if ( glfwGetKey( window, m_eKeys.moveUp ) == GLFW_PRESS ) moveDir += vUp;
 	if ( glfwGetKey( window, m_eKeys.moveDown ) == GLFW_PRESS ) moveDir -= vUp;
 
-	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_PRESS ) m_fMovementSpeed = 6.9f;
+	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_PRESS ) m_fMovementSpeed = 3.0f * GetEditorInstance()->m_FCameraSpeed;
 	if ( glfwGetKey( window, m_eKeys.speed ) == GLFW_RELEASE ) m_fMovementSpeed = 3.0f;
 
 	if ( glm::dot( moveDir, moveDir ) > std::numeric_limits< float >::epsilon() )
@@ -73,12 +73,12 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 
 void CatInput::registerInputHandlers()
 {
-	glfwSetKeyCallback( cat::GetEditorInstance()->m_Window.getGLFWwindow(),
+	glfwSetKeyCallback( **cat::GetEditorInstance()->m_PWindow,
 		[]( GLFWwindow* window, int key, int scancode, int action, int mods )
 		{
 			if ( key == GLFW_KEY_ENTER && action == GLFW_PRESS && mods == GLFW_MOD_ALT )
 			{
-				cat::GetEditorInstance()->m_Window.toggleFullscreen();
+				cat::GetEditorInstance()->m_PWindow->toggleFullscreen();
 			}
 		} );
 }

@@ -39,10 +39,10 @@ protected:
 	bool m_bIsSaved = false;
 
 public:
-	CAT_PROPERTY( m_sSaveLevel, getSaveLevel, setSaveLevel, sSaveLevel, m_SSaveLevel );
-	CAT_PROPERTY( m_sLoadLevel, getLoadLevel, setLoadLevel, sLoadLevel, m_SLoadLevel );
-	CAT_PROPERTY( m_bIsLoaded, isLoaded, setIsLoaded, bIsLoaded, m_BIsLoaded );
-	CAT_PROPERTY( m_bIsSaved, isSaved, setIsSaved, bIsSaved, m_BIsSaved );
+	CAT_PROPERTY( m_sSaveLevel, getSaveLevel, setSaveLevel, m_SSaveLevel );
+	CAT_PROPERTY( m_sLoadLevel, getLoadLevel, setLoadLevel, m_SLoadLevel );
+	CAT_PROPERTY( m_bIsLoaded, isLoaded, setIsLoaded, m_BIsLoaded );
+	CAT_PROPERTY( m_bIsSaved, isSaved, setIsSaved, m_BIsSaved );
 };
 
 } // namespace cat

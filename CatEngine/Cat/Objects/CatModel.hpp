@@ -1,8 +1,8 @@
 #ifndef CATENGINE_CATMODEL_HPP
 #define CATENGINE_CATMODEL_HPP
 
-#include "Cat/Rendering/CatDevice.hpp"
-#include "Cat/Rendering/CatBuffer.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatBuffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -40,14 +40,14 @@ public:
 		void loadModel( const std::string& filepath );
 	};
 
-	CatModel( CatDevice& device, const CatModel::Builder& builder );
+	CatModel( CatDevice* pDevice, const CatModel::Builder& builder );
 	~CatModel();
 
 	CatModel( const CatModel& ) = delete;
 	CatModel& operator=( const CatModel& ) = delete;
 
 	// TODO: Don't load a model twice
-	static std::shared_ptr< CatModel > createModelFromFile( CatDevice& device, const std::string& filepath );
+	static std::shared_ptr< CatModel > createModelFromFile( CatDevice* pDevice, const std::string& filepath );
 
 	void bind( vk::CommandBuffer commandBuffer );
 	void draw( vk::CommandBuffer commandBuffer );
@@ -56,7 +56,7 @@ private:
 	void createVertexBuffers( const std::vector< Vertex >& vertices );
 	void createIndexBuffers( const std::vector< uint32_t >& indices );
 
-	CatDevice& m_rDevice;
+	CatDevice* m_pDevice;
 
 	std::unique_ptr< CatBuffer > m_pVertexBuffer;
 	uint32_t m_nVertexCount;

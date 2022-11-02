@@ -28,7 +28,7 @@ struct hash< cat::CatModel::Vertex >
 
 namespace cat
 {
-CatModel::CatModel( CatDevice& device, const CatModel::Builder& builder ) : m_rDevice{ device }
+CatModel::CatModel( CatDevice* pDevice, const CatModel::Builder& builder ) : m_pDevice{ pDevice }
 {
 	createVertexBuffers( builder.aVertices );
 	createIndexBuffers( builder.aIndices );
@@ -38,11 +38,11 @@ CatModel::~CatModel()
 {
 }
 
-std::shared_ptr< CatModel > CatModel::createModelFromFile( CatDevice& device, const std::string& filepath )
+std::shared_ptr< CatModel > CatModel::createModelFromFile( CatDevice* pDevice, const std::string& filepath )
 {
 	Builder builder{};
 	builder.loadModel( filepath );
-	return std::make_shared< CatModel >( device, builder );
+	return std::make_shared< CatModel >( pDevice, builder );
 }
 
 void CatModel::createVertexBuffers( const std::vector< Vertex >& vertices )
@@ -53,7 +53,7 @@ void CatModel::createVertexBuffers( const std::vector< Vertex >& vertices )
 	uint32_t vertexSize = sizeof( vertices[0] );
 
 	CatBuffer stagingBuffer{
-		m_rDevice,
+		m_pDevice,
 		vertexSize,
 		m_nVertexCount,
 		vk::BufferUsageFlagBits::eTransferSrc,
@@ -63,11 +63,11 @@ void CatModel::createVertexBuffers( const std::vector< Vertex >& vertices )
 	stagingBuffer.map();
 	stagingBuffer.writeToBuffer( (void*)vertices.data() );
 
-	m_pVertexBuffer = std::make_unique< CatBuffer >( m_rDevice, vertexSize, m_nVertexCount,
+	m_pVertexBuffer = std::make_unique< CatBuffer >( m_pDevice, vertexSize, m_nVertexCount,
 		vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
 		vk::MemoryPropertyFlagBits::eDeviceLocal );
 
-	m_rDevice.copyBuffer( stagingBuffer.getBuffer(), m_pVertexBuffer->getBuffer(), bufferSize );
+	m_pDevice->copyBuffer( *stagingBuffer, **m_pVertexBuffer, bufferSize );
 }
 
 void CatModel::createIndexBuffers( const std::vector< uint32_t >& indices )
@@ -84,7 +84,7 @@ void CatModel::createIndexBuffers( const std::vector< uint32_t >& indices )
 	uint32_t indexSize = sizeof( indices[0] );
 
 	CatBuffer stagingBuffer{
-		m_rDevice,
+		m_pDevice,
 		indexSize,
 		m_nIndexCount,
 		vk::BufferUsageFlagBits::eTransferSrc,
@@ -94,11 +94,11 @@ void CatModel::createIndexBuffers( const std::vector< uint32_t >& indices )
 	stagingBuffer.map();
 	stagingBuffer.writeToBuffer( (void*)indices.data() );
 
-	m_pIndexBuffer = std::make_unique< CatBuffer >( m_rDevice, indexSize, m_nIndexCount,
+	m_pIndexBuffer = std::make_unique< CatBuffer >( m_pDevice, indexSize, m_nIndexCount,
 		vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
 		vk::MemoryPropertyFlagBits::eDeviceLocal );
 
-	m_rDevice.copyBuffer( stagingBuffer.getBuffer(), m_pIndexBuffer->getBuffer(), bufferSize );
+	m_pDevice->copyBuffer( *stagingBuffer, **m_pIndexBuffer, bufferSize );
 }
 
 void CatModel::draw( vk::CommandBuffer commandBuffer )
@@ -121,7 +121,7 @@ void CatModel::bind( vk::CommandBuffer commandBuffer )
 
 	if ( m_bHasIndexBuffer )
 	{
-		vkCmdBindIndexBuffer( commandBuffer, m_pIndexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32 );
+		commandBuffer.bindIndexBuffer( **m_pIndexBuffer, 0, vk::IndexType::eUint32 );
 	}
 }
 

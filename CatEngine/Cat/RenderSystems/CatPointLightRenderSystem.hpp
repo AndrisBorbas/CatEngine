@@ -4,10 +4,10 @@
 #pragma once
 
 #include "Cat/Controller/CatCamera.hpp"
-#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
 #include "Cat/CatFrameInfo.hpp"
 #include "Cat/Objects/CatObject.hpp"
-#include "Cat/Rendering/CatPipeline.hpp"
+#include "Cat/VulkanRHI/CatPipeline.hpp"
 
 // std
 #include <memory>
@@ -18,7 +18,7 @@ namespace cat
 class CatPointLightRenderSystem
 {
 public:
-	CatPointLightRenderSystem( CatDevice& rDevice, vk::RenderPass pRenderPass, vk::DescriptorSetLayout pGlobalSetLayout );
+	CatPointLightRenderSystem( CatDevice* pDevice, vk::RenderPass pRenderPass, vk::DescriptorSetLayout pGlobalSetLayout );
 	~CatPointLightRenderSystem();
 
 	CatPointLightRenderSystem( const CatPointLightRenderSystem& ) = delete;
@@ -31,7 +31,7 @@ private:
 	void createPipelineLayout( vk::DescriptorSetLayout pGlobalSetLayout );
 	void createPipeline( vk::RenderPass pRenderPass );
 
-	CatDevice& m_rDevice;
+	CatDevice* m_pDevice;
 
 	std::unique_ptr< CatPipeline > m_pPipeline;
 	vk::PipelineLayout m_pPipelineLayout;

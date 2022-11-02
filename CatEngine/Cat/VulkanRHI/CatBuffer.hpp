@@ -1,14 +1,14 @@
 #ifndef CATENGINE_CATBUFFER_HPP
 #define CATENGINE_CATBUFFER_HPP
 
-#include "Cat/Rendering/CatDevice.hpp"
+#include "Cat/VulkanRHI/CatDevice.hpp"
 
 namespace cat
 {
 class CatBuffer
 {
 public:
-	CatBuffer( CatDevice& device,
+	CatBuffer( CatDevice* pDevice,
 		vk::DeviceSize instanceSize,
 		uint32_t instanceCount,
 		vk::BufferUsageFlags usageFlags,
@@ -32,19 +32,21 @@ public:
 	vk::DescriptorBufferInfo descriptorInfoForIndex( int index );
 	vk::Result invalidateIndex( int index );
 
-	vk::Buffer getBuffer() const { return m_pBuffer; }
-	void* getMappedMemory() const { return m_pMapped; }
-	uint32_t getInstanceCount() const { return m_nInstanceCount; }
-	vk::DeviceSize getInstanceSize() const { return m_pInstanceSize; }
-	vk::DeviceSize getAlignmentSize() const { return m_pAlignmentSize; }
-	vk::BufferUsageFlags getUsageFlags() const { return m_pUsageFlags; }
-	vk::MemoryPropertyFlags getMemoryPropertyFlags() const { return m_pMemoryPropertyFlags; }
-	vk::DeviceSize getBufferSize() const { return m_pBufferSize; }
+	[[nodiscard]] vk::Buffer operator*() const { return m_pBuffer; }
+
+	[[nodiscard]] vk::Buffer getBuffer() const { return m_pBuffer; }
+	[[nodiscard]] void* getMappedMemory() const { return m_pMapped; }
+	[[nodiscard]] uint32_t getInstanceCount() const { return m_nInstanceCount; }
+	[[nodiscard]] vk::DeviceSize getInstanceSize() const { return m_pInstanceSize; }
+	[[nodiscard]] vk::DeviceSize getAlignmentSize() const { return m_pAlignmentSize; }
+	[[nodiscard]] vk::BufferUsageFlags getUsageFlags() const { return m_pUsageFlags; }
+	[[nodiscard]] vk::MemoryPropertyFlags getMemoryPropertyFlags() const { return m_pMemoryPropertyFlags; }
+	[[nodiscard]] vk::DeviceSize getBufferSize() const { return m_pBufferSize; }
 
 private:
 	static vk::DeviceSize getAlignment( vk::DeviceSize instanceSize, vk::DeviceSize minOffsetAlignment );
 
-	CatDevice& m_rDevice;
+	CatDevice* m_pDevice;
 	void* m_pMapped = nullptr;
 	vk::Buffer m_pBuffer = nullptr;
 	vk::DeviceMemory m_pMemory = nullptr;
