@@ -20,7 +20,7 @@ private:
 	std::vector< id_t > m_aObjectIds;
 
 public:
-	CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize ) : m_id( id ), m_vPosition( vPosition ) {}
+	CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize, glm::ivec2 vMaxSize );
 	~CatChunk() = default;
 
 	CAT_READONLY_PROPERTY( m_id, getId, m_ID );
@@ -51,12 +51,15 @@ public:
 	virtual ~CatLevel() = default;
 
 	[[nodiscard]] static std::unique_ptr< CatLevel > create( const std::string& sName,
-		glm::ivec2 vSize = glm::ivec2( 9, 9 ),
-		glm::ivec2 vChunkSize = glm::ivec2( 32, 32 ) );
+		glm::ivec2 vSize = glm::ivec2( 7, 7 ),
+		glm::ivec2 vChunkSize = glm::ivec2( 10, 10 ) );
 	void save( const std::string& sFileName = "" );
 	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& sName );
 
 	bool isFullyLoaded();
+
+	void updateObjectLocation( id_t id );
+	id_t getChunkAtLocation( const glm::vec3& vLocation );
 
 	CatObject::Map getAllObjects();
 

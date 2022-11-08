@@ -22,6 +22,7 @@ public:
 	virtual ~CatAssetLoader() = default;
 
 	std::shared_future< std::shared_ptr< CatModel > > load( const json& object, CatObject::Map& mObjects );
+	std::shared_future< std::shared_ptr< CatModel > > get( const std::string& file );
 
 	CAT_READONLY_PROPERTY( m_mModelCache, getModelCache, m_MModelCache );
 };

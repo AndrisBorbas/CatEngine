@@ -59,4 +59,21 @@ std::shared_future< std::shared_ptr< CatModel > > CatAssetLoader::load( const js
 
 	return {};
 }
+
+std::shared_future< std::shared_ptr< CatModel > > CatAssetLoader::get( const std::string& file )
+{
+	if ( !m_mModelCache.contains( file ) )
+	{
+		auto task = [file]() { return CatModel::createModelFromFile( GetEditorInstance()->m_PDevice, file ); };
+		auto sharedFuture = GetEditorInstance()->m_TAssetLoader.submit( std::move( task ) ).share();
+
+		m_mModelCache[file] = sharedFuture;
+		return sharedFuture;
+	}
+	else
+	{
+		return m_mModelCache[file];
+	}
+}
+
 } // namespace cat

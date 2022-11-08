@@ -213,12 +213,20 @@ void CatImgui::drawWindows()
 	{
 		ImGui::Begin( "Objects" );
 
+		static bool bShowHidden = false;
+
+		ImGui::Checkbox( "Show Hidden", &bShowHidden );
+
 		if ( ImGui::BeginListBox( "##ObjectsLB", ImVec2( -FLT_MIN, -FLT_MIN ) ) )
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
 			for ( auto& [key, object] : GetEditorInstance()->m_RFrameInfo.m_rLevel->getAllObjects() )
 			{
+				if ( !bShowHidden && object->getName().find( "Chunk" ) != std::string::npos )
+				{
+					continue;
+				}
 				++i;
 				ImGui::PushID( i );
 				const bool isSelected = ( GetEditorInstance()->m_RFrameInfo.m_selectedItemId == key );
@@ -242,24 +250,16 @@ void CatImgui::drawWindows()
 		{
 			ImGui::Begin( "SelectedObject" );
 
-			ImGui::DragFloat3( "Position",
-				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->m_RFrameInfo.m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
-												 ->m_transform.translation ),
-				0.1f );
-			ImGui::DragFloat3( "Rotation",
-				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->m_RFrameInfo.m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
-												 ->m_transform.rotation ),
-				0.1f );
-			ImGui::DragFloat3( "Scale",
-				reinterpret_cast< float* >( &GetEditorInstance()
-												 ->m_RFrameInfo.m_rLevel->getAllObjects()
-												 .at( GetEditorInstance()->m_RFrameInfo.m_selectedItemId )
-												 ->m_transform.scale ),
-				0.1f );
+			auto pObject = GetEditorInstance()->m_RFrameInfo.m_rLevel->getAllObjects().at(
+				GetEditorInstance()->m_RFrameInfo.m_selectedItemId );
+
+			auto bIsGlobal = false;
+
+			ImGui::DragFloat3( "Position", reinterpret_cast< float* >( &pObject->m_transform.translation ), 0.1f );
+			ImGui::DragFloat3( "Rotation", reinterpret_cast< float* >( &pObject->m_transform.rotation ), 0.1f );
+			ImGui::DragFloat3( "Scale", reinterpret_cast< float* >( &pObject->m_transform.scale ), 0.1f );
+
+			ImGui::Checkbox( "Is Global", &bIsGlobal );
 
 			ImGui::End();
 		}

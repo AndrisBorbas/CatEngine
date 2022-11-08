@@ -46,7 +46,7 @@ void main()
 		float attenuation = 1.0 / dot( directionToLight, directionToLight ); // distance squared
 		directionToLight = normalize( directionToLight );
 
-		float cosAngIncidence = max( dot( surfaceNormal, directionToLight ), 0 );
+		float cosAngIncidence = max( dot( surfaceNormal, directionToLight ), 0.0 );
 		vec3 intensity = light.color.xyz * light.color.w * attenuation;
 
 		diffuseLight += intensity * cosAngIncidence;
@@ -54,7 +54,7 @@ void main()
 		// specular lighting
 		vec3 halfAngle = normalize( directionToLight + viewDirection );
 		float blinnTerm = dot( surfaceNormal, halfAngle );
-		blinnTerm = clamp( blinnTerm, 0, 1 );
+		blinnTerm = clamp( blinnTerm, 0.0, 1.0 );
 		blinnTerm = pow( blinnTerm, 512.0 ); // higher values -> sharper highlight
 		specularLight += intensity * blinnTerm;
 	}

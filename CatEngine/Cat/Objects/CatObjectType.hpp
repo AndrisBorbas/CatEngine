@@ -14,7 +14,7 @@ enum class ObjectType
 	eGameObject = ( 1u << 3 ),
 	eCamera = ( 1u << 4 ) | eEditorObject,
 	eLight = ( 1u << 5 ),
-	eVolume = ( 1u << 6 ),
+	eVolume = ( 1u << 6 ) | eEditorObject,
 	eGrid = ( 1u << 7 ) | eEditorObject,
 };
 

@@ -2,6 +2,7 @@
 #include "CatLevel.hpp"
 #include "Cat/CatApp.hpp"
 #include "Cat/Objects/CatLight.hpp"
+#include "Cat/Objects/CatVolume.hpp"
 #include "Cat/Objects/CatAssetLoader.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -14,6 +15,22 @@
 
 namespace cat
 {
+
+CatChunk::CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize, glm::ivec2 vMaxSize )
+	: m_id( id ), m_vPosition( vPosition )
+{
+	auto fMesh = GetEditorInstance()->m_AssetLoader.get( "assets/models/cube.obj" );
+
+	auto volume = CatVolume::create( "ChunkVisualizer" );
+	volume->m_transform.translation = glm::vec3( vPosition.x + vSize.x / 2.f, -0.02f, vPosition.y + vSize.y / 2.f );
+	volume->m_transform.scale = glm::vec3( vSize.x / 2.f, 0.02f, vSize.y / 2.f );
+	volume->m_vColor =
+		glm::vec3( float( vPosition.x ) / float( vMaxSize.x ), 0.25f, float( vPosition.y ) / float( vMaxSize.y ) );
+
+	fMesh.wait();
+	volume->m_pModel = fMesh.get();
+	m_mObjects.emplace( volume->getId(), std::move( volume ) );
+}
 
 bool CatLevel::isFullyLoaded()
 {
@@ -32,7 +49,7 @@ bool CatLevel::isFullyLoaded()
 
 CatObject::Map CatLevel::getAllObjects()
 {
-	return m_mObjects;
+	// return m_mObjects;
 
 	// Old copy code
 	CatObject::Map mObjects;
@@ -45,8 +62,8 @@ CatObject::Map CatLevel::getAllObjects()
 }
 
 std::unique_ptr< CatLevel > CatLevel::create( const std::string& sName,
-	const glm::ivec2 vSize /*= glm::ivec2( 9, 9 )*/,
-	const glm::ivec2 vChunkSize /*= glm::ivec2( 32, 32 )*/ )
+	const glm::ivec2 vSize /*= glm::ivec2( 7, 7 )*/,
+	const glm::ivec2 vChunkSize /*= glm::ivec2( 10, 10 )*/ )
 {
 	auto level = std::unique_ptr< CatLevel >( new CatLevel( sName, vSize, vChunkSize ) );
 
@@ -60,7 +77,8 @@ std::unique_ptr< CatLevel > CatLevel::create( const std::string& sName,
 	{
 		for ( int x = 0; x < vSize.y; ++x )
 		{
-			auto chunk = std::make_unique< CatChunk >( ++id, glm::ivec2( x, z ), vChunkSize );
+			auto chunk = std::make_unique< CatChunk >(
+				++id, glm::ivec2( x * vChunkSize.x, z * vChunkSize.y ), vChunkSize, vSize * vChunkSize );
 			level->m_mChunks.emplace( chunk->m_ID, std::move( chunk ) );
 		}
 	}
@@ -211,4 +229,38 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 	return level;
 }
 
+void CatLevel::updateObjectLocation( id_t id )
+{
+	{
+		auto it = m_mObjects.find( id );
+		if ( it != m_mObjects.end() )
+		{
+			return;
+		}
+	}
+	// Iterate through all chunks and update the object
+	for ( auto& [key, chunk] : m_mChunks )
+	{
+		auto it = chunk->m_MObjects.find( id );
+		if ( it != chunk->m_MObjects.end() )
+		{
+			auto obj = it->second.get();
+			auto newChunk = m_mChunks[getChunkAtLocation( obj->m_transform.translation )].get();
+
+			if ( newChunk == nullptr || newChunk->getId() == key ) return;
+
+			newChunk->m_MObjects[obj->getId()] = std::move( it->second );
+			chunk->m_MObjects.erase( it );
+			return;
+		}
+	}
+}
+
+id_t CatLevel::getChunkAtLocation( const glm::vec3& vLocation )
+{
+	auto vChunkLocation = glm::ivec2( floor( vLocation.x ), floor( vLocation.z ) ) / m_vChunkSize;
+	int x = floor( vChunkLocation.x );
+	int y = floor( vChunkLocation.y );
+	return ( x * m_vSize.x ) + y + 1;
+}
 } // namespace cat

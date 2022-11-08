@@ -122,6 +122,8 @@ void CatApp::run()
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 
+	std::shared_ptr< cat::CatObject > pSelectedItem = nullptr;
+
 	// Main loop
 	while ( !m_PWindow->shouldClose() )
 	{
@@ -243,28 +245,22 @@ void CatApp::run()
 			// glm::vec3 flush{ 1.f, 1.f, 1.f };
 			if ( getFrameInfo().m_selectedItemId != 0 )
 			{
+				pSelectedItem = m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId );
+
 				float mxManipulate[16];
-				ImGuizmo::RecomposeMatrixFromComponents(
-					glm::value_ptr(
-						m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.translation ),
-					glm::value_ptr(
-						m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.rotation ),
-					glm::value_ptr( m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.scale ),
+				ImGuizmo::RecomposeMatrixFromComponents( glm::value_ptr( pSelectedItem->m_transform.translation ),
+					glm::value_ptr( pSelectedItem->m_transform.rotation ), glm::value_ptr( pSelectedItem->m_transform.scale ),
 					mxManipulate );
 				auto isManipulated = ImGuizmo::Manipulate( glm::value_ptr( imguizmoCamera.getView() ),
 					glm::value_ptr( imguizmoCamera.getProjection() ), m_eGizmoOperation, m_eGizmoMode, mxManipulate, nullptr,
 					nullptr );
-				ImGuizmo::DecomposeMatrixToComponents( mxManipulate,
-					glm::value_ptr(
-						m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.translation ),
-					glm::value_ptr(
-						m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.rotation ),
-					glm::value_ptr(
-						m_pCurrentLevel->getAllObjects().at( getFrameInfo().m_selectedItemId )->m_transform.scale ) );
+				ImGuizmo::DecomposeMatrixToComponents( mxManipulate, glm::value_ptr( pSelectedItem->m_transform.translation ),
+					glm::value_ptr( pSelectedItem->m_transform.rotation ), glm::value_ptr( pSelectedItem->m_transform.scale ) );
 
 				if ( isManipulated )
 				{
 					// m_mObjects.at( frameInfo.m_selectedItemId ).m_transform.rotation *= ( glm::pi< float >() * 180.f );
+					m_pCurrentLevel->updateObjectLocation( getFrameInfo().m_selectedItemId );
 				}
 			}
 

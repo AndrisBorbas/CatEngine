@@ -23,8 +23,9 @@ json CatVolume::save()
 {
 	auto object = CatObject::save();
 
-	object["trigger"]["saveLevel"] = m_SSaveLevel;
-	object["trigger"]["loadLevel"] = m_SLoadLevel;
+	// Old trigger operation code
+	// object["trigger"]["saveLevel"] = m_SSaveLevel;
+	// object["trigger"]["loadLevel"] = m_SLoadLevel;
 
 	return object;
 }

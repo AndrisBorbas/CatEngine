@@ -20,6 +20,7 @@ layout ( push_constant ) uniform Push
 {
 	mat4 modelMatrix;
 	mat4 normalMatrix;
+	vec3 color;
 }
 push;
 
@@ -37,5 +38,9 @@ void main( )
 	vec3 ambientLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
 	vec3 diffuseLight = lightColor * max( dot( normalWorldSpace, normalize( directionToLight ) ), 0.0f );
 
-	fragColor = color;
+	if ( push.color == vec3( -2.0, -2.0, -2.0 ) ) {
+		fragColor = color;
+	} else {
+		fragColor = push.color;
+	}
 }

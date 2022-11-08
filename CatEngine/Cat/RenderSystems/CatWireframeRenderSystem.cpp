@@ -17,6 +17,7 @@ struct CatPushConstantData
 {
 	glm::mat4 m_mxModel{ 1.f };
 	glm::mat4 m_mxNormal{ 1.f };
+	glm::vec3 m_vColor{ -2.0f, -2.0f, -2.0f };
 };
 
 CatWireframeRenderSystem::CatWireframeRenderSystem( CatDevice* pDevice,
@@ -89,6 +90,7 @@ void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 			CatPushConstantData push{};
 			push.m_mxModel = obj->m_transform.mat4();
 			push.m_mxNormal = obj->m_transform.normalMatrix();
+			push.m_vColor = obj->m_vColor;
 
 			frameInfo.m_pCommandBuffer.pushConstants( m_pPipelineLayout,
 				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, sizeof( CatPushConstantData ),
