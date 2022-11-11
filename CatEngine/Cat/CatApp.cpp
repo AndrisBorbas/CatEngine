@@ -94,10 +94,9 @@ void CatApp::init()
 {
 	m_pCurrentLevel = CatLevel::create( "Base" );
 
-	// GLFW input handlers are overwritten and ImGui calls previously set input handlers
-	CatInput::registerInputHandlers();
-
 	m_pImgui = new CatImgui( m_PWindow, m_PDevice, m_pRenderer->getSwapChainRenderPass(), m_pRenderer->getImageCount() );
+
+	CatInput::registerInputHandlers();
 
 	m_pCameraObject = CatObject::create( "Camera", "", ObjectType::eCamera );
 	m_pCameraObject->m_transform.translation = { 0.f, 1.5f, 2.5f };
@@ -296,7 +295,6 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 	GetEditorInstance()->m_RFrameInfo.m_selectedItemId = 0;
 	m_pCurrentLevel = CatLevel::load( sFileName );
 }
-
 
 
 } // namespace cat

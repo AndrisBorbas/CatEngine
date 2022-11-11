@@ -90,6 +90,8 @@ private:
 
 	std::unique_ptr< CatLevel > m_pCurrentLevel;
 
+	GLFWkeyfun m_fKeyCallback;
+
 public:
 	__declspec( property( get = getFrameInfo ) ) CatFrameInfo& m_RFrameInfo;
 
@@ -105,6 +107,7 @@ public:
 	CAT_READONLY_PROPERTY( m_assetLoader, getAssetLoader, m_AssetLoader );
 	CAT_READONLY_PROPERTY( m_fCameraSpeed, getCameraSpeed, m_FCameraSpeed );
 	CAT_READONLY_PROPERTY( m_pCurrentLevel, getCurrentLevel, m_PCurrentLevel );
+	CAT_PROPERTY( m_fKeyCallback, getKeyCallback, setKeyCallback, m_FKeyCallback );
 };
 
 [[nodiscard]] extern CatApp* GetEditorInstance();

@@ -188,8 +188,6 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 
 		for ( auto& chunkData : file["chunks"] )
 		{
-			// TODO: create new chunkData and load it.
-
 			if ( chunkData.is_null() ) continue;
 
 			auto id = chunkData["id"].get< id_t >();
@@ -216,6 +214,14 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 			if ( f.valid() )
 			{
 				f.wait();
+			}
+		}
+
+		for ( auto& chunk : level->m_mChunks | std::views::values )
+		{
+			for ( auto& key : chunk->m_MObjects | std::views::keys )
+			{
+				chunk->m_AObjectIds.push_back( key );
 			}
 		}
 

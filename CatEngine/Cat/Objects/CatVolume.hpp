@@ -21,6 +21,7 @@ public:
 	}
 
 	virtual bool isInside( const CatObject& other );
+	virtual bool isInside2D( const CatObject& other );
 	json save() override;
 
 	virtual ~CatVolume() override = default;

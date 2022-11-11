@@ -73,9 +73,11 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 
 void CatInput::registerInputHandlers()
 {
+	GetEditorInstance()->m_FKeyCallback = glfwSetKeyCallback( **cat::GetEditorInstance()->m_PWindow, nullptr );
 	glfwSetKeyCallback( **cat::GetEditorInstance()->m_PWindow,
 		[]( GLFWwindow* window, int key, int scancode, int action, int mods )
 		{
+			GetEditorInstance()->m_FKeyCallback( window, key, scancode, action, mods );
 			if ( key == GLFW_KEY_ENTER && action == GLFW_PRESS && mods == GLFW_MOD_ALT )
 			{
 				cat::GetEditorInstance()->m_PWindow->toggleFullscreen();

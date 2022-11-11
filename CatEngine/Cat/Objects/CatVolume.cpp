@@ -19,6 +19,20 @@ bool CatVolume::isInside( const CatObject& other )
 	return false;
 }
 
+bool CatVolume::isInside2D( const CatObject& other )
+{
+	glm::vec3 point = other.m_transform.translation;
+	glm::vec3 center = m_transform.translation;
+	glm::vec3 scale = m_transform.scale;
+
+	if ( ( point.x < center.x + scale.x && point.x > center.x - scale.x )
+		 && ( point.z < center.z + scale.z && point.z > center.z - scale.z ) )
+	{
+		return true;
+	}
+	return false;
+}
+
 json CatVolume::save()
 {
 	auto object = CatObject::save();
