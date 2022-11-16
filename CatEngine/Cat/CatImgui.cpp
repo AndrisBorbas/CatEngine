@@ -12,6 +12,7 @@
 #include <functional>
 
 #include "ImGuizmo.h"
+#include "implot.h"
 
 namespace cat
 {
@@ -37,6 +38,7 @@ CatImgui::CatImgui( CatWindow* pWindow, CatDevice* pDevice, vk::RenderPass rende
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
@@ -84,6 +86,7 @@ CatImgui::~CatImgui()
 	// m_rDevice.getDevice().destroyDescriptorPool( m_pDescriptorPool->getDescriptorPool() );
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
+	ImPlot::DestroyContext();
 	ImGui::DestroyContext();
 }
 
@@ -133,6 +136,8 @@ void CatImgui::drawWindows()
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can
 	// browse its code to learn more about Dear ImGui!).
 	if ( m_bShowDemoWindow ) ImGui::ShowDemoWindow( &m_bShowDemoWindow );
+
+	// ImPlot::ShowDemoWindow();
 
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named
 	// window.
@@ -184,29 +189,34 @@ void CatImgui::drawWindows()
 			GetEditorInstance()->saveLevel( name );
 		}
 
-		// TODO: https://github.com/epezent/implot
-
-		auto dFrameRate = GetEditorInstance()->m_DFrameRate;
-		if ( !m_qFrameTimes.empty() && dFrameRate != m_qFrameTimes.front() )
+		
+		if ( ImPlot::BeginPlot( "##FramePacing", ImVec2( -1, 150 ) ) )
 		{
-			m_qFrameTimes.push_front( dFrameRate );
-			if ( m_qFrameTimes.size() > m_nQueueSize )
-			{
-				m_qFrameTimes.pop_back();
-			}
+			static double history = 1.0;
+			static double t = 0.0;
+			t += GetEditorInstance()->m_DFrameTime;
+			m_vFrameTimes.add( float( t ), float( GetEditorInstance()->m_DFrameTime * 1000.0 ) );
+			m_vFrameRates.add( float( t ), float( GetEditorInstance()->m_DFrameRate ) );
+
+			static ImPlotAxisFlags flags;
+			ImPlot::SetupAxes( nullptr, nullptr, flags, flags );
+			ImPlot::SetupAxis( ImAxis_Y2, "", ImPlotAxisFlags_AuxDefault );
+			ImPlot::SetupAxisLimits( ImAxis_X1, t - history, t, ImGuiCond_Always );
+			ImPlot::SetupAxisLimits( ImAxis_Y1, 0, 10.0f );
+			ImPlot::SetupAxisLimits( ImAxis_Y2, 0, 1000.0f );
+
+			ImPlot::TagY( GetEditorInstance()->m_DFrameTime * 1000.0f, ImVec4( 0, 0, 0.475f, 0.725f ), "%.4f",
+				GetEditorInstance()->m_DFrameTime * 1000.0f );
+			ImPlot::PlotLine( "FrameTime", &m_vFrameTimes.m_vData[0].x, &m_vFrameTimes.m_vData[0].y,
+				m_vFrameTimes.m_vData.size(), 0, m_vFrameTimes.m_nOffset, 2 * sizeof( float ) );
+
+			ImPlot::SetAxes( ImAxis_X1, ImAxis_Y2 );
+			ImPlot::TagY( GetEditorInstance()->m_DFrameRate, ImVec4( 0.863f, 0.256f, 0, 0.625f ), "%.1f",
+				GetEditorInstance()->m_DFrameRate );
+			ImPlot::PlotLine( "FrameRate", &m_vFrameRates.m_vData[0].x, &m_vFrameRates.m_vData[0].y,
+				m_vFrameRates.m_vData.size(), 0, m_vFrameRates.m_nOffset, 2 * sizeof( float ) );
+			ImPlot::EndPlot();
 		}
-
-		auto func = [&]( void* data, int idx ) -> float
-		{
-			auto asd = m_qFrameTimes.begin();
-			std::advance( asd, idx );
-			return *asd;
-		};
-
-
-		//		 float ( *f )( void*, int ) = Lambda::ptr< float, float ( * )( void*, int ) >( func );
-
-		// ImGui::PlotLines( "Frame Times", f, nullptr, m_qFrameTimes.size(), 0, NULL, 0.0f, 2000.0f, ImVec2( 0, 80 ) );
 
 		ImGui::End();
 	}

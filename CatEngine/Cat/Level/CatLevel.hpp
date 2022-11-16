@@ -3,31 +3,15 @@
 
 #include "Cat/Utils/CatUtils.hpp"
 #include "Cat/Objects/CatObject.hpp"
+#include "Cat/Level/CatChunk.hpp"
 
 #include <string>
 #include <utility>
 #include <future>
+#include <queue>
 
 namespace cat
 {
-
-class CatChunk
-{
-private:
-	const id_t m_id;
-	glm::ivec2 m_vPosition;
-	CatObject::Map m_mObjects;
-	std::vector< id_t > m_aObjectIds;
-
-public:
-	CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize, glm::ivec2 vMaxSize );
-	~CatChunk() = default;
-
-	CAT_READONLY_PROPERTY( m_id, getId, m_ID );
-	CAT_PROPERTY( m_vPosition, getPosition, setPosition, m_VPosition );
-	CAT_READONLY_PROPERTY( m_mObjects, getObjects, m_MObjects );
-	CAT_READONLY_PROPERTY( m_aObjectIds, getObjectIds, m_AObjectIds );
-};
 
 // TODO: Levels are rectangular, and chunks have ascending ids, so you can easily calculate the neighbouring chunk ids on the x
 // axis by adding/subtracting 1 and ont the z axis by adding/subtracting the width of the level in chunks.
@@ -42,10 +26,11 @@ private:
 	glm::ivec2 m_vChunkSize;
 	id_t m_idCurrentChunk = 0;
 	std::unordered_map< id_t, std::unique_ptr< CatChunk > > m_mChunks;
-	std::vector< id_t > m_aLoadedChunkIds;
+	std::vector< bool > m_aLoadedChunks;
+	std::vector< bool > m_aLastLoadedChunks;
 	CatObject::Map m_mObjects;
 	std::future< void > m_fLoaded;
-
+	json m_jData;
 
 public:
 	virtual ~CatLevel() = default;
@@ -54,7 +39,7 @@ public:
 		glm::ivec2 vSize = glm::ivec2( 7, 7 ),
 		glm::ivec2 vChunkSize = glm::ivec2( 10, 10 ) );
 	void save( const std::string& sFileName = "" );
-	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& sName );
+	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& levelData );
 
 	bool isFullyLoaded();
 
@@ -63,10 +48,14 @@ public:
 
 	CatObject::Map getAllObjects();
 
+	void loadChunk( const glm::vec3& vLocationm, int nRadius = 1 );
+
 protected:
 	[[nodiscard]] explicit CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )
 		: m_sName( std::move( sName ) ), m_vSize( vSize ), m_vChunkSize( vChunkSize )
 	{
+		m_aLoadedChunks = std::vector< bool >( m_vSize.x * m_vSize.y + 1, false );
+		m_aLastLoadedChunks = std::vector< bool >( m_vSize.x * m_vSize.y + 1, false );
 	}
 
 public:

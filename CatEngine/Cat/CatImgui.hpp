@@ -24,6 +24,37 @@ static void check_vk_result( VkResult err )
 	if ( err < 0 ) abort();
 }
 
+struct CatScrollingBuffer
+{
+	int m_nMaxSize;
+	int m_nOffset;
+	ImVector< ImVec2 > m_vData;
+	CatScrollingBuffer( int nMaxSize = 1000 )
+	{
+		m_nMaxSize = nMaxSize;
+		m_nOffset = 0;
+		m_vData.reserve( m_nMaxSize );
+	}
+	void add( float x, float y )
+	{
+		if ( m_vData.size() < m_nMaxSize )
+			m_vData.push_back( ImVec2( x, y ) );
+		else
+		{
+			m_vData[m_nOffset] = ImVec2( x, y );
+			m_nOffset = ( m_nOffset + 1 ) % m_nMaxSize;
+		}
+	}
+	void erase()
+	{
+		if ( m_vData.size() > 0 )
+		{
+			m_vData.shrink( 0 );
+			m_nOffset = 0;
+		}
+	}
+};
+
 class CatImgui
 {
 public:
@@ -50,9 +81,10 @@ private:
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 
-	std::list< double > m_qFrameTimes{ 0.0 };
+	CatScrollingBuffer m_vFrameTimes{ 1 << 10 };
+	CatScrollingBuffer m_vFrameRates{ 1 << 10 };
 
-	const size_t m_nQueueSize = 100;
+	const size_t m_nQueueSize = 1000;
 };
 } // namespace cat
 

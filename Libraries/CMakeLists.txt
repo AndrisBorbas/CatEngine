@@ -62,3 +62,14 @@ target_include_directories(concurrentqueue INTERFACE concurrentqueue-1.0.3)
 
 add_library(threadpool INTERFACE)
 target_include_directories(threadpool INTERFACE thread-pool-3.3.0)
+
+add_library(implot STATIC)
+target_include_directories(implot PUBLIC implot-master)
+target_sources(implot PRIVATE
+		"implot-master/implot_internal.h"
+		"implot-master/implot.h"
+		"implot-master/implot.cpp"
+		"implot-master/implot_demo.cpp"
+		"implot-master/implot_items.cpp"
+		)
+target_link_libraries(implot imgui)

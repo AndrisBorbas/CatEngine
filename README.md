@@ -3,16 +3,17 @@
 ### TODO:
 
 - [ ] chunks
-  - [x] Base
-  - [x] Asset caching
-  - [x] Moving object between chunks
-  - [ ] chunk unloading
-    - [ ] asset unloading
-  - [ ] dynamic chunk loading
+    - [x] Base
+    - [x] Asset caching
+    - [x] Moving object between chunks
+    - [x] chunk unloading
+        - [ ] asset unloading
+    - [x] dynamic chunk loading
 - [ ] LODs
 - [ ] Terrain
-  - [ ] Terrain generation
-  - [ ] Tessellation
+    - [ ] Terrain generation
+    - [ ] Tessellation
 - [ ] Performance
-    - [ ] Implement graph
+    - [x] Implement graph
+        - [ ] Fix performance
     - [ ] gather data

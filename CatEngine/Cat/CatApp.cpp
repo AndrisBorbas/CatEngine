@@ -170,6 +170,8 @@ void CatApp::run()
 		}
 		*/
 
+		m_pCurrentLevel->loadChunk( m_pCameraObject->m_transform.translation );
+
 		if ( m_pCurrentLevel->isFullyLoaded() )
 		{
 			DLOG_F( INFO, "Frame: %llu, level fully loaded", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
@@ -182,7 +184,7 @@ void CatApp::run()
 			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
 
 		float aspect = m_pRenderer->getAspectRatio();
-		m_camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.10f, 100.f );
+		m_camera.setPerspectiveProjection( glm::radians( 50.f ), aspect, 0.10f, 1000.f );
 
 		auto imguizmoCamera = m_camera;
 		imguizmoCamera.setPerspectiveProjectionImGuizmo( glm::radians( 50.f ), aspect, 0.10f, 100.f );

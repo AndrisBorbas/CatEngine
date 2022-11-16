@@ -32,6 +32,16 @@
 
 #include <json.hpp>
 
+#ifndef GLM_FORCE_RADIANS
+#define GLM_FORCE_RADIANS
+#endif // GLM_FORCE_RADIANS
+#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#endif // GLM_FORCE_DEPTH_ZERO_TO_ONE
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif // GLM_ENABLE_EXPERIMENTAL
+
 #include "Cat/Utils/CatUtils.hpp"
 
 // for convenience

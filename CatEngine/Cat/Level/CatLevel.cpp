@@ -1,36 +1,17 @@
-#include <fstream>
 #include "CatLevel.hpp"
 #include "Cat/CatApp.hpp"
 #include "Cat/Objects/CatLight.hpp"
 #include "Cat/Objects/CatVolume.hpp"
 #include "Cat/Objects/CatAssetLoader.hpp"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/constants.hpp>
 #include <memory>
+#include <fstream>
 
 namespace cat
 {
-
-CatChunk::CatChunk( const id_t id, glm::ivec2 vPosition, glm::ivec2 vSize, glm::ivec2 vMaxSize )
-	: m_id( id ), m_vPosition( vPosition )
-{
-	auto fMesh = GetEditorInstance()->m_AssetLoader.get( "assets/models/cube.obj" );
-
-	auto volume = CatVolume::create( "ChunkVisualizer" );
-	volume->m_transform.translation = glm::vec3( vPosition.x + vSize.x / 2.f, -0.02f, vPosition.y + vSize.y / 2.f );
-	volume->m_transform.scale = glm::vec3( vSize.x / 2.f, 0.02f, vSize.y / 2.f );
-	volume->m_vColor =
-		glm::vec3( float( vPosition.x ) / float( vMaxSize.x ), 0.25f, float( vPosition.y ) / float( vMaxSize.y ) );
-
-	fMesh.wait();
-	volume->m_pModel = fMesh.get();
-	m_mObjects.emplace( volume->getId(), std::move( volume ) );
-}
 
 bool CatLevel::isFullyLoaded()
 {
@@ -150,6 +131,8 @@ void CatLevel::save( const std::string& sFileName /* = "" */ )
 	ofs << file.dump( -1, '\t' ) << std::endl;
 	ofs.close();
 
+	m_jData = file;
+
 	LOG_F( INFO, "Saved level: %s", sPath.c_str() );
 }
 
@@ -162,22 +145,23 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 		sPath += ".json";
 	}
 
-	json file;
+	json jLevelData;
 	std::ifstream ifs( sPath );
-	ifs >> file;
+	ifs >> jLevelData;
 	ifs.close();
 
-	glm::ivec2 vSize = glm::make_vec2( file["size"].get< std::vector< int > >().data() );
-	glm::ivec2 vChunkSize = glm::make_vec2( file["chunkSize"].get< std::vector< int > >().data() );
+	glm::ivec2 vSize = glm::make_vec2( jLevelData["size"].get< std::vector< int > >().data() );
+	glm::ivec2 vChunkSize = glm::make_vec2( jLevelData["chunkSize"].get< std::vector< int > >().data() );
 
 	// We only block to parse the level data from disk, loading objects is done async.
 	auto level = create( sName, vSize, vChunkSize );
+	level->m_jData = jLevelData;
 
-	auto task = []( json file, CatLevel* level )
+	auto task = []( CatLevel* level )
 	{
 		LOG_SCOPE_F( INFO, "Running level load task" );
 		auto aGlobalFutures = std::vector< std::shared_future< std::shared_ptr< CatModel > > >();
-		for ( auto& object : file["globals"] )
+		for ( auto& object : level->m_jData["globals"] )
 		{
 			if ( object.is_null() ) continue;
 
@@ -186,7 +170,7 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 			aGlobalFutures.push_back( GetEditorInstance()->m_AssetLoader.load( object, level->m_mObjects ) );
 		}
 
-		for ( auto& chunkData : file["chunks"] )
+		for ( auto& chunkData : level->m_jData["chunks"] )
 		{
 			if ( chunkData.is_null() ) continue;
 
@@ -230,7 +214,7 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 
 	LOG_F( INFO, "Loaded level data: %s", ( LEVELS_BASE_PATH + level->m_sName ).c_str() );
 
-	level->m_fLoaded = GetEditorInstance()->m_TLevelLoader.submit( std::move( task ), file, level.get() );
+	level->m_fLoaded = GetEditorInstance()->m_TLevelLoader.submit( std::move( task ), level.get() );
 
 	return level;
 }
@@ -251,7 +235,10 @@ void CatLevel::updateObjectLocation( id_t id )
 		if ( it != chunk->m_MObjects.end() )
 		{
 			auto obj = it->second.get();
-			auto newChunk = m_mChunks[getChunkAtLocation( obj->m_transform.translation )].get();
+			auto newId = getChunkAtLocation( obj->m_transform.translation );
+			if ( newId <= 0 || newId > m_vSize.x * m_vSize.y ) return;
+
+			auto newChunk = m_mChunks[newId].get();
 
 			if ( newChunk == nullptr || newChunk->getId() == key ) return;
 
@@ -267,6 +254,59 @@ id_t CatLevel::getChunkAtLocation( const glm::vec3& vLocation )
 	auto vChunkLocation = glm::ivec2( floor( vLocation.x ), floor( vLocation.z ) ) / m_vChunkSize;
 	int x = floor( vChunkLocation.x );
 	int y = floor( vChunkLocation.y );
-	return ( x * m_vSize.x ) + y + 1;
+	if ( x < 0 || x >= m_vSize.x || y < 0 || y >= m_vSize.y ) return 0;
+	return ( y * m_vSize.y ) + x + 1;
 }
+
+void CatLevel::loadChunk( const glm::vec3& vLocation, int nRadius /* = 1 */ )
+{
+	auto id = getChunkAtLocation( vLocation );
+	if ( id <= 0 || id > m_vSize.x * m_vSize.y ) return;
+
+	std::swap( m_aLoadedChunks, m_aLastLoadedChunks );
+	std::fill( m_aLoadedChunks.begin(), m_aLoadedChunks.end(), false );
+
+	if ( m_mChunks[id]->load() )
+	{
+		m_aLoadedChunks[id] = true;
+	}
+
+	int lx = -std::min( m_mChunks[id]->m_VPosition.x / m_vChunkSize.x, nRadius );
+	int hx = std::min( m_mChunks[id]->m_VPosition.x / m_vChunkSize.x, nRadius );
+
+	for ( int j = -nRadius; j <= nRadius; j++ )
+	{
+		for ( int i = -nRadius; i <= nRadius; i++ )
+		{
+			auto neighbourId = id + ( j * m_vSize.y ) + i;
+			if ( neighbourId <= 0 || neighbourId > m_vSize.x * m_vSize.y ) continue;
+			// dont wrap on edge
+			// if ( m_mChunks[neighbourId]->m_VPosition.x + i <= 0 || m_mChunks[neighbourId]->m_VPosition.x + i >= m_vSize.x )
+			// continue;
+
+			if ( m_mChunks[neighbourId]->load() )
+			{
+				m_aLoadedChunks[neighbourId] = true;
+			}
+		}
+	}
+
+	// Unload chunks that are too far away
+
+	for ( int i = 0; i < m_aLastLoadedChunks.size(); i++ )
+	{
+		if ( m_aLastLoadedChunks[i] && !m_aLoadedChunks[i] )
+		{
+			m_mChunks[i]->unload();
+		}
+	}
+}
+
+// 01  2  3  4  5  6  7  8  9 10
+// 11 12 13 14 15 16 17 18 19 20
+// 21 22 23 24 25 26 27 28 29 30
+// 31 32 33 34 35 36 37 38 39 40
+// 41 42 43 44 45 46 47 48 49 50
+// 51 52 53 54 55 56 57 58 59 60
+
 } // namespace cat
