@@ -108,7 +108,7 @@ vk::Result CatSwapChain::submitCommandBuffers( const vk::CommandBuffer* buffers,
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	const std::lock_guard lock( cat::CatDevice::m_mutex );
+	// const std::lock_guard lock( cat::CatDevice::m_mutex );
 
 	(**m_pDevice).resetFences( 1, &inFlightFences[m_nCurrentFrame] );
 	if ( m_pDevice->getGraphicsQueue().submit( 1, &submitInfo, inFlightFences[m_nCurrentFrame] ) != vk::Result::eSuccess )

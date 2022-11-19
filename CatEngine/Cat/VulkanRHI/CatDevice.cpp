@@ -635,7 +635,7 @@ void CatDevice::endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const
 		.pCommandBuffers = &commandBuffer,
 	};
 
-	const std::lock_guard lock( m_mutex );
+	// const std::lock_guard lock( m_mutex );
 	m_transferQueue.submit( 1, &submitInfo, VK_NULL_HANDLE );
 	m_transferQueue.waitIdle();
 
@@ -657,7 +657,10 @@ void CatDevice::copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::Devi
 	endSingleTimeCommands( commandBuffer );
 }
 
-void CatDevice::copyBufferToImage( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount )
+void CatDevice::copyBufferToImage( vk::Buffer buffer,
+	vk::Image image,
+	vk::Extent3D imageExtent,
+	vk::ImageSubresourceLayers imageSubresource /* = Color 1 layer 0 mip level */ )
 {
 	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -666,15 +669,10 @@ void CatDevice::copyBufferToImage( vk::Buffer buffer, vk::Image image, uint32_t 
 		.bufferRowLength = 0,
 		.bufferImageHeight = 0,
 
-		.imageSubresource{
-			.aspectMask = vk::ImageAspectFlagBits::eColor,
-			.mipLevel = 0,
-			.baseArrayLayer = 0,
-			.layerCount = layerCount,
-		},
+		.imageSubresource = imageSubresource,
 
 		.imageOffset = { 0, 0, 0 },
-		.imageExtent = { width, height, 1 },
+		.imageExtent = imageExtent,
 	};
 
 
@@ -708,4 +706,53 @@ void CatDevice::createImageWithInfo( const vk::ImageCreateInfo& imageInfo,
 
 	m_device.bindImageMemory( image, imageMemory, 0 );
 }
+
+void CatDevice::transitionImageLayout( vk::Image image,
+	vk::ImageLayout oldLayout,
+	vk::ImageLayout newLayout,
+	vk::ImageSubresourceRange subresourceRange /* = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 } */ )
+{
+	auto commandBuffer = beginSingleTimeCommands();
+
+	vk::ImageMemoryBarrier barrier{
+		.oldLayout = oldLayout,
+		.newLayout = newLayout,
+
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+
+		.image = image,
+
+		.subresourceRange = subresourceRange,
+	};
+
+	vk::PipelineStageFlags sourceStage;
+	vk::PipelineStageFlags destinationStage;
+
+	if ( oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal )
+	{
+		barrier.srcAccessMask = {};
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	else if ( oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal )
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+	}
+	else
+	{
+		LOG_F( ERROR, "Unsupported layout transition!" );
+	}
+
+	commandBuffer.pipelineBarrier( sourceStage, destinationStage, {}, 0, nullptr, 0, nullptr, 1, &barrier );
+
+	endSingleTimeCommands( commandBuffer );
+}
+
 } // namespace cat

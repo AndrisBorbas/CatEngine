@@ -77,7 +77,7 @@ private:
 	std::unique_ptr< CatDescriptorSetLayout > m_pGlobalDescriptorSetLayout;
 	std::vector< vk::DescriptorSet > m_aGlobalDescriptorSets;
 
-	CatImgui* m_pImgui;
+	CatImgui* m_pImgui = nullptr;
 
 	CatCamera m_camera;
 	std::unique_ptr< CatObject > m_pCameraObject;
@@ -90,7 +90,7 @@ private:
 
 	std::unique_ptr< CatLevel > m_pCurrentLevel;
 
-	GLFWkeyfun m_fKeyCallback;
+	GLFWkeyfun m_fKeyCallback = nullptr;
 
 public:
 	__declspec( property( get = getFrameInfo ) ) CatFrameInfo& m_RFrameInfo;

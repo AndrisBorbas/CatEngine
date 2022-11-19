@@ -30,6 +30,7 @@
 #include "Objects/CatVolume.hpp"
 #include "RenderSystems/CatWireframeRenderSystem.hpp"
 #include "Cat/RenderSystems/CatGridRenderSystem.hpp"
+#include "Cat/Texture/CatTexture.hpp"
 
 namespace cat
 {
@@ -107,6 +108,9 @@ void CatApp::init()
 
 void CatApp::run()
 {
+	auto yes = CatTexture2D( m_PDevice, "assets/textures/yes.png" );
+	auto tex = CatTexture2D( m_PDevice, "assets/textures/terrain.tga", vk::Format::eR8Srgb, STBI_grey );
+
 	CatSimpleRenderSystem simpleRenderSystem{
 		m_PDevice, m_pRenderer->getSwapChainRenderPass(), m_pGlobalDescriptorSetLayout->getDescriptorSetLayout() };
 	CatPointLightRenderSystem pointLightRenderSystem{
@@ -121,7 +125,7 @@ void CatApp::run()
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 
-	std::shared_ptr< cat::CatObject > pSelectedItem = nullptr;
+	std::shared_ptr< cat::CatObject > pSelectedItem;
 
 	// Main loop
 	while ( !m_PWindow->shouldClose() )
@@ -142,33 +146,6 @@ void CatApp::run()
 			m_dDeltaTime -= 0.1;
 			// m_dFrameRate = 1000.0 / ( m_dFrameRate == 0.0 ? 0.001 : m_dFrameRate );
 		}
-
-		// Check if camera is in a volume
-		/*
-		if ( viewerObject )
-		{
-			for ( auto& obj : m_mObjects | std::views::values )
-			{
-				if ( const auto volume = dynamic_cast< CatVolume* >( &( *obj ) ) )
-				{
-					if ( volume->isInside( *viewerObject ) )
-					{
-						// LOG_F( INFO, "POG" );
-						if ( !volume->m_SLoadLevel.empty() && !volume->m_BIsLoaded )
-						{
-							volume->m_BIsLoaded = true;
-							loadLevel( volume->m_SLoadLevel, false );
-						}
-						if ( !volume->m_SSaveLevel.empty() && !volume->m_BIsSaved )
-						{
-							volume->m_BIsSaved = true;
-							saveLevel( volume->m_SSaveLevel );
-						}
-					}
-				}
-			}
-		}
-		*/
 
 		m_pCurrentLevel->loadChunk( m_pCameraObject->m_transform.translation );
 

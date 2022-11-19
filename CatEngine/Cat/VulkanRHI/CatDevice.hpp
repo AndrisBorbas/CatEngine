@@ -74,16 +74,29 @@ public:
 	[[nodiscard]] vk::CommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const;
 	void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
-	void copyBufferToImage( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount );
+	void copyBufferToImage( vk::Buffer buffer,
+		vk::Image image,
+		vk::Extent3D imageExtent,
+		vk::ImageSubresourceLayers imageSubresource = vk::ImageSubresourceLayers{
+			.aspectMask = vk::ImageAspectFlagBits::eColor,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		} );
 
 	void createImageWithInfo( const vk::ImageCreateInfo& imageInfo,
 		vk::MemoryPropertyFlags properties,
 		vk::Image& image,
 		vk::DeviceMemory& imageMemory );
 
+	void transitionImageLayout( vk::Image image,
+		vk::ImageLayout oldLayout,
+		vk::ImageLayout newLayout,
+		vk::ImageSubresourceRange subresourceRange = vk::ImageSubresourceRange{ vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 } );
+
 	vk::PhysicalDeviceProperties m_properties;
 
-	inline static std::mutex m_mutex{};
+	// inline static std::mutex m_mutex{};
 
 private:
 	void createInstance();
