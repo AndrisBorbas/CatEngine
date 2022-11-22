@@ -6,6 +6,8 @@
 
 #include <stb_image.h>
 
+#include <dds.hpp>
+
 namespace cat
 {
 
@@ -16,6 +18,9 @@ public:
 		const std::string& rFilename,
 		vk::Format format,
 		int stbiFormat,
+		vk::Flags< vk::ImageUsageFlagBits > usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled );
+	CatTexture( CatDevice* pDevice,
+		const std::string& rFilename,
 		vk::Flags< vk::ImageUsageFlagBits > usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled );
 	virtual ~CatTexture();
 
@@ -31,12 +36,11 @@ protected:
 	uint32_t m_nLayerCount;
 	vk::DescriptorImageInfo m_rDescriptor;
 	vk::Sampler m_rSampler;
+	vk::ImageCreateInfo m_rImageCreateInfo;
+	vk::ImageViewCreateInfo m_rImageViewCreateInfo;
+	vk::Format m_rImageFormat;
 
 	void updateDescriptor();
-	void loadTexture( const std::string& rFilename,
-		vk::Format format,
-		int stbiFormat,
-		vk::Flags< vk::ImageUsageFlagBits > usage );
 
 public:
 	CAT_READONLY_PROPERTY( m_rSampler, getSampler, m_RSampler );
@@ -45,14 +49,16 @@ public:
 class CatTexture2D : public CatTexture
 {
 public:
-	// TODO: Add support for mipmaps
-	// https://github.com/spnda/dds_image
+	// STBI loader without mips
 	CatTexture2D( CatDevice* pDevice,
 		const std::string& rFilename,
 		vk::Format format = vk::Format::eR8G8B8A8Srgb,
 		int stbiFormat = STBI_rgb_alpha,
 		vk::Flags< vk::ImageAspectFlagBits > aspectMask = vk::ImageAspectFlagBits::eColor,
 		vk::Flags< vk::ImageUsageFlagBits > usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled );
+	// TODO: FIX
+	// DDS loader
+	CatTexture2D( CatDevice* pDevice, const std::string& rFilename, vk::Flags< vk::ImageUsageFlagBits > usage );
 	~CatTexture2D() override = default;
 };
 

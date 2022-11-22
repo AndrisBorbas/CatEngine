@@ -660,7 +660,7 @@ void CatDevice::copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::Devi
 void CatDevice::copyBufferToImage( vk::Buffer buffer,
 	vk::Image image,
 	vk::Extent3D imageExtent,
-	vk::ImageSubresourceLayers imageSubresource /* = Color 1 layer 0 mip level */ )
+	vk::ImageSubresourceLayers imageSubresource /* = Color bit, layer 1, mip level 0 */ )
 {
 	vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 

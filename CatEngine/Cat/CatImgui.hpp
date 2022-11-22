@@ -81,10 +81,10 @@ private:
 
 	std::unique_ptr< CatDescriptorPool > m_pDescriptorPool;
 
-	CatScrollingBuffer m_vFrameTimes{ 1 << 10 };
-	CatScrollingBuffer m_vFrameRates{ 1 << 10 };
+	CatScrollingBuffer m_vFrameTimes{ 1 << 12 };
+	CatScrollingBuffer m_vFrameRates{ 1 << 12 };
 
-	const size_t m_nQueueSize = 1000;
+	const size_t m_nQueueSize = 3000;
 };
 } // namespace cat
 

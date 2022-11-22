@@ -96,7 +96,7 @@ public:
 
 	vk::PhysicalDeviceProperties m_properties;
 
-	// inline static std::mutex m_mutex{};
+	inline static std::mutex m_mutex{};
 
 private:
 	void createInstance();

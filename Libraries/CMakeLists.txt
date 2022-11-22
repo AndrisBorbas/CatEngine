@@ -6,6 +6,9 @@ target_include_directories(glm INTERFACE glm)
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE stb-master)
 
+add_library(dds_image INTERFACE)
+target_include_directories(dds_image INTERFACE dds_image-main/include)
+
 add_library(glfw INTERFACE)
 target_include_directories(glfw INTERFACE glfw-3.3.8.bin.WIN64/include)
 target_link_directories(glfw INTERFACE glfw-3.3.8.bin.WIN64/lib-vc2022)

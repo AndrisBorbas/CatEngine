@@ -39,6 +39,35 @@ CatTexture::CatTexture( CatDevice* pDevice,
 	stbi_image_free( pixels );
 }
 
+CatTexture::CatTexture( cat::CatDevice* pDevice,
+	const std::string& rFilename,
+	vk::Flags< vk::ImageUsageFlagBits > usage /* = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled */ )
+	: m_pDevice( pDevice )
+{
+	dds::Image image;
+
+	dds::readFile( rFilename, &image );
+
+	m_nWidth = image.width;
+	m_nHeight = image.height;
+	m_nMipLevels = image.numMips;
+	m_nLayerCount = image.depth;
+	m_rImageFormat = vk::Format{ dds::getVulkanFormat( image.format, image.supportsAlpha ) };
+	m_rImageCreateInfo = dds::getVulkanImageCreateInfo( &image );
+	m_rImageCreateInfo.usage = usage;
+	m_rImageCreateInfo.samples = vk::SampleCountFlagBits::e1;
+	m_rImageViewCreateInfo = dds::getVulkanImageViewCreateInfo( &image );
+	m_rImageViewCreateInfo.image = m_rImage;
+
+	m_pStagingBuffer = new CatBuffer( m_pDevice, image.arraySize, 1, vk::BufferUsageFlagBits::eTransferSrc,
+		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
+
+	m_pStagingBuffer->map();
+	m_pStagingBuffer->writeToBuffer( image.data.data() );
+
+	m_pStagingBuffer->unmap();
+}
+
 CatTexture::~CatTexture()
 {
 	( **m_pDevice ).destroyImageView( m_rImageView );
@@ -53,13 +82,6 @@ void CatTexture::updateDescriptor()
 	m_rDescriptor.imageLayout = m_rImageLayout;
 	m_rDescriptor.imageView = m_rImageView;
 	m_rDescriptor.sampler = m_rSampler;
-}
-
-void CatTexture::loadTexture( const std::string& rFilename,
-	vk::Format format,
-	int stbiFormat,
-	vk::Flags< vk::ImageUsageFlagBits > usage )
-{
 }
 
 CatTexture2D::CatTexture2D( CatDevice* pDevice,
@@ -136,4 +158,58 @@ CatTexture2D::CatTexture2D( CatDevice* pDevice,
 	updateDescriptor();
 }
 
+CatTexture2D::CatTexture2D( CatDevice* pDevice,
+	const std::string& rFilename,
+	vk::Flags< vk::ImageUsageFlagBits > usage /* = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled */ )
+	: CatTexture( pDevice, rFilename, usage )
+{
+	m_pDevice->createImageWithInfo( m_rImageCreateInfo, vk::MemoryPropertyFlagBits::eDeviceLocal, m_rImage, m_rImageMemory );
+
+	m_pDevice->transitionImageLayout(
+		m_rImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, m_rImageViewCreateInfo.subresourceRange );
+
+	m_pDevice->copyBufferToImage( m_pStagingBuffer->getBuffer(), m_rImage, m_rImageCreateInfo.extent,
+		{
+			m_rImageViewCreateInfo.subresourceRange.aspectMask,
+			0,
+			m_rImageViewCreateInfo.subresourceRange.baseArrayLayer,
+			m_rImageViewCreateInfo.subresourceRange.layerCount,
+		} );
+
+	m_pDevice->transitionImageLayout( m_rImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal,
+		m_rImageViewCreateInfo.subresourceRange );
+
+	delete m_pStagingBuffer;
+	m_pStagingBuffer = nullptr;
+
+	vk::SamplerCreateInfo samplerCreateInfo{
+		.magFilter = vk::Filter::eLinear,
+		.minFilter = vk::Filter::eLinear,
+		.mipmapMode = vk::SamplerMipmapMode::eLinear,
+		.addressModeU = vk::SamplerAddressMode::eRepeat,
+		.addressModeV = vk::SamplerAddressMode::eRepeat,
+		.addressModeW = vk::SamplerAddressMode::eRepeat,
+		.mipLodBias = 0.0f,
+		.anisotropyEnable = VK_TRUE,
+		.maxAnisotropy = 16,
+		.compareEnable = VK_FALSE,
+		.compareOp = vk::CompareOp::eAlways,
+		.minLod = 0.0f,
+		.maxLod = 0.0f,
+		.borderColor = vk::BorderColor::eFloatTransparentBlack,
+		.unnormalizedCoordinates = VK_FALSE,
+	};
+
+	if ( ( **m_pDevice ).createSampler( &samplerCreateInfo, nullptr, &m_rSampler ) != vk::Result::eSuccess )
+	{
+		LOG_F( ERROR, "Failed to create texture sampler!" );
+	}
+
+	if ( ( **m_pDevice ).createImageView( &m_rImageViewCreateInfo, nullptr, &m_rImageView ) != vk::Result::eSuccess )
+	{
+		LOG_F( ERROR, "Failed to create texture image view!" );
+	}
+
+	updateDescriptor();
+}
 } // namespace cat

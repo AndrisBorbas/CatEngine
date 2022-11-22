@@ -35,7 +35,7 @@ add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngin
 # ###Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image loguru imgui ImGuizmo json concurrentqueue threadpool implot)
+target_link_libraries(${PROJECT_NAME} glm tinyobjloader stb_image dds_image loguru imgui ImGuizmo json concurrentqueue threadpool implot)
 target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan glfw)
 
 if (MSVC)
