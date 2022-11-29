@@ -51,6 +51,8 @@ public:
 	std::future< void > m_jLevelLoad{};
 	std::vector< std::future< std::pair< json, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
+	bool m_bTerrain = false;
+
 
 private:
 	CatWindow* m_pWindow;
@@ -71,7 +73,7 @@ private:
 	BS::thread_pool m_tLevelLoader{ 1 };
 	moodycamel::ConcurrentQueue< const char* > m_qLoadAssets{ 1 << 16 };
 	CatAssetLoader m_assetLoader{};
-	float m_fCameraSpeed = 2.33f;
+	float m_fCameraSpeed = 12.33f;
 
 	std::vector< std::unique_ptr< CatBuffer > > m_aUboBuffers;
 	std::unique_ptr< CatDescriptorSetLayout > m_pGlobalDescriptorSetLayout;
@@ -111,6 +113,8 @@ public:
 };
 
 [[nodiscard]] extern CatApp* GetEditorInstance();
+[[nodiscard]] extern CatApp* GEI();
+
 extern void CreateEditorInstance();
 extern void DestroyGameInstance();
 

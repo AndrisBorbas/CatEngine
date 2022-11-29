@@ -80,7 +80,7 @@ void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUb
 	const auto rotateLight =
 		glm::rotate( glm::mat4( 1.f ), 0.5f * static_cast< float >( rFrameInfo.m_dFrameTime ), { 0.f, -1.f, 0.f } );
 	int lightIndex = 0;
-	for ( auto& [key, obj] : rFrameInfo.m_rLevel->getAllObjects() )
+	for ( auto& [key, obj] : rFrameInfo.m_pLevel->getAllObjects() )
 	{
 		if ( obj->getType() >= ObjectType::eLight )
 		{
@@ -107,7 +107,7 @@ void CatPointLightRenderSystem::update( const CatFrameInfo& rFrameInfo, GlobalUb
 void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 {
 	std::map< float, id_t > sorted;
-	for ( auto& [key, obj] : rFrameInfo.m_rLevel->getAllObjects() )
+	for ( auto& [key, obj] : rFrameInfo.m_pLevel->getAllObjects() )
 	{
 		if ( !obj ) continue;
 		if ( obj->getType() >= ObjectType::eLight )
@@ -129,7 +129,7 @@ void CatPointLightRenderSystem::render( const CatFrameInfo& rFrameInfo ) const
 	// iterate through sorted lights in reverse order
 	for ( auto it = sorted.rbegin(); it != sorted.rend(); ++it )
 	{
-		const auto& object = rFrameInfo.m_rLevel->getAllObjects()[it->second].get();
+		const auto& object = rFrameInfo.m_pLevel->getAllObjects()[it->second].get();
 
 		if ( !object->m_BVisible ) continue;
 

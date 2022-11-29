@@ -20,19 +20,19 @@ CatImgui::CatImgui( CatWindow* pWindow, CatDevice* pDevice, vk::RenderPass rende
 	: m_pWindow{ pWindow }, m_pDevice{ pDevice }
 {
 	m_pDescriptorPool = CatDescriptorPool::Builder( *m_pDevice )
-							.addPoolSize( vk::DescriptorType::eSampler, 1000 )
-							.addPoolSize( vk::DescriptorType::eCombinedImageSampler, 1000 )
-							.addPoolSize( vk::DescriptorType::eSampledImage, 1000 )
-							.addPoolSize( vk::DescriptorType::eStorageImage, 1000 )
-							.addPoolSize( vk::DescriptorType::eUniformTexelBuffer, 1000 )
-							.addPoolSize( vk::DescriptorType::eStorageTexelBuffer, 1000 )
-							.addPoolSize( vk::DescriptorType::eUniformBuffer, 1000 )
-							.addPoolSize( vk::DescriptorType::eStorageBuffer, 1000 )
-							.addPoolSize( vk::DescriptorType::eUniformBufferDynamic, 1000 )
-							.addPoolSize( vk::DescriptorType::eStorageBufferDynamic, 1000 )
-							.addPoolSize( vk::DescriptorType::eInputAttachment, 1000 )
-							.setMaxSets( 1000 * 11 )
-							.setPoolFlags( vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet )
+							.addPoolSize( vk::DescriptorType::eSampler, 10 )
+							.addPoolSize( vk::DescriptorType::eCombinedImageSampler, 10 )
+							.addPoolSize( vk::DescriptorType::eSampledImage, 10 )
+							.addPoolSize( vk::DescriptorType::eStorageImage, 10 )
+							.addPoolSize( vk::DescriptorType::eUniformTexelBuffer, 10 )
+							.addPoolSize( vk::DescriptorType::eStorageTexelBuffer, 10 )
+							.addPoolSize( vk::DescriptorType::eUniformBuffer, 10 )
+							.addPoolSize( vk::DescriptorType::eStorageBuffer, 10 )
+							.addPoolSize( vk::DescriptorType::eUniformBufferDynamic, 10 )
+							.addPoolSize( vk::DescriptorType::eStorageBufferDynamic, 10 )
+							.addPoolSize( vk::DescriptorType::eInputAttachment, 10 )
+							.setMaxSets( 10 )
+							/*.setPoolFlags( vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet )*/
 							.build();
 
 	// Setup Dear ImGui context
@@ -162,10 +162,16 @@ void CatImgui::drawWindows()
 		// ImGui::SameLine();
 		// ImGui::Text( "counter = %d", counter );
 
+		ImGui::Checkbox( "Terrain", &GEI()->m_bTerrain );
+
 		ImGui::DragFloat3( "cam pos",
 			reinterpret_cast< float* >( &GetEditorInstance()->m_RFrameInfo.m_rCameraObject.m_transform.translation ), 0.1f );
 		ImGui::DragFloat3( "cam rot",
 			reinterpret_cast< float* >( &GetEditorInstance()->m_RFrameInfo.m_rCameraObject.m_transform.rotation ), 0.1f );
+
+		ImGui::DragFloat( "displacement", &GEI()->m_PCurrentLevel->m_PTerrain->m_Ubo.displacementFactor, 1.0f, 0.0f, 64.0f );
+		ImGui::DragFloat( "tessellation", &GEI()->m_PCurrentLevel->m_PTerrain->m_Ubo.tessellationFactor, 0.01f, 0.0f, 1.0f );
+		ImGui::DragFloat( "UVScale", &GEI()->m_PCurrentLevel->m_PTerrain->m_Ubo.uvScale, 1.0f, 0.0f, 1024.0f );
 		// ImGui::DragFloat3( "pos", (float*)&pFrameInfo.m_rUBO.lightPosition, 0.1f );
 
 		static char buf[128] = "wasd";
@@ -180,7 +186,8 @@ void CatImgui::drawWindows()
 			}
 			LOG_F( INFO, "Frame: %llu", GetEditorInstance()->m_RFrameInfo.m_nFrameNumber );
 
-			GetEditorInstance()->loadLevel( name );
+			std::thread t( [=] { GEI()->loadLevel( name ); } );
+			t.detach();
 		}
 		ImGui::SameLine();
 		if ( ImGui::Button( "Save Level" ) )
@@ -231,7 +238,7 @@ void CatImgui::drawWindows()
 		{
 			// static CatObject::id_t currentItemIdx = 0;
 			int i = 0;
-			for ( auto& [key, object] : GetEditorInstance()->m_RFrameInfo.m_rLevel->getAllObjects() )
+			for ( auto& [key, object] : GetEditorInstance()->m_RFrameInfo.m_pLevel->getAllObjects() )
 			{
 				if ( !bShowHidden && object->getName().find( "Chunk" ) != std::string::npos )
 				{
@@ -260,7 +267,7 @@ void CatImgui::drawWindows()
 		{
 			ImGui::Begin( "SelectedObject" );
 
-			auto pObject = GetEditorInstance()->m_RFrameInfo.m_rLevel->getAllObjects().at(
+			auto pObject = GetEditorInstance()->m_RFrameInfo.m_pLevel->getAllObjects().at(
 				GetEditorInstance()->m_RFrameInfo.m_selectedItemId );
 
 			auto bIsGlobal = false;

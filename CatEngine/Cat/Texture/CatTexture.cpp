@@ -14,14 +14,14 @@ CatTexture::CatTexture( CatDevice* pDevice,
 	const std::string& rFilename,
 	vk::Format format,
 	int stbiFormat,
-	vk::Flags< vk::ImageUsageFlagBits > usage /* = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled */ )
+	vk::Flags< vk::ImageUsageFlagBits > usage )
 	: m_pDevice( pDevice )
 {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load( rFilename.c_str(), &texWidth, &texHeight, &texChannels, stbiFormat );
+	m_pPixels = stbi_load( rFilename.c_str(), &texWidth, &texHeight, &texChannels, stbiFormat );
 	vk::DeviceSize imageSize = texWidth * texHeight * texChannels;
 
-	if ( !pixels )
+	if ( !m_pPixels )
 	{
 		LOG_F( ERROR, "Failed to load texture image!" );
 	}
@@ -33,15 +33,12 @@ CatTexture::CatTexture( CatDevice* pDevice,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
 
 	m_pStagingBuffer->map();
-	m_pStagingBuffer->writeToBuffer( pixels );
+	m_pStagingBuffer->writeToBuffer( m_pPixels );
 
 	m_pStagingBuffer->unmap();
-	stbi_image_free( pixels );
 }
 
-CatTexture::CatTexture( cat::CatDevice* pDevice,
-	const std::string& rFilename,
-	vk::Flags< vk::ImageUsageFlagBits > usage /* = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled */ )
+CatTexture::CatTexture( cat::CatDevice* pDevice, const std::string& rFilename, vk::Flags< vk::ImageUsageFlagBits > usage )
 	: m_pDevice( pDevice )
 {
 	dds::Image image;
@@ -70,6 +67,7 @@ CatTexture::CatTexture( cat::CatDevice* pDevice,
 
 CatTexture::~CatTexture()
 {
+	stbi_image_free( m_pPixels );
 	( **m_pDevice ).destroyImageView( m_rImageView );
 	( **m_pDevice ).destroyImage( m_rImage );
 	( **m_pDevice ).destroySampler( m_rSampler );

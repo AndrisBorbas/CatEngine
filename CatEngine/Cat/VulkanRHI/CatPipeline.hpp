@@ -29,11 +29,15 @@ struct PipelineConfigInfo
 	vk::PipelineLayout m_pPipelineLayout = nullptr;
 	vk::RenderPass m_pRenderPass = nullptr;
 	uint32_t m_nSubpass = 0;
+
+	std::vector< vk::PipelineShaderStageCreateInfo > m_aShaderStages;
+	vk::PipelineTessellationStateCreateInfo m_pTessellationInfo;
 };
 
 class CatPipeline
 {
 public:
+	CatPipeline( CatDevice* pDevice, const PipelineConfigInfo& configInfo );
 	CatPipeline( CatDevice* pDevice,
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
@@ -56,9 +60,15 @@ public:
 	static void disableBackFaceCulling( PipelineConfigInfo& configInfo );
 	static void disableDepthWrite( PipelineConfigInfo& configInfo );
 	static void disableDepthTest( PipelineConfigInfo& configInfo );
+	static void enableTessellation( PipelineConfigInfo& configInfo, uint32_t patchControlPoints = 4 );
+
+	static vk::PipelineShaderStageCreateInfo loadShader( CatDevice* pDevice,
+		const std::string& filepath,
+		vk::ShaderStageFlagBits stage );
+	static std::vector< char > readFile( const std::string& filepath );
 
 private:
-	static std::vector< char > readFile( const std::string& filepath );
+	void createGraphicsPipeline( const PipelineConfigInfo& configInfo );
 
 	void createGraphicsPipeline( const std::string& vertFilepath,
 		const std::string& fragFilepath,
@@ -69,6 +79,7 @@ private:
 		const std::string& compFilepath,
 		const PipelineConfigInfo& configInfo );
 
+
 	void createShaderModule( const std::vector< char >& code, vk::ShaderModule* shaderModule );
 
 	CatDevice* m_pDevice;
@@ -76,6 +87,8 @@ private:
 	vk::ShaderModule m_pVertShaderModule;
 	vk::ShaderModule m_pFragShaderModule;
 	vk::ShaderModule m_pCompShaderModule;
+	vk::ShaderModule m_pTessControlShaderModule;
+	vk::ShaderModule m_pTessEvalShaderModule;
 };
 } // namespace cat
 

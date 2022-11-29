@@ -10,6 +10,8 @@
 #include <cassert>
 #include <cstring>
 
+#include <loguru.hpp>
+
 namespace cat
 {
 
@@ -66,7 +68,7 @@ CatBuffer::~CatBuffer()
  */
 vk::Result CatBuffer::map( vk::DeviceSize size, vk::DeviceSize offset )
 {
-	assert( m_pBuffer && m_pMemory && "Called map on buffer before create" );
+	CHECK_F( m_pBuffer && m_pMemory, "Called map on buffer before create" );
 	return ( **m_pDevice ).mapMemory( m_pMemory, offset, size, {}, &m_pMapped );
 }
 
@@ -95,7 +97,7 @@ void CatBuffer::unmap()
  */
 void CatBuffer::writeToBuffer( void* data, vk::DeviceSize size, vk::DeviceSize offset )
 {
-	assert( m_pMapped && "Cannot copy to unmapped buffer" );
+	CHECK_NOTNULL_F( m_pMapped, "Cannot copy to unmapped buffer" );
 
 	if ( size == VK_WHOLE_SIZE )
 	{

@@ -15,12 +15,18 @@ namespace cat
 
 bool CatLevel::isFullyLoaded()
 {
+	return m_bIsFullyLoaded;
+}
+
+bool CatLevel::isLoadingFinished()
+{
 	if ( m_fLoaded.valid() )
 	{
 		using namespace std::chrono_literals;
 		if ( m_fLoaded.wait_for( 0ms ) == std::future_status::ready )
 		{
 			m_fLoaded = {};
+			m_bIsFullyLoaded = true;
 			return true;
 		}
 	}
@@ -63,6 +69,11 @@ std::unique_ptr< CatLevel > CatLevel::create( const std::string& sName,
 			level->m_mChunks.emplace( chunk->m_ID, std::move( chunk ) );
 		}
 	}
+
+	level->m_pTerrain = std::make_unique< CatTerrain >(
+		GEI()->m_PDevice, "assets/textures/terrain_orig.tga", "assets/textures/Grass_Base_Color.tga" );
+
+	level->m_bIsFullyLoaded = true;
 
 	return level;
 }
@@ -156,6 +167,7 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 	// We only block to parse the level data from disk, loading objects is done async.
 	auto level = create( sName, vSize, vChunkSize );
 	level->m_jData = jLevelData;
+	level->m_bIsFullyLoaded = false;
 
 	auto task = []( CatLevel* level )
 	{

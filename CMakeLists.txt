@@ -30,7 +30,7 @@ add_subdirectory(Libraries)
 
 include_directories(CatEngine)
 
-add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngine/Cat/CatWindow.cpp CatEngine/Cat/Controller/CatCamera.cpp CatEngine/Cat/Controller/CatCamera.hpp CatEngine/Cat/Controller/CatInput.cpp CatEngine/Cat/Controller/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/VulkanRHI/CatDevice.cpp CatEngine/Cat/VulkanRHI/CatDevice.hpp CatEngine/Cat/Utils/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/VulkanRHI/CatBuffer.cpp CatEngine/Cat/VulkanRHI/CatBuffer.hpp CatEngine/Cat/VulkanRHI/CatDescriptors.cpp CatEngine/Cat/VulkanRHI/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/VulkanRHI/CatPipeline.cpp CatEngine/Cat/VulkanRHI/CatPipeline.hpp CatEngine/Cat/VulkanRHI/CatRenderer.cpp CatEngine/Cat/VulkanRHI/CatRenderer.hpp CatEngine/Cat/VulkanRHI/CatSwapChain.cpp CatEngine/Cat/VulkanRHI/CatSwapChain.hpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.cpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImgui.cpp CatEngine/Cat/CatImgui.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.hpp CatEngine/Cat/Objects/CatVolume.cpp CatEngine/Cat/Objects/CatVolume.hpp CatEngine/Cat/Objects/CatLight.cpp CatEngine/Cat/Objects/CatLight.hpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.cpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.hpp CatEngine/Cat/Level/CatLevel.cpp CatEngine/Cat/Level/CatLevel.hpp CatEngine/Cat/Objects/CatObjectType.hpp CatEngine/Cat/Objects/CatAssetLoader.cpp CatEngine/Cat/Objects/CatAssetLoader.hpp CatEngine/Cat/Level/CatChunk.cpp CatEngine/Cat/Level/CatChunk.hpp CatEngine/Cat/Terrain/CatTerrain.cpp CatEngine/Cat/Terrain/CatTerrain.hpp CatEngine/Cat/Texture/CatTexture.cpp CatEngine/Cat/Texture/CatTexture.hpp)
+add_executable(CatEngine CatEngine/main.cpp CatEngine/Cat/CatWindow.hpp CatEngine/Cat/CatWindow.cpp CatEngine/Cat/Controller/CatCamera.cpp CatEngine/Cat/Controller/CatCamera.hpp CatEngine/Cat/Controller/CatInput.cpp CatEngine/Cat/Controller/CatInput.hpp CatEngine/Cat/Objects/CatObject.cpp CatEngine/Cat/Objects/CatObject.hpp CatEngine/Cat/Objects/CatModel.cpp CatEngine/Cat/Objects/CatModel.hpp CatEngine/Cat/VulkanRHI/CatDevice.cpp CatEngine/Cat/VulkanRHI/CatDevice.hpp CatEngine/Cat/Utils/CatUtils.hpp CatEngine/Cat/CatApp.cpp CatEngine/Cat/CatApp.hpp CatEngine/Cat/VulkanRHI/CatBuffer.cpp CatEngine/Cat/VulkanRHI/CatBuffer.hpp CatEngine/Cat/VulkanRHI/CatDescriptors.cpp CatEngine/Cat/VulkanRHI/CatDescriptors.hpp CatEngine/Cat/CatFrameInfo.hpp CatEngine/Cat/VulkanRHI/CatPipeline.cpp CatEngine/Cat/VulkanRHI/CatPipeline.hpp CatEngine/Cat/VulkanRHI/CatRenderer.cpp CatEngine/Cat/VulkanRHI/CatRenderer.hpp CatEngine/Cat/VulkanRHI/CatSwapChain.cpp CatEngine/Cat/VulkanRHI/CatSwapChain.hpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.cpp CatEngine/Cat/RenderSystems/CatSimpleRenderSystem.hpp CatEngine/Globals.hpp CatEngine/Cat/CatImgui.cpp CatEngine/Cat/CatImgui.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.hpp CatEngine/Cat/RenderSystems/CatPointLightRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.cpp CatEngine/Cat/RenderSystems/CatWireframeRenderSystem.hpp CatEngine/Cat/Objects/CatVolume.cpp CatEngine/Cat/Objects/CatVolume.hpp CatEngine/Cat/Objects/CatLight.cpp CatEngine/Cat/Objects/CatLight.hpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.cpp CatEngine/Cat/RenderSystems/CatGridRenderSystem.hpp CatEngine/Cat/Level/CatLevel.cpp CatEngine/Cat/Level/CatLevel.hpp CatEngine/Cat/Objects/CatObjectType.hpp CatEngine/Cat/Objects/CatAssetLoader.cpp CatEngine/Cat/Objects/CatAssetLoader.hpp CatEngine/Cat/Level/CatChunk.cpp CatEngine/Cat/Level/CatChunk.hpp CatEngine/Cat/Terrain/CatTerrain.cpp CatEngine/Cat/Terrain/CatTerrain.hpp CatEngine/Cat/Texture/CatTexture.cpp CatEngine/Cat/Texture/CatTexture.hpp CatEngine/Cat/RenderSystems/CatTerrainRenderSystem.cpp CatEngine/Cat/RenderSystems/CatTerrainRenderSystem.hpp CatEngine/Cat/Rendering/CatFrustum.hpp)
 
 # ###Vulkan
 find_package(Vulkan REQUIRED)
@@ -46,25 +46,39 @@ endif ()
 include(Shaders.cmake)
 
 # Find all shaders.
-file(GLOB vertex-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.vert)
-file(GLOB fragment-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.frag)
-file(GLOB compute-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.comp)
+file(GLOB_RECURSE vertex-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.vert)
+file(GLOB_RECURSE fragment-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.frag)
+file(GLOB_RECURSE compute-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.comp)
+file(GLOB_RECURSE geometry-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.geom)
+file(GLOB_RECURSE tessellation-control-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.tesc)
+file(GLOB_RECURSE tessellation-evaluation-shaders ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/*.tese)
 
 # Add them to the build.
 foreach (vertex-shader ${vertex-shaders})
-	get_filename_component(shader ${vertex-shader} NAME)
+
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${vertex-shader})
 	add_shader(${PROJECT_NAME} ${shader})
 endforeach (vertex-shader)
-
 foreach (fragment-shader ${fragment-shaders})
-	get_filename_component(shader ${fragment-shader} NAME)
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${fragment-shader})
 	add_shader(${PROJECT_NAME} ${shader})
 endforeach (fragment-shader)
-
 foreach (compute-shader ${compute-shaders})
-	get_filename_component(shader ${compute-shader} NAME)
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${compute-shader})
 	add_shader(${PROJECT_NAME} ${shader})
 endforeach (compute-shader)
+foreach (geometry-shader ${geometry-shaders})
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${geometry-shader})
+	add_shader(${PROJECT_NAME} ${shader})
+endforeach (geometry-shader)
+foreach (tessellation-control-shader ${tessellation-control-shaders})
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${tessellation-control-shader})
+	add_shader(${PROJECT_NAME} ${shader})
+endforeach (tessellation-control-shader)
+foreach (tessellation-evaluation-shader ${tessellation-evaluation-shaders})
+	string(REPLACE "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/shaders/" "" shader ${tessellation-evaluation-shader})
+	add_shader(${PROJECT_NAME} ${shader})
+endforeach (tessellation-evaluation-shader)
 
 message("Shaders: ${shaders}")
 

@@ -38,7 +38,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 	CatObject& m_rCameraObject;
 	vk::DescriptorSet m_pGlobalDescriptorSet;
 	GlobalUbo& m_rUBO;
-	std::unique_ptr< CatLevel >& m_rLevel;
+	std::unique_ptr< CatLevel >& m_pLevel;
 	id_t m_selectedItemId;
 
 	CatFrameInfo_t( vk::CommandBuffer commandBuffer,
@@ -59,7 +59,7 @@ using CatFrameInfo = struct CatFrameInfo_t
 		  m_rCameraObject( rCameraObject ),
 		  m_pGlobalDescriptorSet( globalDescriptorSet ),
 		  m_rUBO( rUBO ),
-		  m_rLevel( rLevel ),
+		  m_pLevel( rLevel ),
 		  m_selectedItemId( selectedItemId )
 	{
 	}

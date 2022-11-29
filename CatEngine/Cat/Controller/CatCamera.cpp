@@ -42,6 +42,8 @@ void CatCamera::setViewDirection( glm::vec3 vPosition, glm::vec3 vDirection, glm
 	m_mxView[3][0] = -glm::dot( u, vPosition );
 	m_mxView[3][1] = -glm::dot( v, vPosition );
 	m_mxView[3][2] = -glm::dot( w, vPosition );
+
+	m_mxInverseViewMatrix = glm::inverse( m_mxView );
 }
 
 void CatCamera::setViewTarget( glm::vec3 vPosition, glm::vec3 vTarget, glm::vec3 vUp )

@@ -173,6 +173,10 @@ bool CatDevice::isDeviceSuitable( const vk::PhysicalDevice rPhysicalDevice )
 	{
 		return false;
 	}
+	if ( !supportedFeatures.features.tessellationShader )
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -331,7 +335,7 @@ void CatDevice::createCommandPool()
 	}
 
 	vk::CommandPoolCreateInfo transferPoolInfo = {
-		.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer ,
+		.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
 		.queueFamilyIndex = queueFamilyIndices.nTransferFamily.value(),
 	};
 
@@ -589,7 +593,7 @@ void CatDevice::createBuffer( vk::DeviceSize size,
 
 	if ( m_device.createBuffer( &bufferInfo, nullptr, &buffer ) != vk::Result::eSuccess )
 	{
-		throw std::runtime_error( "failed to create vertex m_Buffer!" );
+		throw std::runtime_error( "failed to create buffer!" );
 	}
 
 	vk::MemoryRequirements memRequirements;
@@ -602,7 +606,7 @@ void CatDevice::createBuffer( vk::DeviceSize size,
 
 	if ( m_device.allocateMemory( &allocInfo, VK_NULL_HANDLE, &bufferMemory ) != vk::Result::eSuccess )
 	{
-		throw std::runtime_error( "failed to allocate vertex m_Buffer m_pMemory!" );
+		throw std::runtime_error( "failed to allocate buffer device memory!" );
 	}
 
 	m_device.bindBufferMemory( buffer, bufferMemory, 0 );
@@ -635,7 +639,7 @@ void CatDevice::endSingleTimeCommands( vk::CommandBuffer commandBuffer ) const
 		.pCommandBuffers = &commandBuffer,
 	};
 
-	// const std::lock_guard lock( m_mutex );
+	const std::lock_guard lock( m_mutex );
 	m_transferQueue.submit( 1, &submitInfo, VK_NULL_HANDLE );
 	m_transferQueue.waitIdle();
 

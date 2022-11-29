@@ -18,10 +18,8 @@ public:
 		const std::string& rFilename,
 		vk::Format format,
 		int stbiFormat,
-		vk::Flags< vk::ImageUsageFlagBits > usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled );
-	CatTexture( CatDevice* pDevice,
-		const std::string& rFilename,
-		vk::Flags< vk::ImageUsageFlagBits > usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled );
+		vk::Flags< vk::ImageUsageFlagBits > usage );
+	CatTexture( CatDevice* pDevice, const std::string& rFilename, vk::Flags< vk::ImageUsageFlagBits > usage );
 	virtual ~CatTexture();
 
 protected:
@@ -39,11 +37,15 @@ protected:
 	vk::ImageCreateInfo m_rImageCreateInfo;
 	vk::ImageViewCreateInfo m_rImageViewCreateInfo;
 	vk::Format m_rImageFormat;
+	stbi_uc* m_pPixels;
 
 	void updateDescriptor();
 
 public:
 	CAT_READONLY_PROPERTY( m_rSampler, getSampler, m_RSampler );
+	CAT_READONLY_PROPERTY( m_rDescriptor, getDescriptor, m_RDescriptor );
+	CAT_READONLY_PROPERTY( m_nWidth, getWidth, m_NWidth );
+	CAT_READONLY_PROPERTY( m_pPixels, getPixels, m_PPixels );
 };
 
 class CatTexture2D : public CatTexture

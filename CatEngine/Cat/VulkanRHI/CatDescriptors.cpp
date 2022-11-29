@@ -1,4 +1,5 @@
 #include "CatDescriptors.hpp"
+#include "loguru.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -12,7 +13,7 @@ CatDescriptorSetLayout::Builder& CatDescriptorSetLayout::Builder::addBinding( ui
 	vk::ShaderStageFlags stageFlags,
 	uint32_t count )
 {
-	assert( m_mBindings.count( binding ) == 0 && "Binding already in use" );
+	CHECK_F( m_mBindings.count( binding ) == 0, "Binding already in use" );
 	vk::DescriptorSetLayoutBinding layoutBinding{
 		.binding = binding,
 		.descriptorType = descriptorType,
@@ -144,14 +145,15 @@ CatDescriptorWriter::CatDescriptorWriter( CatDescriptorSetLayout& setLayout, Cat
 
 CatDescriptorWriter& CatDescriptorWriter::writeBuffer( uint32_t binding, vk::DescriptorBufferInfo* bufferInfo )
 {
-	assert( m_rSetLayout.m_mBindings.count( binding ) == 1 && "Layout does not contain specified binding" );
+	CHECK_F( m_rSetLayout.m_mBindings.count( binding ) == 1, "Layout does not contain specified binding" );
 
 	auto& bindingDescription = m_rSetLayout.m_mBindings[binding];
 
-	assert( bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple" );
+	CHECK_F( bindingDescription.descriptorCount == 1, "Binding single descriptor info, but binding expects multiple" );
 
 	vk::WriteDescriptorSet write{
 		.dstBinding = binding,
+		//.dstSet = m_pDescriptorSet,
 		.descriptorCount = 1,
 		.descriptorType = bindingDescription.descriptorType,
 		.pBufferInfo = bufferInfo,
@@ -163,15 +165,15 @@ CatDescriptorWriter& CatDescriptorWriter::writeBuffer( uint32_t binding, vk::Des
 
 CatDescriptorWriter& CatDescriptorWriter::writeImage( uint32_t binding, vk::DescriptorImageInfo* imageInfo )
 {
-	assert( m_rSetLayout.m_mBindings.count( binding ) == 1 && "Layout does not contain specified binding" );
+	CHECK_F( m_rSetLayout.m_mBindings.count( binding ) == 1, "Layout does not contain specified binding" );
 
 	auto& bindingDescription = m_rSetLayout.m_mBindings[binding];
 
-	assert( bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple" );
+	// CHECK_F( bindingDescription.descriptorCount == 1, "Binding single descriptor info, but binding expects multiple" );
 
 	vk::WriteDescriptorSet write{
 		.dstBinding = binding,
-		.descriptorCount = 1,
+		.descriptorCount = bindingDescription.descriptorCount,
 		.descriptorType = bindingDescription.descriptorType,
 		.pImageInfo = imageInfo,
 	};
@@ -179,6 +181,7 @@ CatDescriptorWriter& CatDescriptorWriter::writeImage( uint32_t binding, vk::Desc
 	m_aWrites.push_back( write );
 	return *this;
 }
+
 
 bool CatDescriptorWriter::build( vk::DescriptorSet& set )
 {

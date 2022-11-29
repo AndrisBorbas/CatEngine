@@ -4,6 +4,7 @@
 #include "Cat/Utils/CatUtils.hpp"
 #include "Cat/Objects/CatObject.hpp"
 #include "Cat/Level/CatChunk.hpp"
+#include "Cat/Terrain/CatTerrain.hpp"
 
 #include <string>
 #include <utility>
@@ -29,6 +30,7 @@ private:
 	std::vector< bool > m_aLoadedChunks;
 	std::vector< bool > m_aLastLoadedChunks;
 	CatObject::Map m_mObjects;
+	std::unique_ptr< CatTerrain > m_pTerrain;
 	std::future< void > m_fLoaded;
 	json m_jData;
 
@@ -42,6 +44,7 @@ public:
 	[[nodiscard]] static std::unique_ptr< CatLevel > load( const std::string& levelData );
 
 	bool isFullyLoaded();
+	bool isLoadingFinished();
 
 	void updateObjectLocation( id_t id );
 	id_t getChunkAtLocation( const glm::vec3& vLocation );
@@ -49,6 +52,8 @@ public:
 	CatObject::Map getAllObjects();
 
 	void loadChunk( const glm::vec3& vLocationm, int nRadius = 1 );
+
+	bool m_bIsFullyLoaded = false;
 
 protected:
 	[[nodiscard]] explicit CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )
@@ -61,6 +66,7 @@ protected:
 public:
 	CAT_PROPERTY( m_sName, getName, setName, m_SName );
 	CAT_READONLY_PROPERTY( m_idCurrentChunk, getCurrentChunkId, m_IDCurrentChunk );
+	CAT_READONLY_PROPERTY( m_pTerrain, getTerrain, m_PTerrain );
 };
 
 } // namespace cat

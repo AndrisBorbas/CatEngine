@@ -5,13 +5,17 @@
 
 namespace cat
 {
-void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject )
+bool CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObject )
 {
+	bool bWasMatrixupdated = false;
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_RELEASE )
 	{
 		m_bFirstMouse = true;
 		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
 	}
+
+	auto fLastPitch = m_fPitch;
+	auto fLastYaw = m_fYaw;
 
 	if ( glfwGetMouseButton( window, m_eKeys.look ) == GLFW_PRESS )
 	{
@@ -42,6 +46,11 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 	m_fPitch = glm::clamp( m_fPitch, -1.5f, 1.5f );
 	m_fYaw = glm::mod( m_fYaw, glm::two_pi< float >() );
 
+	if ( fLastPitch != m_fPitch || fLastYaw != m_fYaw )
+	{
+		bWasMatrixupdated = true;
+	}
+
 	glm::vec3 vFront;
 	vFront.x = cos( m_fYaw ) * cos( m_fPitch );
 	vFront.y = sin( m_fPitch );
@@ -68,19 +77,22 @@ void CatInput::moveInPlaneXZ( GLFWwindow* window, float dt, CatObject& gameObjec
 	if ( glm::dot( moveDir, moveDir ) > std::numeric_limits< float >::epsilon() )
 	{
 		gameObject.m_transform.translation += m_fMovementSpeed * dt * glm::normalize( moveDir );
+		bWasMatrixupdated = true;
 	}
+
+	return bWasMatrixupdated;
 }
 
 void CatInput::registerInputHandlers()
 {
-	GetEditorInstance()->m_FKeyCallback = glfwSetKeyCallback( **cat::GetEditorInstance()->m_PWindow, nullptr );
-	glfwSetKeyCallback( **cat::GetEditorInstance()->m_PWindow,
+	GEI()->m_FKeyCallback = glfwSetKeyCallback( **GEI()->m_PWindow, nullptr );
+	glfwSetKeyCallback( **GEI()->m_PWindow,
 		[]( GLFWwindow* window, int key, int scancode, int action, int mods )
 		{
-			GetEditorInstance()->m_FKeyCallback( window, key, scancode, action, mods );
+			GEI()->m_FKeyCallback( window, key, scancode, action, mods );
 			if ( key == GLFW_KEY_ENTER && action == GLFW_PRESS && mods == GLFW_MOD_ALT )
 			{
-				cat::GetEditorInstance()->m_PWindow->toggleFullscreen();
+				GEI()->m_PWindow->toggleFullscreen();
 			}
 		} );
 }

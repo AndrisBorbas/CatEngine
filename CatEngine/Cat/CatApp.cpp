@@ -31,12 +31,19 @@
 #include "RenderSystems/CatWireframeRenderSystem.hpp"
 #include "Cat/RenderSystems/CatGridRenderSystem.hpp"
 #include "Cat/Texture/CatTexture.hpp"
+#include "Cat/RenderSystems/CatTerrainRenderSystem.hpp"
+#include "Cat/Rendering/CatFrustum.hpp"
 
 namespace cat
 {
 CatApp* GlobalEditorInstance = nullptr;
 
 CatApp* GetEditorInstance()
+{
+	return GlobalEditorInstance;
+}
+
+CatApp* GEI()
 {
 	return GlobalEditorInstance;
 }
@@ -119,6 +126,9 @@ void CatApp::run()
 		m_PDevice, m_pRenderer->getSwapChainRenderPass(), m_pGlobalDescriptorSetLayout->getDescriptorSetLayout() };
 	CatGridRenderSystem gridRenderSystem{
 		m_PDevice, m_pRenderer->getSwapChainRenderPass(), m_pGlobalDescriptorSetLayout->getDescriptorSetLayout() };
+	CatTerrainRenderSystem terrainRenderSystem{ m_PDevice, m_pRenderer->getSwapChainRenderPass(),
+		m_pCurrentLevel->m_PTerrain->m_PDescriptorSetLayout->getDescriptorSetLayout() };
+	CatFrustum frustum;
 
 
 	uint64_t nFrames = 0;
@@ -149,13 +159,14 @@ void CatApp::run()
 
 		m_pCurrentLevel->loadChunk( m_pCameraObject->m_transform.translation );
 
-		if ( m_pCurrentLevel->isFullyLoaded() )
+		if ( m_pCurrentLevel->isLoadingFinished() )
 		{
+			m_bTerrain = true;
 			DLOG_F( INFO, "Frame: %llu, level fully loaded", GetEditorInstance()->getFrameInfo().m_nFrameNumber );
 			// Level fully loaded
 		}
 
-		m_cameraController.moveInPlaneXZ(
+		auto bWasCameraMatrixUpdated = m_cameraController.moveInPlaneXZ(
 			m_PWindow->getGLFWwindow(), static_cast< float >( m_dFrameTime ), getFrameInfo().m_rCameraObject );
 		m_camera.setViewYXZ(
 			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
@@ -181,6 +192,19 @@ void CatApp::run()
 			m_aUboBuffers[getFrameInfo().m_nFrameIndex]->writeToBuffer( &m_ubo );
 			m_aUboBuffers[getFrameInfo().m_nFrameIndex]->flush();
 
+			m_pCurrentLevel->m_PTerrain->m_Ubo.projection = m_camera.getProjection();
+			m_pCurrentLevel->m_PTerrain->m_Ubo.view = m_camera.getView();
+			m_pCurrentLevel->m_PTerrain->m_Ubo.viewportDimensions = {
+				m_pWindow->getExtent().width, m_pWindow->getExtent().height };
+
+			frustum.update( m_camera.getProjection() * m_camera.getView() );
+			memcpy( m_pCurrentLevel->m_PTerrain->m_Ubo.frustumPlanes, frustum.m_APlanes.data(), sizeof( glm::vec4 ) * 6 );
+
+			m_pCurrentLevel->m_PTerrain->m_AUboBuffers[getFrameInfo().m_nFrameIndex]->writeToBuffer(
+				&m_pCurrentLevel->m_PTerrain->m_Ubo );
+			m_pCurrentLevel->m_PTerrain->m_AUboBuffers[getFrameInfo().m_nFrameIndex]->flush();
+
+
 			// tell imgui that we're starting a new frame
 			CatImgui::newFrame();
 
@@ -201,6 +225,10 @@ void CatApp::run()
 			// Once we cover offscreen rendering, we can render the scene to a image/texture rather than
 			// directly to the swap chain. This texture of the scene can then be rendered to an imgui
 			// subwindow
+			if ( m_bTerrain )
+			{
+				terrainRenderSystem.render( getFrameInfo() );
+			}
 			simpleRenderSystem.renderObjects( getFrameInfo() );
 			wireframeRenderSystem.renderObjects( getFrameInfo() );
 			gridRenderSystem.renderObjects( getFrameInfo() );
@@ -271,7 +299,9 @@ void CatApp::saveLevel( const std::string& sFileName ) const
 
 void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious /* = true */ )
 {
-	GetEditorInstance()->m_RFrameInfo.m_selectedItemId = 0;
+	m_RFrameInfo.m_selectedItemId = 0;
+	m_bTerrain = false;
+	std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 	m_pCurrentLevel = CatLevel::load( sFileName );
 }
 

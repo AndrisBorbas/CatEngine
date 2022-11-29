@@ -68,7 +68,7 @@ void CatWireframeRenderSystem::createPipeline( vk::RenderPass renderPass )
 	pipelineConfig.m_pRenderPass = renderPass;
 	pipelineConfig.m_pPipelineLayout = m_pPipelineLayout;
 	m_pPipeline = std::make_unique< CatPipeline >(
-		m_pDevice, "assets/shaders/simple_shader.vert.spv", "assets/shaders/simple_shader.frag.spv", pipelineConfig );
+		m_pDevice, "assets/shaders/wireframe.vert.spv", "assets/shaders/wireframe.frag.spv", pipelineConfig );
 }
 
 void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
@@ -78,7 +78,7 @@ void CatWireframeRenderSystem::renderObjects( const CatFrameInfo& frameInfo )
 	frameInfo.m_pCommandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, m_pPipelineLayout, 0, 1, &frameInfo.m_pGlobalDescriptorSet, 0, nullptr );
 
-	for ( auto& [key, obj] : frameInfo.m_rLevel->getAllObjects() )
+	for ( auto& [key, obj] : frameInfo.m_pLevel->getAllObjects() )
 	{
 		if ( !obj ) continue;
 		if ( !obj->m_BVisible ) continue;

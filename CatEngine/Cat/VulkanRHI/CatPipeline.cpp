@@ -11,6 +11,11 @@
 
 namespace cat
 {
+CatPipeline::CatPipeline( cat::CatDevice* pDevice, const cat::PipelineConfigInfo& configInfo ) : m_pDevice{ pDevice }
+{
+	createGraphicsPipeline( configInfo );
+}
+
 CatPipeline::CatPipeline( CatDevice* pDevice,
 	const std::string& vertFilepath,
 	const std::string& fragFilepath,
@@ -54,6 +59,70 @@ std::vector< char > CatPipeline::readFile( const std::string& filepath )
 
 	file.close();
 	return buffer;
+}
+
+vk::PipelineShaderStageCreateInfo CatPipeline::loadShader( CatDevice* pDevice,
+	const std::string& filepath,
+	vk::ShaderStageFlagBits stage )
+{
+	auto code = CatPipeline::readFile( filepath );
+
+	vk::ShaderModuleCreateInfo createInfo{
+		.codeSize = code.size(),
+		.pCode = reinterpret_cast< const uint32_t* >( code.data() ),
+	};
+
+	vk::ShaderModule shaderModule;
+
+	if ( ( **pDevice ).createShaderModule( &createInfo, nullptr, &shaderModule ) != vk::Result::eSuccess )
+	{
+		throw std::runtime_error( "failed to create shader module" );
+	}
+
+	vk::PipelineShaderStageCreateInfo shaderStageInfo{
+		.stage = stage,
+		.module = shaderModule,
+		.pName = "main",
+	};
+
+	return shaderStageInfo;
+}
+
+void CatPipeline::createGraphicsPipeline( const cat::PipelineConfigInfo& configInfo )
+{
+	auto& bindingDescriptions = configInfo.m_aBindingDescriptions;
+	auto& attributeDescriptions = configInfo.m_aAttributeDescriptions;
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
+		.vertexBindingDescriptionCount = static_cast< uint32_t >( bindingDescriptions.size() ),
+		.pVertexBindingDescriptions = bindingDescriptions.data(),
+		.vertexAttributeDescriptionCount = static_cast< uint32_t >( attributeDescriptions.size() ),
+		.pVertexAttributeDescriptions = attributeDescriptions.data(),
+	};
+
+	vk::GraphicsPipelineCreateInfo pipelineInfo{
+		.stageCount = static_cast< uint32_t >( configInfo.m_aShaderStages.size() ),
+		.pStages = configInfo.m_aShaderStages.data(),
+		.pVertexInputState = &vertexInputInfo,
+		.pInputAssemblyState = &configInfo.m_pInputAssemblyInfo,
+		.pTessellationState = &configInfo.m_pTessellationInfo,
+		.pViewportState = &configInfo.m_pViewportInfo,
+		.pRasterizationState = &configInfo.m_pRasterizationInfo,
+		.pMultisampleState = &configInfo.m_pMultisampleInfo,
+		.pDepthStencilState = &configInfo.m_pDepthStencilInfo,
+		.pColorBlendState = &configInfo.m_pColorBlendInfo,
+		.pDynamicState = &configInfo.m_pDynamicStateInfo,
+		.layout = configInfo.m_pPipelineLayout,
+		.renderPass = configInfo.m_pRenderPass,
+		.subpass = configInfo.m_nSubpass,
+		.basePipelineHandle = nullptr,
+		.basePipelineIndex = -1,
+	};
+
+	if ( ( **m_pDevice ).createGraphicsPipelines( nullptr, 1, &pipelineInfo, nullptr, &m_pGraphicsPipeline )
+		 != vk::Result::eSuccess )
+	{
+		throw std::runtime_error( "failed to create graphics pipeline" );
+	}
 }
 
 void CatPipeline::createGraphicsPipeline( const std::string& vertFilepath,
@@ -310,6 +379,13 @@ void CatPipeline::disableDepthTest( PipelineConfigInfo& configInfo )
 {
 	configInfo.m_pDepthStencilInfo.depthTestEnable = false;
 	configInfo.m_pDepthStencilInfo.depthWriteEnable = false;
+}
+
+void CatPipeline::enableTessellation( PipelineConfigInfo& configInfo, uint32_t patchControlPoints /* = 4 */ )
+{
+	configInfo.m_pInputAssemblyInfo.topology = vk::PrimitiveTopology::ePatchList;
+	configInfo.m_pInputAssemblyInfo.primitiveRestartEnable = false;
+	configInfo.m_pTessellationInfo.patchControlPoints = patchControlPoints;
 }
 
 } // namespace cat
