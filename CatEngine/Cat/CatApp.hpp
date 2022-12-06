@@ -52,6 +52,9 @@ public:
 	std::vector< std::future< std::pair< json, std::shared_ptr< CatModel > > > > m_aLoadingObjects{};
 
 	bool m_bTerrain = false;
+	bool m_bUpdateFrustum = true;
+
+	bool m_bRenderEverything = false;
 
 
 private:

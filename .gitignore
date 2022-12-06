@@ -362,3 +362,5 @@ build/*
 cmake-build-*/*
 
 !CatEngine/assets/*
+
+docs/*

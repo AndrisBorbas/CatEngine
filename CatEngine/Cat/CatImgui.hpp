@@ -12,6 +12,7 @@
 #include <queue>
 
 #include <glm/vec3.hpp>
+#include <loguru.hpp>
 
 #include <stdexcept>
 
@@ -20,7 +21,7 @@ namespace cat
 static void check_vk_result( VkResult err )
 {
 	if ( err == 0 ) return;
-	fprintf( stderr, "[vulkan] Error: VkResult = %d\n", err );
+	LOG_F( ERROR, "[vulkan] Error: VkResult = %d\n", err );
 	if ( err < 0 ) abort();
 }
 

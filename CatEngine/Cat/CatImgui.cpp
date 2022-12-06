@@ -163,6 +163,9 @@ void CatImgui::drawWindows()
 		// ImGui::Text( "counter = %d", counter );
 
 		ImGui::Checkbox( "Terrain", &GEI()->m_bTerrain );
+		ImGui::Checkbox( "Frustum", &GEI()->m_bUpdateFrustum );
+
+		ImGui::Checkbox( "Render Everything", &GEI()->m_bRenderEverything );
 
 		ImGui::DragFloat3( "cam pos",
 			reinterpret_cast< float* >( &GetEditorInstance()->m_RFrameInfo.m_rCameraObject.m_transform.translation ), 0.1f );

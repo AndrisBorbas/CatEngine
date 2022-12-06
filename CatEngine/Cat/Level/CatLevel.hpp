@@ -54,6 +54,8 @@ public:
 	void loadChunk( const glm::vec3& vLocationm, int nRadius = 1 );
 
 	bool m_bIsFullyLoaded = false;
+	id_t m_idLastChunk;
+	int m_nLastRadius;
 
 protected:
 	[[nodiscard]] explicit CatLevel( std::string sName, const glm::ivec2 vSize, const glm::ivec2 vChunkSize )

@@ -157,7 +157,7 @@ void CatApp::run()
 			// m_dFrameRate = 1000.0 / ( m_dFrameRate == 0.0 ? 0.001 : m_dFrameRate );
 		}
 
-		m_pCurrentLevel->loadChunk( m_pCameraObject->m_transform.translation );
+		m_pCurrentLevel->loadChunk( m_pCameraObject->m_transform.translation, m_bRenderEverything ? 1000 : 1 );
 
 		if ( m_pCurrentLevel->isLoadingFinished() )
 		{
@@ -179,6 +179,7 @@ void CatApp::run()
 		imguizmoCamera.setViewYXZ(
 			getFrameInfo().m_rCameraObject.m_transform.translation, getFrameInfo().m_rCameraObject.m_transform.rotation );
 
+
 		if ( auto commandBuffer = m_pRenderer->beginFrame() )
 		{
 			short frameIndex = m_pRenderer->getFrameIndex();
@@ -197,7 +198,10 @@ void CatApp::run()
 			m_pCurrentLevel->m_PTerrain->m_Ubo.viewportDimensions = {
 				m_pWindow->getExtent().width, m_pWindow->getExtent().height };
 
-			frustum.update( m_camera.getProjection() * m_camera.getView() );
+			if ( m_bUpdateFrustum )
+			{
+				frustum.update( m_camera.getProjection() * m_camera.getView() );
+			}
 			memcpy( m_pCurrentLevel->m_PTerrain->m_Ubo.frustumPlanes, frustum.m_APlanes.data(), sizeof( glm::vec4 ) * 6 );
 
 			m_pCurrentLevel->m_PTerrain->m_AUboBuffers[getFrameInfo().m_nFrameIndex]->writeToBuffer(
@@ -284,6 +288,7 @@ void CatApp::run()
 			// Update and Render additional Platform Windows
 			CatImgui::renderPlatformWindows();
 
+
 			m_pRenderer->endSwapChainRenderPass( commandBuffer );
 			m_pRenderer->endFrame();
 		}
@@ -301,7 +306,7 @@ void CatApp::loadLevel( const std::string& sFileName, const bool bClearPrevious 
 {
 	m_RFrameInfo.m_selectedItemId = 0;
 	m_bTerrain = false;
-	std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+	// std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	m_pCurrentLevel = CatLevel::load( sFileName );
 }
 

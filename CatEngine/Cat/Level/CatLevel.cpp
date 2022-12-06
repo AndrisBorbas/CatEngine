@@ -78,75 +78,6 @@ std::unique_ptr< CatLevel > CatLevel::create( const std::string& sName,
 	return level;
 }
 
-void CatLevel::save( const std::string& sFileName /* = "" */ )
-{
-	LOG_SCOPE_FUNCTION( INFO );
-
-	if ( !sFileName.empty() )
-	{
-		m_sName = sFileName;
-	}
-
-	auto sPath = LEVELS_BASE_PATH + m_sName;
-
-
-	nlohmann::ordered_json file;
-
-	file["size"] = m_vSize;
-	file["chunkSize"] = m_vChunkSize;
-
-	{
-		json objects = json::array();
-		int i = 0;
-		for ( const auto& obj : m_mObjects | std::views::values )
-		{
-			if ( const auto& save = obj->save(); !save.empty() )
-			{
-				objects[i++] = save;
-			}
-		}
-		file["globals"] = objects;
-	}
-
-	{
-		json chunks = json::array();
-		int j = 0;
-		for ( const auto& chunk : m_mChunks | std::views::values )
-		{
-			nlohmann::ordered_json chunkData;
-			chunkData["id"] = chunk->m_ID;
-			chunkData["position"] = chunk->m_VPosition;
-
-			json objects = json::array();
-			int i = 0;
-			for ( const auto& obj : chunk->m_MObjects | std::views::values )
-			{
-				if ( const auto& save = obj->save(); !save.empty() )
-				{
-					objects[i++] = save;
-				}
-			}
-			chunkData["objects"] = objects;
-
-			chunks[j++] = chunkData;
-		}
-		file["chunks"] = chunks;
-	}
-
-
-	if ( !sPath.ends_with( ".json" ) )
-	{
-		sPath += ".json";
-	}
-	std::ofstream ofs( sPath );
-	ofs << file.dump( -1, '\t' ) << std::endl;
-	ofs.close();
-
-	m_jData = file;
-
-	LOG_F( INFO, "Saved level: %s", sPath.c_str() );
-}
-
 std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 {
 	LOG_SCOPE_FUNCTION( INFO );
@@ -231,6 +162,75 @@ std::unique_ptr< CatLevel > CatLevel::load( const std::string& sName )
 	return level;
 }
 
+void CatLevel::save( const std::string& sFileName /* = "" */ )
+{
+	LOG_SCOPE_FUNCTION( INFO );
+
+	if ( !sFileName.empty() )
+	{
+		m_sName = sFileName;
+	}
+
+	auto sPath = LEVELS_BASE_PATH + m_sName;
+
+
+	nlohmann::ordered_json file;
+
+	file["size"] = m_vSize;
+	file["chunkSize"] = m_vChunkSize;
+
+	{
+		json objects = json::array();
+		int i = 0;
+		for ( const auto& obj : m_mObjects | std::views::values )
+		{
+			if ( const auto& save = obj->save(); !save.empty() )
+			{
+				objects[i++] = save;
+			}
+		}
+		file["globals"] = objects;
+	}
+
+	{
+		json chunks = json::array();
+		int j = 0;
+		for ( const auto& chunk : m_mChunks | std::views::values )
+		{
+			nlohmann::ordered_json chunkData;
+			chunkData["id"] = chunk->m_ID;
+			chunkData["position"] = chunk->m_VPosition;
+
+			json objects = json::array();
+			int i = 0;
+			for ( const auto& obj : chunk->m_MObjects | std::views::values )
+			{
+				if ( const auto& save = obj->save(); !save.empty() )
+				{
+					objects[i++] = save;
+				}
+			}
+			chunkData["objects"] = objects;
+
+			chunks[j++] = chunkData;
+		}
+		file["chunks"] = chunks;
+	}
+
+
+	if ( !sPath.ends_with( ".json" ) )
+	{
+		sPath += ".json";
+	}
+	std::ofstream ofs( sPath );
+	ofs << file.dump( -1, '\t' ) << std::endl;
+	ofs.close();
+
+	m_jData = file;
+
+	LOG_F( INFO, "Saved level: %s", sPath.c_str() );
+}
+
 void CatLevel::updateObjectLocation( id_t id )
 {
 	{
@@ -274,6 +274,11 @@ void CatLevel::loadChunk( const glm::vec3& vLocation, int nRadius /* = 1 */ )
 {
 	auto id = getChunkAtLocation( vLocation );
 	if ( id <= 0 || id > m_vSize.x * m_vSize.y ) return;
+
+	if ( id == m_idLastChunk && nRadius == m_nLastRadius ) return;
+
+	m_nLastRadius = nRadius;
+	m_idLastChunk = id;
 
 	std::swap( m_aLoadedChunks, m_aLastLoadedChunks );
 	std::fill( m_aLoadedChunks.begin(), m_aLoadedChunks.end(), false );

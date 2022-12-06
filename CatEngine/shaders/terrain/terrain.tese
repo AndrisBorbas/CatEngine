@@ -29,6 +29,7 @@ layout( location = 3 ) out vec3 outLightVec;
 layout( location = 4 ) out vec3 outEyePos;
 layout( location = 5 ) out vec3 outWorldPos;
 layout( location = 6 ) out float outUVScale;
+layout( location = 7 ) out float outHeight;
 
 void main()
 {
@@ -44,7 +45,9 @@ void main()
 	vec4 pos2 = mix( gl_in[3].gl_Position, gl_in[2].gl_Position, gl_TessCoord.x );
 	vec4 pos = mix( pos1, pos2, gl_TessCoord.y );
 
-	pos.y += textureLod( displacementMap, outUV, 0.0 ).r * ubo.displacementFactor;
+	outHeight = textureLod( displacementMap, outUV, 0.0 ).r;
+
+	pos.y += outHeight * ubo.displacementFactor;
 
 	gl_Position = ubo.projection * ubo.view * pos;
 

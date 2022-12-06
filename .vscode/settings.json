@@ -1,6 +1,17 @@
 {
 	"cSpell.enabled": false,
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/docs": true,
+		"**/Libraries": true
+	},
 	"files.associations": {
+		"*.map": "ccfg",
 		"vector": "cpp",
 		"algorithm": "cpp",
 		"array": "cpp",
@@ -81,6 +92,9 @@
 		"xstring": "cpp",
 		"xtr1common": "cpp",
 		"xtree": "cpp",
-		"xutility": "cpp"
+		"xutility": "cpp",
+		"*.rh": "cpp",
+		"any": "cpp",
+		"ranges": "cpp"
 	}
 }
