@@ -106,7 +106,7 @@
 		},
 		{
 			"color": [1.0, 0.10000000149011612, 1.0],
-			"file": "assets/models/sponza.obj",
+			"file": "assets/models/sponza/sponza.obj",
 			"name": "Sponza",
 			"transform": {
 				"r": [0.0, -0.0, 0.0],
@@ -125,7 +125,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza1",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -145,7 +145,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza2",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -165,7 +165,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza3",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -185,7 +185,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza4",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -205,7 +205,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza5",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -225,7 +225,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza6",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -245,7 +245,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza7",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -265,7 +265,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza8",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -285,7 +285,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza9",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -305,7 +305,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza10",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -325,7 +325,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza11",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -345,7 +345,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza12",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -365,7 +365,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza13",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -385,7 +385,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza14",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -405,7 +405,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza15",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -425,7 +425,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza16",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -445,7 +445,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza17",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -465,7 +465,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza18",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -485,7 +485,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza19",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -505,7 +505,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza20",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -525,7 +525,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza21",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -545,7 +545,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza22",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -565,7 +565,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza23",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -585,7 +585,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza24",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -605,7 +605,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza25",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -625,7 +625,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza26",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -645,7 +645,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza27",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -665,7 +665,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza28",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -685,7 +685,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza29",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -705,7 +705,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza30",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -725,7 +725,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza31",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -745,7 +745,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza32",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -765,7 +765,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza33",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -785,7 +785,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza34",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -805,7 +805,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza35",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -825,7 +825,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza36",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -845,7 +845,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza37",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -865,7 +865,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza38",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -885,7 +885,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza39",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -905,7 +905,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza40",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -925,7 +925,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza41",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -945,7 +945,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza42",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -965,7 +965,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza43",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -985,7 +985,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza44",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -1005,7 +1005,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza45",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -1025,7 +1025,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza46",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -1045,7 +1045,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza47",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -1065,7 +1065,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza48",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
@@ -1085,7 +1085,7 @@
 			"objects": [
 				{
 					"color": [1.0, 0.10000000149011612, 1.0],
-					"file": "assets/models/sponza.obj",
+					"file": "assets/models/sponza/sponza.obj",
 					"name": "Sponza49",
 					"transform": {
 						"r": [0.0, -0.0, 0.0],
