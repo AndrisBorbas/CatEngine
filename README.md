@@ -10,10 +10,10 @@
         - [ ] asset unloading
     - [x] dynamic chunk loading
 - [ ] LODs
-- [ ] Terrain
-    - [ ] Terrain generation
-    - [ ] Tessellation
+- [x] Terrain
+    - [x] Terrain generation
+    - [x] Tessellation
 - [ ] Performance
     - [x] Implement graph
         - [ ] Fix performance
-    - [ ] gather data
+    - [x] gather data
